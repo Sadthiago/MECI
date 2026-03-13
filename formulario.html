@@ -1312,36 +1312,69 @@
 
     // ---- FOLLOW-UP Si/No/Justificación ----
     function initFollowUps() {
-      // Attach to all radio-group and check-group containers inside a .campo
+      // Para cada campo que sea radio o checkbox
       document.querySelectorAll('.campo .radio-group, .campo .check-group').forEach(function (group) {
         var campo = group.closest('.campo');
         if (!campo) return;
-        // Avoid duplicating
-        if (campo.querySelector('.followup-block')) return;
+        var inputs = group.querySelectorAll('input');
+        var isCheckGroup = group.classList.contains('check-group');
 
-        var campoId = campo.id || ('fu-' + Math.random().toString(36).substr(2, 6));
-        var fuId = 'fu_' + campoId;
+        inputs.forEach(function (inp) {
+          var fuId;
+          if (isCheckGroup) {
+            fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
+          } else {
+            // Para radio, creamos un bloque por cada OPCIÓN físicamente, 
+            // pero solo se verá la del radio marcado.
+            fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
+          }
 
-        var block = document.createElement('div');
-        block.className = 'followup-block';
-        block.id = fuId;
-        block.innerHTML =
-          '<span class="fu-label">📝 Verificación adicional</span>' +
-          '<div class="followup-sn">' +
-          '<label id="' + fuId + '_si_lbl"><input type="radio" name="' + fuId + '_sn" value="si" onchange="markFuSN(this)"> ✅ Sí</label>' +
-          '<label id="' + fuId + '_no_lbl"><input type="radio" name="' + fuId + '_sn" value="no" onchange="markFuSN(this)"> ❌ No</label>' +
-          '</div>' +
-          '<span class="followup-just-label">Justificación (opcional)</span>' +
-          '<textarea class="followup-just" name="' + fuId + '_just" rows="2" placeholder="Escriba una justificación si lo considera necesario..."></textarea>';
+          var block = document.createElement('div');
+          block.className = 'followup-block';
+          block.id = fuId;
+          
+          var labelText = isCheckGroup ? 'Verificación: ' + inp.closest('label').textContent.trim() : 'Verificación adicional';
+          
+          block.innerHTML =
+            '<span class="fu-label">📝 ' + labelText + '</span>' +
+            '<div class="followup-sn">' +
+            '<label id="' + fuId + '_si_lbl"><input type="radio" name="' + fuId + '_sn" value="si" onchange="markFuSN(this)"> ✅ Sí</label>' +
+            '<label id="' + fuId + '_no_lbl"><input type="radio" name="' + fuId + '_sn" value="no" onchange="markFuSN(this)"> ❌ No</label>' +
+            '</div>' +
+            '<span class="followup-just-label">Justificación (opcional)</span>' +
+            '<textarea class="followup-just" name="' + fuId + '_just" rows="2" placeholder="Escriba una justificación para esta opción..."></textarea>';
 
-        campo.appendChild(block);
+          // INSERTAR JUSTO DEBAJO DE LA OPCIÓN (el label)
+          var wrapperLabel = inp.closest('label');
+          wrapperLabel.parentNode.insertBefore(block, wrapperLabel.nextSibling);
 
-        // Show block when any input in the group changes
-        group.querySelectorAll('input').forEach(function (inp) {
+          // Lógica de visibilidad
           inp.addEventListener('change', function () {
-            block.classList.add('visible');
+            actualizarVisibilidadFU(group);
           });
         });
+      });
+    }
+
+    function actualizarVisibilidadFU(group) {
+      var inputs = group.querySelectorAll('input');
+      
+      inputs.forEach(function(inp) {
+        var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
+        var block = document.getElementById(fuId);
+        if (!block) return;
+
+        if (inp.checked) {
+          block.classList.add('visible');
+        } else {
+          block.classList.remove('visible');
+          // Limpiar valores al ocultar
+          block.querySelectorAll('input[type=radio]').forEach(r => {
+            r.checked = false;
+            markFuSN(r);
+          });
+          block.querySelector('textarea').value = '';
+        }
       });
     }
 
@@ -1351,15 +1384,17 @@
       var noLbl = document.getElementById(fuId + '_no_lbl');
       if (siLbl) siLbl.classList.remove('fu-selected-si', 'fu-selected-no');
       if (noLbl) noLbl.classList.remove('fu-selected-si', 'fu-selected-no');
-      if (radio.value === 'si' && siLbl) siLbl.classList.add('fu-selected-si');
-      if (radio.value === 'no' && noLbl) noLbl.classList.add('fu-selected-no');
+      
+      if (radio.checked) {
+        if (radio.value === 'si' && siLbl) siLbl.classList.add('fu-selected-si');
+        if (radio.value === 'no' && noLbl) noLbl.classList.add('fu-selected-no');
+      }
     }
 
     // Initialize on DOM ready
     document.addEventListener('DOMContentLoaded', function () {
       initFollowUps();
     });
-    // Also call immediately in case DOMContentLoaded already fired
     if (document.readyState !== 'loading') {
       initFollowUps();
     }
