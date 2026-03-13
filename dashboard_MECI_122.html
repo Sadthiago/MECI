@@ -1,757 +1,335 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard MECI 122 – Evaluación Independiente</title>
-  <!-- SheetJS para exportar -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  <!-- Chart.js para gráficas -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --primary: #1a3a6b;
-      --accent: #2d7dd2;
-      --success: #27ae60;
-      --warn: #e67e22;
-      --bg: #f0f4fb;
-      --card: #fff;
-      --border: #dde3ef;
-      --text: #222b3a;
-      --muted: #6c7a93
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0
-    }
-
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text)
-    }
-
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 20px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px
-    }
-
-    header h1 {
-      font-size: 1.1rem;
-      font-weight: 700
-    }
-
-    header p {
-      font-size: .8rem;
-      opacity: .8;
-      margin-top: 2px
-    }
-
-    .header-btns {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap
-    }
-
-    .btn {
-      padding: 9px 20px;
-      border: none;
-      border-radius: 20px;
-      font-size: .85rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform .15s
-    }
-
-    .btn:hover {
-      transform: translateY(-1px)
-    }
-
-    .btn-reload {
-      background: #fff;
-      color: var(--primary)
-    }
-
-    .btn-excel {
-      background: var(--success);
-      color: #fff
-    }
-
-    .btn-clear {
-      background: #e74c3c;
-      color: #fff
-    }
-
-    /* FILTROS */
-    .filters {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 32px;
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      position: sticky;
-      top: 0;
-      z-index: 100
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 180px
-    }
-
-    .filter-group label {
-      font-size: .75rem;
-      font-weight: 600;
-      color: var(--muted)
-    }
-
-    .filter-group select,
-    .filter-group input {
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 12px;
-      font-size: .85rem;
-      background: #f9fbff
-    }
-
-    .filter-group select:focus,
-    .filter-group input:focus {
-      outline: none;
-      border-color: var(--accent)
-    }
-
-    .badge-count {
-      background: var(--accent);
-      color: #fff;
-      border-radius: 12px;
-      padding: 2px 10px;
-      font-size: .78rem;
-      font-weight: 700;
-      align-self: flex-end;
-      margin-bottom: 8px
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 28px auto;
-      padding: 0 20px 60px
-    }
-
-    /* KPI CARDS */
-    .kpi-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px
-    }
-
-    .kpi {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      border-left: 4px solid var(--accent)
-    }
-
-    .kpi.success {
-      border-left-color: var(--success)
-    }
-
-    .kpi.warn {
-      border-left-color: var(--warn)
-    }
-
-    .kpi.danger {
-      border-left-color: #e74c3c
-    }
-
-    .kpi-label {
-      font-size: .75rem;
-      color: var(--muted);
-      font-weight: 600;
-      margin-bottom: 6px
-    }
-
-    .kpi-value {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--primary)
-    }
-
-    .kpi-sub {
-      font-size: .72rem;
-      color: var(--muted);
-      margin-top: 3px
-    }
-
-    /* SECTION TITLE */
-    .section-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin: 28px 0 14px;
-      border-left: 4px solid var(--accent);
-      padding-left: 12px
-    }
-
-    /* CHARTS GRID */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-      gap: 20px;
-      margin-bottom: 28px
-    }
-
-    .chart-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px
-    }
-
-    .chart-card h3 {
-      font-size: .85rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 14px
-    }
-
-    .chart-wrap {
-      position: relative;
-      height: 220px
-    }
-
-    /* TABLA */
-    .table-wrap {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 28px
-    }
-
-    .table-wrap table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .82rem
-    }
-
-    .table-wrap th {
-      background: var(--primary);
-      color: #fff;
-      padding: 10px 14px;
-      text-align: left;
-      font-weight: 600;
-      white-space: nowrap
-    }
-
-    .table-wrap td {
-      padding: 9px 14px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: top
-    }
-
-    .table-wrap tr:last-child td {
-      border-bottom: none
-    }
-
-    .table-wrap tr:hover td {
-      background: #f4f8ff
-    }
-
-    .progress-cell {
-      display: flex;
-      align-items: center;
-      gap: 8px
-    }
-
-    .prog-bar {
-      flex: 1;
-      height: 8px;
-      background: #e8eef7;
-      border-radius: 4px;
-      overflow: hidden
-    }
-
-    .prog-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--success));
-      border-radius: 4px
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: .7rem;
-      font-weight: 700
-    }
-
-    .badge-ok {
-      background: #d4edda;
-      color: #155724
-    }
-
-    .badge-warn {
-      background: #fff3cd;
-      color: #856404
-    }
-
-    .badge-bad {
-      background: #f8d7da;
-      color: #721c24
-    }
-
-    /* DETALLE MODAL */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .5);
-      z-index: 999;
-      align-items: center;
-      justify-content: center
-    }
-
-    .modal-overlay.open {
-      display: flex
-    }
-
-    .modal {
-      background: #fff;
-      border-radius: 14px;
-      width: 90%;
-      max-width: 740px;
-      max-height: 85vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column
-    }
-
-    .modal-header {
-      background: var(--primary);
-      color: #fff;
-      padding: 16px 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center
-    }
-
-    .modal-header h2 {
-      font-size: 1rem
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.4rem;
-      cursor: pointer
-    }
-
-    .modal-body {
-      overflow-y: auto;
-      padding: 22px
-    }
-
-    .modal-row {
-      display: grid;
-      grid-template-columns: 200px 1fr;
-      gap: 8px;
-      border-bottom: 1px solid var(--border);
-      padding: 8px 0;
-      font-size: .83rem
-    }
-
-    .modal-row:last-child {
-      border-bottom: none
-    }
-
-    .modal-row .key {
-      color: var(--muted);
-      font-weight: 600
-    }
-
-    /* EMPTY STATE */
-    .empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--muted)
-    }
-
-    .empty .icon {
-      font-size: 3rem;
-      margin-bottom: 12px
-    }
-
-    .empty p {
-      font-size: .95rem
-    }
-
-    /* TOAST */
-    #toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: .88rem;
-      display: none;
-      z-index: 9999;
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, .2)
-    }
-
-    #toast.ok {
-      background: var(--success)
-    }
-
-    #toast.err {
-      background: #e74c3c
-    }
-
-    #toast.info {
-      background: var(--accent)
-    }
-
-    @media(max-width:700px) {
-      .filters {
-        padding: 12px 16px
-      }
-
-      .charts-grid {
-        grid-template-columns: 1fr
-      }
-
-      .table-wrap {
-        overflow-x: auto
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard MECI 122</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--primary:#1a3a6b;--accent:#2d7dd2;--success:#27ae60;--warn:#e67e22;--bg:#f0f4fb;--card:#fff;--border:#dde3ef;--text:#222b3a;--muted:#6c7a93}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--primary);color:#fff;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+header h1{font-size:1.1rem;font-weight:700}
+header p{font-size:.8rem;opacity:.8;margin-top:2px}
+.header-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:9px 20px;border:none;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-reload{background:#fff;color:var(--primary)}
+.btn-excel{background:var(--success);color:#fff}
+.btn-clear{background:#e74c3c;color:#fff}
+
+.filters{background:var(--card);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;position:sticky;top:0;z-index:100}
+.filter-group{display:flex;flex-direction:column;gap:4px;min-width:180px}
+.filter-group label{font-size:.75rem;font-weight:600;color:var(--muted)}
+.filter-group select,.filter-group input{border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.85rem;background:#f9fbff}
+.filter-group select:focus,.filter-group input:focus{outline:none;border-color:var(--accent)}
+.badge-count{background:var(--accent);color:#fff;border-radius:12px;padding:2px 10px;font-size:.78rem;font-weight:700;align-self:flex-end;margin-bottom:8px}
+
+.container{max-width:1200px;margin:28px auto;padding:0 20px 60px}
+
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;border-left:4px solid var(--accent)}
+.kpi.success{border-left-color:var(--success)}
+.kpi.warn{border-left-color:var(--warn)}
+.kpi.danger{border-left-color:#e74c3c}
+.kpi-label{font-size:.75rem;color:var(--muted);font-weight:600;margin-bottom:6px}
+.kpi-value{font-size:2rem;font-weight:800;color:var(--primary)}
+.kpi-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+
+.section-title{font-size:1rem;font-weight:700;color:var(--primary);margin:28px 0 14px;border-left:4px solid var(--accent);padding-left:12px}
+
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:28px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.chart-card h3{font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:14px}
+.chart-wrap{position:relative;height:220px}
+
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:.82rem}
+.table-wrap th{background:var(--primary);color:#fff;padding:10px 14px;text-align:left;font-weight:600;white-space:nowrap}
+.table-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.table-wrap tr:last-child td{border-bottom:none}
+.table-wrap tr:hover td{background:#f4f8ff}
+.progress-cell{display:flex;align-items:center;gap:8px}
+.prog-bar{flex:1;height:8px;background:#e8eef7;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--success));border-radius:4px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
+.badge-ok{background:#d4edda;color:#155724}
+.badge-warn{background:#fff3cd;color:#856404}
+.badge-bad{background:#f8d7da;color:#721c24}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:90%;max-width:740px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-header{background:var(--primary);color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1rem}
+.modal-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
+.modal-body{overflow-y:auto;padding:22px}
+.modal-row{display:grid;grid-template-columns:200px 1fr;gap:8px;border-bottom:1px solid var(--border);padding:8px 0;font-size:.83rem}
+.modal-row:last-child{border-bottom:none}
+.modal-row .key{color:var(--muted);font-weight:600}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .icon{font-size:3rem;margin-bottom:12px}
+.empty p{font-size:.95rem}
+
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-weight:700;font-size:.88rem;display:none;z-index:9999;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+#toast.ok{background:var(--success)}
+#toast.err{background:#e74c3c}
+#toast.info{background:var(--accent)}
+
+@media(max-width:700px){
+  .filters{padding:12px 16px}
+  .charts-grid{grid-template-columns:1fr}
+  .table-wrap{overflow-x:auto}
+}
+</style>
 </head>
-
 <body>
 
-  <header>
-    <div>
-      <h1>📊 Dashboard MECI 122 – Evaluación Independiente</h1>
-      <p>Vigencia 2025 &nbsp;|&nbsp; Función Pública</p>
-    </div>
-    <div class="header-btns">
-      <button class="btn btn-reload" onclick="cargarDatos()">🔄 Actualizar</button>
-      <button class="btn btn-excel" onclick="exportarExcel()">📥 Exportar Excel</button>
-      <button class="btn btn-clear" onclick="confirmarLimpiar()">🗑️ Limpiar datos</button>
-    </div>
-  </header>
+<header>
+  <div>
+    <h1>📊 Dashboard MECI 122</h1>
+    <p>Evaluación Independiente – Vigencia 2025</p>
+  </div>
+  <div class="header-btns">
+    <button class="btn btn-reload" onclick="cargarDatos()">🔄 Actualizar</button>
+    <button class="btn btn-excel"  onclick="exportarExcel()">📥 Exportar Excel</button>
+    <button class="btn btn-clear"  onclick="confirmarLimpiar()">🗑️ Limpiar datos</button>
+  </div>
+</header>
 
-  <!-- FILTROS -->
-  <div class="filters">
-    <div class="filter-group">
-      <label>Entidad</label>
-      <select id="filtro-entidad" onchange="aplicarFiltros()">
-        <option value="">— Todas las entidades —</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>Vigencia</label>
-      <select id="filtro-vigencia" onchange="aplicarFiltros()">
-        <option value="">— Todas —</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>Municipio</label>
-      <select id="filtro-municipio" onchange="aplicarFiltros()">
-        <option value="">— Todos —</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>Buscar</label>
-      <input type="text" id="filtro-texto" placeholder="Nombre, NIT..." oninput="aplicarFiltros()">
-    </div>
-    <span class="badge-count" id="conteo-badge">0 registros</span>
+<div class="filters">
+  <div class="filter-group">
+    <label>Entidad</label>
+    <select id="filtro-entidad" onchange="aplicarFiltros()">
+      <option value="">— Todas las entidades —</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Vigencia</label>
+    <select id="filtro-vigencia" onchange="aplicarFiltros()">
+      <option value="">— Todas —</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Municipio</label>
+    <select id="filtro-municipio" onchange="aplicarFiltros()">
+      <option value="">— Todos —</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Buscar</label>
+    <input type="text" id="filtro-texto" placeholder="Nombre, NIT..." oninput="aplicarFiltros()">
+  </div>
+  <span class="badge-count" id="conteo-badge">0 registros</span>
+</div>
+
+<div class="container">
+
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi"><div class="kpi-label">Total Entidades</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-sub">formularios recibidos</div></div>
+    <div class="kpi success"><div class="kpi-label">Completados ≥90%</div><div class="kpi-value" id="kpi-completos">0</div><div class="kpi-sub">formularios completos</div></div>
+    <div class="kpi warn"><div class="kpi-label">En progreso 50–89%</div><div class="kpi-value" id="kpi-parciales">0</div><div class="kpi-sub">parcialmente respondidos</div></div>
+    <div class="kpi danger"><div class="kpi-label">Incompletos &lt;50%</div><div class="kpi-value" id="kpi-incompletos">0</div><div class="kpi-sub">pendientes de completar</div></div>
+    <div class="kpi"><div class="kpi-label">Promedio respuestas</div><div class="kpi-value" id="kpi-promedio">0</div><div class="kpi-sub">de 48 campos</div></div>
   </div>
 
-  <div class="container">
-
-    <!-- KPIs -->
-    <div class="kpi-row" id="kpi-row">
-      <div class="kpi">
-        <div class="kpi-label">Total Entidades</div>
-        <div class="kpi-value" id="kpi-total">0</div>
-        <div class="kpi-sub">formularios recibidos</div>
-      </div>
-      <div class="kpi success">
-        <div class="kpi-label">Completados ≥90%</div>
-        <div class="kpi-value" id="kpi-completos">0</div>
-        <div class="kpi-sub">formularios completos</div>
-      </div>
-      <div class="kpi warn">
-        <div class="kpi-label">En progreso 50–89%</div>
-        <div class="kpi-value" id="kpi-parciales">0</div>
-        <div class="kpi-sub">parcialmente respondidos</div>
-      </div>
-      <div class="kpi danger">
-        <div class="kpi-label">Incompletos &lt;50%</div>
-        <div class="kpi-value" id="kpi-incompletos">0</div>
-        <div class="kpi-sub">pendientes de completar</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Promedio respuestas</div>
-        <div class="kpi-value" id="kpi-promedio">0</div>
-        <div class="kpi-sub">de 42 preguntas</div>
-      </div>
+  <div class="section-title">📈 Análisis de Respuestas</div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>Avance por entidad (campos completados de 48)</h3>
+      <div class="chart-wrap"><canvas id="chart-avance"></canvas></div>
     </div>
-
-    <!-- GRÁFICAS -->
-    <div class="section-title">📈 Análisis de Respuestas</div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <h3>Avance por entidad (preguntas respondidas de 42)</h3>
-        <div class="chart-wrap"><canvas id="chart-avance"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>P1 – ¿El MECI generó valor agregado?</h3>
-        <div class="chart-wrap"><canvas id="chart-p1"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>P16 – Ejecución del plan anual de auditorías</h3>
-        <div class="chart-wrap"><canvas id="chart-p16"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>P24 – Tipo de estructura de Control Interno</h3>
-        <div class="chart-wrap"><canvas id="chart-p24"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>P27 – Nivel formación jefe Control Interno</h3>
-        <div class="chart-wrap"><canvas id="chart-p27"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>P29 – Experiencia del jefe en CI</h3>
-        <div class="chart-wrap"><canvas id="chart-p29"></canvas></div>
-      </div>
+    <div class="chart-card">
+      <h3>PER201 – ¿El MECI generó valor agregado?</h3>
+      <div class="chart-wrap"><canvas id="chart-per201"></canvas></div>
     </div>
-
-    <!-- TABLA -->
-    <div class="section-title">📋 Detalle por Entidad</div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Entidad</th>
-            <th>Municipio</th>
-            <th>Vigencia</th>
-            <th>Responsable</th>
-            <th>Avance</th>
-            <th>Fecha</th>
-            <th>Detalle</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-body">
-          <tr>
-            <td colspan="8">
-              <div class="empty">
-                <div class="icon">📭</div>
-                <p>No hay datos cargados aún.<br>Cuando las entidades envíen el formulario, aparecerán aquí.</p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="chart-card">
+      <h3>CIN243 – Ejecución del plan anual de auditorías</h3>
+      <div class="chart-wrap"><canvas id="chart-cin243"></canvas></div>
     </div>
-
-  </div>
-
-  <!-- MODAL DETALLE -->
-  <div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
-    <div class="modal">
-      <div class="modal-header">
-        <h2 id="modal-title">Detalle de respuestas</h2>
-        <button class="modal-close"
-          onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
-      </div>
-      <div class="modal-body" id="modal-body"></div>
+    <div class="chart-card">
+      <h3>CIN264 – Tipo de estructura de Control Interno</h3>
+      <div class="chart-wrap"><canvas id="chart-cin264"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>CIN270 – Nivel formación jefe Control Interno</h3>
+      <div class="chart-wrap"><canvas id="chart-cin270"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>CIN272 – Experiencia del jefe en CI</h3>
+      <div class="chart-wrap"><canvas id="chart-cin272"></canvas></div>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <div class="section-title">📋 Detalle por Entidad</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Entidad</th>
+          <th>Municipio</th>
+          <th>Vigencia</th>
+          <th>Responsable</th>
+          <th>Avance</th>
+          <th>Fecha</th>
+          <th>Detalle</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body">
+        <tr><td colspan="8"><div class="empty"><div class="icon">📭</div><p>No hay datos cargados aún.<br>Cuando las entidades envíen el formulario, aparecerán aquí.</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
 
-  <script>
-    // ─────────────────────────────────────────────
-    // CONFIGURACIÓN
-    // Debe ser la misma URL que en el formulario
-    // ─────────────────────────────────────────────
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
-    const STORAGE_KEY = "meci_respuestas";  // localStorage como caché local
+</div>
 
-    // ─────────────────────────────────────────────
-    // ESTADO
-    // ─────────────────────────────────────────────
-    let todosLosDatos = [];
-    let datosFiltrados = [];
-    let chartInstances = {};
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Detalle de respuestas</h2>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
 
-    // ─────────────────────────────────────────────
-    // CARGA DE DATOS
-    // Intenta Google Sheets → si falla usa localStorage
-    // ─────────────────────────────────────────────
-    async function cargarDatos() {
-      showToast('⏳ Cargando datos...', 'info');
-      try {
-        const res = await fetch(APPS_SCRIPT_URL);
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          todosLosDatos = data;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-          showToast(`✅ ${data.length} registros cargados desde Google Sheets`, 'ok');
-        } else {
-          throw new Error('Sin datos');
-        }
-      } catch {
-        // Fallback: datos locales
-        const local = localStorage.getItem(STORAGE_KEY);
-        if (local) {
-          todosLosDatos = JSON.parse(local);
-          showToast(`📦 ${todosLosDatos.length} registros desde caché local`, 'info');
-        } else {
-          todosLosDatos = cargarDatosDemostracion();
-          showToast('ℹ️ Mostrando datos de demostración', 'info');
-        }
-      }
-      poblarFiltros();
-      aplicarFiltros();
+<div id="toast"></div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
+const STORAGE_KEY = "meci_respuestas";
+
+let todosLosDatos = [];
+let datosFiltrados = [];
+let chartInstances = {};
+
+async function cargarDatos() {
+  showToast('⏳ Cargando datos...', 'info');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      todosLosDatos = data;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showToast(`✅ ${data.length} registros cargados desde Google Sheets`, 'ok');
+    } else {
+      throw new Error('Sin datos');
     }
-
-    // ─────────────────────────────────────────────
-    // DATOS DE DEMOSTRACIÓN (para ver el dashboard
-    // mientras no hay respuestas reales)
-    // ─────────────────────────────────────────────
-    function cargarDatosDemostracion() {
-      return [
-        { timestamp: "2025-11-10T10:00:00Z", entidad_nombre: "Hospital San Rafael Caqueza", entidad_nit: "800.001.001-1", entidad_municipio: "Caqueza", entidad_vigencia: "2025", entidad_responsable: "Juan Pérez", entidad_cargo: "Jefe Control Interno", p1: "si", p6: "a", p10: "siempre", p11: "a", p12: "a", p16: "a", p24: "a", p25: "a", p26: "directivo", p27: "especializacion", p29: "4-6", p41: "3", p42: "si" },
-        { timestamp: "2025-11-12T14:30:00Z", entidad_nombre: "Alcaldía de Fómeque", entidad_nit: "800.002.002-2", entidad_municipio: "Fómeque", entidad_vigencia: "2025", entidad_responsable: "María López", entidad_cargo: "Jefe Control Interno", p1: "si", p6: "b", p10: "mayoria", p11: "b", p12: "b", p16: "b", p24: "b", p25: "c", p26: "asesor", p27: "pregrado", p29: "1-3", p41: "2", p42: "si" },
-        { timestamp: "2025-11-15T09:15:00Z", entidad_nombre: "Alcaldía de Choachí", entidad_nit: "800.003.003-3", entidad_municipio: "Choachí", entidad_vigencia: "2025", entidad_responsable: "Carlos Rojas", entidad_cargo: "Asesor CI", p1: "no", p6: "c", p10: "pocas", p11: "c", p12: "c", p16: "c", p24: "c", p25: "d", p26: "profesional", p27: "pregrado", p29: "1-3", p41: "1", p42: "no" },
-        { timestamp: "2025-11-18T11:00:00Z", entidad_nombre: "ESE Hospital de Ubaque", entidad_nit: "800.004.004-4", entidad_municipio: "Ubaque", entidad_vigencia: "2025", entidad_responsable: "Ana Torres", entidad_cargo: "Jefe CI", p1: "si", p6: "a", p10: "siempre", p11: "a", p12: "a", p16: "b", p24: "a", p25: "a", p26: "directivo", p27: "maestria", p29: "7-10", p41: "4", p42: "si" },
-        { timestamp: "2025-11-20T16:45:00Z", entidad_nombre: "Personería Caqueza", entidad_nit: "800.005.005-5", entidad_municipio: "Caqueza", entidad_vigencia: "2025", entidad_responsable: "Luis García", entidad_cargo: "Profesional CI", p1: "si", p6: "b", p10: "mayoria", p11: "b", p12: "a", p16: "a", p24: "b", p25: "b", p26: "profesional", p27: "especializacion", p29: "4-6", p41: "2", p42: "na" },
-      ];
+  } catch {
+    const local = localStorage.getItem(STORAGE_KEY);
+    if (local) {
+      todosLosDatos = JSON.parse(local);
+      showToast(`📦 ${todosLosDatos.length} registros desde caché local`, 'info');
+    } else {
+      todosLosDatos = cargarDatosDemostracion();
+      showToast('ℹ️ Mostrando datos de demostración', 'info');
     }
+  }
+  poblarFiltros();
+  aplicarFiltros();
+}
 
-    // ─────────────────────────────────────────────
-    // CALCULAR AVANCE (% preguntas respondidas)
-    // ─────────────────────────────────────────────
-    const PREGUNTAS = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10',
-      'p11', 'p12', 'p13', 'p14', 'p15', 'p16', 'p17', 'p18', 'p19', 'p20',
-      'p21', 'p22', 'p23', 'p24', 'p25', 'p26', 'p27', 'p28', 'p29',
-      'p30a', 'p31a', 'p32a', 'p33', 'p34', 'p35a', 'p36a', 'p37a',
-      'p38', 'p39', 'p40a', 'p41', 'p42'];
+function cargarDatosDemostracion() {
+  return [
+    { timestamp:"2025-11-10T10:00:00Z", entidad_nombre:"Hospital San Rafael Caqueza", entidad_nit:"800.001.001-1", entidad_municipio:"Caqueza", entidad_vigencia:"2025", entidad_responsable:"Juan Pérez", entidad_cargo:"Jefe Control Interno", PER201:"si", CIN221:"a", CIN236:"siempre", CIN238:"a", CIN239:"a", CIN243:"a", CIN264:"a", CIN268:"a", CIN269:"directivo", CIN270:"especializacion", CIN272:"4-6", CIN305:"3", CIN306:"si" },
+    { timestamp:"2025-11-12T14:30:00Z", entidad_nombre:"Alcaldía de Fómeque", entidad_nit:"800.002.002-2", entidad_municipio:"Fómeque", entidad_vigencia:"2025", entidad_responsable:"María López", entidad_cargo:"Jefe Control Interno", PER201:"si", CIN221:"b", CIN236:"mayoria", CIN238:"b", CIN239:"b", CIN243:"b", CIN264:"b", CIN268:"c", CIN269:"asesor", CIN270:"pregrado", CIN272:"1-3", CIN305:"2", CIN306:"si" },
+    { timestamp:"2025-11-15T09:15:00Z", entidad_nombre:"Alcaldía de Choachí", entidad_nit:"800.003.003-3", entidad_municipio:"Choachí", entidad_vigencia:"2025", entidad_responsable:"Carlos Rojas", entidad_cargo:"Asesor CI", PER201:"no", CIN221:"c", CIN236:"pocas", CIN238:"c", CIN239:"c", CIN243:"c", CIN264:"c", CIN268:"d", CIN269:"profesional", CIN270:"pregrado", CIN272:"1-3", CIN305:"1", CIN306:"no" },
+    { timestamp:"2025-11-18T11:00:00Z", entidad_nombre:"ESE Hospital de Ubaque", entidad_nit:"800.004.004-4", entidad_municipio:"Ubaque", entidad_vigencia:"2025", entidad_responsable:"Ana Torres", entidad_cargo:"Jefe CI", PER201:"si", CIN221:"a", CIN236:"siempre", CIN238:"a", CIN239:"a", CIN243:"b", CIN264:"a", CIN268:"a", CIN269:"directivo", CIN270:"maestria", CIN272:"7-10", CIN305:"4", CIN306:"si" },
+    { timestamp:"2025-11-20T16:45:00Z", entidad_nombre:"Personería Caqueza", entidad_nit:"800.005.005-5", entidad_municipio:"Caqueza", entidad_vigencia:"2025", entidad_responsable:"Luis García", entidad_cargo:"Profesional CI", PER201:"si", CIN221:"b", CIN236:"mayoria", CIN238:"b", CIN239:"a", CIN243:"a", CIN264:"b", CIN268:"b", CIN269:"profesional", CIN270:"especializacion", CIN272:"4-6", CIN305:"2", CIN306:"na" },
+  ];
+}
 
-    function calcularAvance(row) {
-      let ok = 0;
-      PREGUNTAS.forEach(k => { if (row[k] && String(row[k]).trim() !== '' && String(row[k]) !== '0') ok++; });
-      return Math.round(ok / PREGUNTAS.length * 100);
+const CAMPOS_IMPORTANTES = ['entidad_nombre','entidad_nit','entidad_municipio','entidad_vigencia','entidad_responsable','entidad_cargo',
+  'PER201','PER205','CIN203','CIN206','CIN207','CIN221','CIN222','CIN233','CIN234','CIN236',
+  'CIN238','CIN239','CIN240','CIN241','CIN242','CIN243','CIN244','CIN246','CIN247','CIN252','CIN253','CIN254','CIN255',
+  'CIN264','CIN268','CIN269','CIN270','CIN271','CIN272','CIN273_a','CIN274_a','CIN275_a','CIN276','CIN287','CIN288_a','CIN289_a','CIN290_a',
+  'CIN300','CIN301','CIN304_a','CIN305','CIN306'];
+
+function calcularAvance(row) {
+  let ok = 0;
+  CAMPOS_IMPORTANTES.forEach(k => { if (row[k] && String(row[k]).trim() !== '' && String(row[k]) !== '0') ok++; });
+  return Math.round(ok / CAMPOS_IMPORTANTES.length * 100);
+}
+
+function poblarFiltros() {
+  const entidades  = [...new Set(todosLosDatos.map(r => r.entidad_nombre).filter(Boolean))].sort();
+  const vigencias  = [...new Set(todosLosDatos.map(r => r.entidad_vigencia).filter(Boolean))].sort();
+  const municipios = [...new Set(todosLosDatos.map(r => r.entidad_municipio).filter(Boolean))].sort();
+
+  poblarSelect('filtro-entidad',  entidades);
+  poblarSelect('filtro-vigencia', vigencias);
+  poblarSelect('filtro-municipio',municipios);
+}
+function poblarSelect(id, valores) {
+  const sel = document.getElementById(id);
+  const current = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  valores.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = opt.textContent = v;
+    sel.appendChild(opt);
+  });
+  sel.value = current;
+}
+
+function aplicarFiltros() {
+  const fEntidad   = document.getElementById('filtro-entidad').value;
+  const fVigencia  = document.getElementById('filtro-vigencia').value;
+  const fMunicipio = document.getElementById('filtro-municipio').value;
+  const fTexto     = document.getElementById('filtro-texto').value.toLowerCase();
+
+  datosFiltrados = todosLosDatos.filter(r => {
+    if (fEntidad   && r.entidad_nombre     !== fEntidad)   return false;
+    if (fVigencia  && r.entidad_vigencia   !== fVigencia)  return false;
+    if (fMunicipio && r.entidad_municipio  !== fMunicipio) return false;
+    if (fTexto) {
+      const haystack = JSON.stringify(r).toLowerCase();
+      if (!haystack.includes(fTexto)) return false;
     }
+    return true;
+  });
 
-    // ─────────────────────────────────────────────
-    // POBLAR FILTROS DINÁMICAMENTE
-    // ─────────────────────────────────────────────
-    function poblarFiltros() {
-      const entidades = [...new Set(todosLosDatos.map(r => r.entidad_nombre).filter(Boolean))].sort();
-      const vigencias = [...new Set(todosLosDatos.map(r => r.entidad_vigencia).filter(Boolean))].sort();
-      const municipios = [...new Set(todosLosDatos.map(r => r.entidad_municipio).filter(Boolean))].sort();
+  document.getElementById('conteo-badge').textContent = `${datosFiltrados.length} registros`;
+  actualizarKPIs();
+  actualizarTabla();
+  actualizarGraficas();
+}
 
-      poblarSelect('filtro-entidad', entidades);
-      poblarSelect('filtro-vigencia', vigencias);
-      poblarSelect('filtro-municipio', municipios);
-    }
-    function poblarSelect(id, valores) {
-      const sel = document.getElementById(id);
-      const current = sel.value;
-      while (sel.options.length > 1) sel.remove(1);
-      valores.forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = opt.textContent = v;
-        sel.appendChild(opt);
-      });
-      sel.value = current;
-    }
+function actualizarKPIs() {
+  const n = datosFiltrados.length;
+  const avances = datosFiltrados.map(calcularAvance);
+  const completos   = avances.filter(a => a >= 90).length;
+  const parciales   = avances.filter(a => a >= 50 && a < 90).length;
+  const incompletos = avances.filter(a => a < 50).length;
+  const promedio    = n ? Math.round(avances.reduce((s,v)=>s+v,0)/n) : 0;
 
-    // ─────────────────────────────────────────────
-    // APLICAR FILTROS
-    // ─────────────────────────────────────────────
-    function aplicarFiltros() {
-      const fEntidad = document.getElementById('filtro-entidad').value;
-      const fVigencia = document.getElementById('filtro-vigencia').value;
-      const fMunicipio = document.getElementById('filtro-municipio').value;
-      const fTexto = document.getElementById('filtro-texto').value.toLowerCase();
+  document.getElementById('kpi-total').textContent      = n;
+  document.getElementById('kpi-completos').textContent  = completos;
+  document.getElementById('kpi-parciales').textContent  = parciales;
+  document.getElementById('kpi-incompletos').textContent= incompletos;
+  document.getElementById('kpi-promedio').textContent   = promedio + '%';
+}
 
-      datosFiltrados = todosLosDatos.filter(r => {
-        if (fEntidad && r.entidad_nombre !== fEntidad) return false;
-        if (fVigencia && r.entidad_vigencia !== fVigencia) return false;
-        if (fMunicipio && r.entidad_municipio !== fMunicipio) return false;
-        if (fTexto) {
-          const haystack = JSON.stringify(r).toLowerCase();
-          if (!haystack.includes(fTexto)) return false;
-        }
-        return true;
-      });
-
-      document.getElementById('conteo-badge').textContent = `${datosFiltrados.length} registros`;
-      actualizarKPIs();
-      actualizarTabla();
-      actualizarGraficas();
-    }
-
-    // ─────────────────────────────────────────────
-    // KPIs
-    // ─────────────────────────────────────────────
-    function actualizarKPIs() {
-      const n = datosFiltrados.length;
-      const avances = datosFiltrados.map(calcularAvance);
-      const completos = avances.filter(a => a >= 90).length;
-      const parciales = avances.filter(a => a >= 50 && a < 90).length;
-      const incompletos = avances.filter(a => a < 50).length;
-      const promedio = n ? Math.round(avances.reduce((s, v) => s + v, 0) / n) : 0;
-
-      document.getElementById('kpi-total').textContent = n;
-      document.getElementById('kpi-completos').textContent = completos;
-      document.getElementById('kpi-parciales').textContent = parciales;
-      document.getElementById('kpi-incompletos').textContent = incompletos;
-      document.getElementById('kpi-promedio').textContent = promedio + '%';
-    }
-
-    // ─────────────────────────────────────────────
-    // TABLA
-    // ─────────────────────────────────────────────
-    function actualizarTabla() {
-      const tbody = document.getElementById('tabla-body');
-      if (!datosFiltrados.length) {
-        tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="icon">🔍</div><p>Ningún registro coincide con los filtros seleccionados.</p></div></td></tr>`;
-        return;
-      }
-      tbody.innerHTML = datosFiltrados.map((row, i) => {
-        const avance = calcularAvance(row);
-        const badgeClass = avance >= 90 ? 'badge-ok' : avance >= 50 ? 'badge-warn' : 'badge-bad';
-        const fecha = row.timestamp ? new Date(row.timestamp).toLocaleDateString('es-CO') : '—';
-        return `<tr>
-      <td>${i + 1}</td>
-      <td><strong>${row.entidad_nombre || '—'}</strong><br><small style="color:var(--muted)">${row.entidad_nit || ''}</small></td>
+function actualizarTabla() {
+  const tbody = document.getElementById('tabla-body');
+  if (!datosFiltrados.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="icon">🔍</div><p>Ningún registro coincide con los filtros seleccionados.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = datosFiltrados.map((row, i) => {
+    const avance = calcularAvance(row);
+    const badgeClass = avance >= 90 ? 'badge-ok' : avance >= 50 ? 'badge-warn' : 'badge-bad';
+    const fecha = row.timestamp ? new Date(row.timestamp).toLocaleDateString('es-CO') : '—';
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${row.entidad_nombre || '—'}</strong><br><small style="color:var(--muted)">${row.entidad_nit||''}</small></td>
       <td>${row.entidad_municipio || '—'}</td>
-      <td>${row.entidad_vigencia || '—'}</td>
-      <td>${row.entidad_responsable || '—'}<br><small style="color:var(--muted)">${row.entidad_cargo || ''}</small></td>
+      <td>${row.entidad_vigencia  || '—'}</td>
+      <td>${row.entidad_responsable || '—'}<br><small style="color:var(--muted)">${row.entidad_cargo||''}</small></td>
       <td>
         <div class="progress-cell">
           <div class="prog-bar"><div class="prog-fill" style="width:${avance}%"></div></div>
@@ -761,159 +339,134 @@
       <td>${fecha}</td>
       <td><button class="btn btn-reload" style="padding:5px 14px;font-size:.78rem" onclick="verDetalle(${i})">👁️ Ver</button></td>
     </tr>`;
-      }).join('');
+  }).join('');
+}
+
+const LABELS = {
+  entidad_nombre:"Entidad", entidad_nit:"NIT", entidad_municipio:"Municipio",
+  entidad_vigencia:"Vigencia", entidad_responsable:"Responsable", entidad_cargo:"Cargo",
+  timestamp:"Fecha envío",
+  PER201:"PER201 – MECI genera valor", PER205:"PER205 – Percepción guías DAFP",
+  CIN221:"CIN221 – Gestión integral de riesgos", CIN236:"CIN236 – Informes oportunos",
+  CIN238:"CIN238 – Metodología auditora", CIN239:"CIN239 – Plan anual elaborado",
+  CIN243:"CIN243 – Ejecución plan anual", CIN255:"CIN255 – Herramientas seguimiento",
+  CIN264:"CIN264 – Estructura CI", CIN268:"CIN268 – Tipo nombramiento jefe CI",
+  CIN269:"CIN269 – Nivel jerárquico jefe CI", CIN270:"CIN270 – Formación jefe CI",
+  CIN272:"CIN272 – Experiencia CI", CIN305:"CIN305 – Total trabajadores CI", CIN306:"CIN306 – Alertas integridad"
+};
+
+function verDetalle(idx) {
+  const row = datosFiltrados[idx];
+  document.getElementById('modal-title').textContent = row.entidad_nombre || 'Detalle';
+  const body = document.getElementById('modal-body');
+  body.innerHTML = Object.entries(row).map(([k,v]) => {
+    const label = LABELS[k] || k;
+    const val = v || '<em style="color:var(--muted)">Sin respuesta</em>';
+    return `<div class="modal-row"><div class="key">${label}</div><div>${val}</div></div>`;
+  }).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function cerrarModal(e) {
+  if (e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+const PALETTE = ['#2d7dd2','#27ae60','#e67e22','#e74c3c','#9b59b6','#1abc9c','#f39c12','#3498db'];
+
+function buildChart(id, type, labels, datasets, opts={}) {
+  if (chartInstances[id]) chartInstances[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  chartInstances[id] = new Chart(ctx, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: type==='bar'?'top':'right', labels:{boxWidth:12,font:{size:11}} } },
+      scales: type==='bar' ? { y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}} } : undefined,
+      ...opts
     }
+  });
+}
 
-    // ─────────────────────────────────────────────
-    // MODAL DETALLE
-    // ─────────────────────────────────────────────
-    const LABELS = {
-      entidad_nombre: "Entidad", entidad_nit: "NIT", entidad_municipio: "Municipio",
-      entidad_vigencia: "Vigencia", entidad_responsable: "Responsable", entidad_cargo: "Cargo",
-      timestamp: "Fecha envío",
-      p1: "P1 – MECI genera valor", p2: "P2 – Percepción guías DAFP",
-      p6: "P6 – Gestión integral de riesgos", p10: "P10 – Informes oportunos",
-      p11: "P11 – Metodología auditora", p12: "P12 – Plan anual elaborado",
-      p16: "P16 – Ejecución plan anual", p23: "P23 – Herramientas seguimiento",
-      p24: "P24 – Estructura CI", p25: "P25 – Tipo nombramiento jefe CI",
-      p26: "P26 – Nivel jerárquico jefe CI", p27: "P27 – Formación jefe CI",
-      p29: "P29 – Experiencia CI", p41: "P41 – Total trabajadores CI", p42: "P42 – Alertas integridad"
-    };
+function contarPorValor(campo) {
+  const counts = {};
+  datosFiltrados.forEach(r => {
+    const v = r[campo] || 'Sin respuesta';
+    counts[v] = (counts[v]||0) + 1;
+  });
+  return counts;
+}
 
-    function verDetalle(idx) {
-      const row = datosFiltrados[idx];
-      document.getElementById('modal-title').textContent = row.entidad_nombre || 'Detalle';
-      const body = document.getElementById('modal-body');
-      body.innerHTML = Object.entries(row).map(([k, v]) => {
-        const label = LABELS[k] || k;
-        const val = v || '<em style="color:var(--muted)">Sin respuesta</em>';
-        return `<div class="modal-row"><div class="key">${label}</div><div>${val}</div></div>`;
-      }).join('');
-      document.getElementById('modal-overlay').classList.add('open');
-    }
-    function cerrarModal(e) {
-      if (e.target === document.getElementById('modal-overlay'))
-        document.getElementById('modal-overlay').classList.remove('open');
-    }
+function actualizarGraficas() {
+  const n = datosFiltrados.length;
+  if (!n) return;
 
-    // ─────────────────────────────────────────────
-    // GRÁFICAS
-    // ─────────────────────────────────────────────
-    const PALETTE = ['#2d7dd2', '#27ae60', '#e67e22', '#e74c3c', '#9b59b6', '#1abc9c', '#f39c12', '#3498db'];
+  const nombres  = datosFiltrados.map(r => (r.entidad_nombre||'?').substring(0,22)+'…');
+  const avances  = datosFiltrados.map(calcularAvance);
+  buildChart('chart-avance','bar', nombres, [{
+    label:'Avance (%)', data:avances,
+    backgroundColor: avances.map(a => a>=90?'#27ae60': a>=50?'#e67e22':'#e74c3c')
+  }]);
 
-    function buildChart(id, type, labels, datasets, opts = {}) {
-      if (chartInstances[id]) chartInstances[id].destroy();
-      const ctx = document.getElementById(id).getContext('2d');
-      chartInstances[id] = new Chart(ctx, {
-        type,
-        data: { labels, datasets },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { position: type === 'bar' ? 'top' : 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
-          scales: type === 'bar' ? { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } } : undefined,
-          ...opts
-        }
-      });
-    }
+  const per201 = contarPorValor('PER201');
+  buildChart('chart-per201','doughnut',
+    Object.keys(per201).map(k=>k==='si'?'Sí':k==='no'?'No':k),
+    [{ data:Object.values(per201), backgroundColor:PALETTE }]);
 
-    function contarPorValor(campo) {
-      const counts = {};
-      datosFiltrados.forEach(r => {
-        const v = r[campo] || 'Sin respuesta';
-        counts[v] = (counts[v] || 0) + 1;
-      });
-      return counts;
-    }
+  const cin243 = contarPorValor('CIN243');
+  const cin243Labels = {'a':'90–100% ejecutado','b':'60–89% ejecutado','c':'Menos del 60%','Sin respuesta':'Sin respuesta'};
+  buildChart('chart-cin243','pie',
+    Object.keys(cin243).map(k=>cin243Labels[k]||k),
+    [{ data:Object.values(cin243), backgroundColor:PALETTE }]);
 
-    function actualizarGraficas() {
-      const n = datosFiltrados.length;
-      if (!n) return;
+  const cin264 = contarPorValor('CIN264');
+  const cin264L = {a:'Oficina CI completa',b:'Grupo interno',c:'Servidor sin equipo',d:'Contrato de apoyo',e:'Sin responsable'};
+  buildChart('chart-cin264','doughnut',
+    Object.keys(cin264).map(k=>cin264L[k]||k),
+    [{ data:Object.values(cin264), backgroundColor:PALETTE }]);
 
-      // Avance por entidad
-      const nombres = datosFiltrados.map(r => (r.entidad_nombre || '?').substring(0, 22) + '…');
-      const avances = datosFiltrados.map(calcularAvance);
-      buildChart('chart-avance', 'bar', nombres, [{
-        label: 'Avance (%)', data: avances,
-        backgroundColor: avances.map(a => a >= 90 ? '#27ae60' : a >= 50 ? '#e67e22' : '#e74c3c')
-      }]);
+  const cin270 = contarPorValor('CIN270');
+  const cin270L = {doctorado:'Doctorado',maestria:'Maestría',especializacion:'Especialización',pregrado:'Pregrado',tecnica:'Técnica',media:'Bachiller',basica:'Básica'};
+  buildChart('chart-cin270','bar',
+    Object.keys(cin270).map(k=>cin270L[k]||k),
+    [{ label:'Conteo', data:Object.values(cin270), backgroundColor:PALETTE }],
+    { scales:{y:{beginAtZero:true,ticks:{stepSize:1}}} });
 
-      // P1
-      const p1 = contarPorValor('p1');
-      buildChart('chart-p1', 'doughnut',
-        Object.keys(p1).map(k => k === 'si' ? 'Sí' : k === 'no' ? 'No' : k),
-        [{ data: Object.values(p1), backgroundColor: PALETTE }]);
+  const cin272 = contarPorValor('CIN272');
+  const cin272L = {'1':'< 1 año','1-3':'1–3 años','4-6':'4–6 años','7-10':'7–10 años','11-20':'11–20 años','21':'> 21 años'};
+  buildChart('chart-cin272','bar',
+    Object.keys(cin272).map(k=>cin272L[k]||k),
+    [{ label:'Conteo', data:Object.values(cin272), backgroundColor:PALETTE }],
+    { scales:{y:{beginAtZero:true,ticks:{stepSize:1}}} });
+}
 
-      // P16
-      const p16 = contarPorValor('p16');
-      const p16Labels = { 'a': '90–100% ejecutado', 'b': '60–89% ejecutado', 'c': 'Menos del 60%', 'Sin respuesta': 'Sin respuesta' };
-      buildChart('chart-p16', 'pie',
-        Object.keys(p16).map(k => p16Labels[k] || k),
-        [{ data: Object.values(p16), backgroundColor: PALETTE }]);
+function exportarExcel() {
+  if (!datosFiltrados.length) { showToast('No hay datos para exportar', 'err'); return; }
+  const ws = XLSX.utils.json_to_sheet(datosFiltrados);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Respuestas MECI');
+  const fecha = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `Dashboard_MECI_122_${fecha}.xlsx`);
+  showToast('📥 Excel exportado correctamente', 'ok');
+}
 
-      // P24
-      const p24 = contarPorValor('p24');
-      const p24L = { a: 'Oficina CI completa', b: 'Grupo interno', c: 'Servidor sin equipo', d: 'Contrato de apoyo', e: 'Sin responsable' };
-      buildChart('chart-p24', 'doughnut',
-        Object.keys(p24).map(k => p24L[k] || k),
-        [{ data: Object.values(p24), backgroundColor: PALETTE }]);
+function confirmarLimpiar() {
+  if (confirm('¿Estás seguro de que deseas eliminar los datos en caché local? Los datos en Google Sheets NO se borrarán.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    todosLosDatos = [];
+    datosFiltrados = [];
+    aplicarFiltros();
+    showToast('🗑️ Caché local eliminada', 'info');
+  }
+}
 
-      // P27
-      const p27 = contarPorValor('p27');
-      const p27L = { doctorado: 'Doctorado', maestria: 'Maestría', especializacion: 'Especialización', pregrado: 'Pregrado', tecnica: 'Técnica', media: 'Bachiller', basica: 'Básica' };
-      buildChart('chart-p27', 'bar',
-        Object.keys(p27).map(k => p27L[k] || k),
-        [{ label: 'Conteo', data: Object.values(p27), backgroundColor: PALETTE }],
-        { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } });
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = type; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 4000);
+}
 
-      // P29
-      const p29 = contarPorValor('p29');
-      const p29L = { '1': '< 1 año', '1-3': '1–3 años', '4-6': '4–6 años', '7-10': '7–10 años', '11-20': '11–20 años', '21': '> 21 años' };
-      buildChart('chart-p29', 'bar',
-        Object.keys(p29).map(k => p29L[k] || k),
-        [{ label: 'Conteo', data: Object.values(p29), backgroundColor: PALETTE }],
-        { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } });
-    }
-
-    // ─────────────────────────────────────────────
-    // EXPORTAR EXCEL
-    // ─────────────────────────────────────────────
-    function exportarExcel() {
-      if (!datosFiltrados.length) { showToast('No hay datos para exportar', 'err'); return; }
-      const ws = XLSX.utils.json_to_sheet(datosFiltrados);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Respuestas MECI');
-      const fecha = new Date().toISOString().slice(0, 10);
-      XLSX.writeFile(wb, `Dashboard_MECI_122_${fecha}.xlsx`);
-      showToast('📥 Excel exportado correctamente', 'ok');
-    }
-
-    // ─────────────────────────────────────────────
-    // LIMPIAR DATOS LOCALES
-    // ─────────────────────────────────────────────
-    function confirmarLimpiar() {
-      if (confirm('¿Estás seguro de que deseas eliminar los datos en caché local? Los datos en Google Sheets NO se borrarán.')) {
-        localStorage.removeItem(STORAGE_KEY);
-        todosLosDatos = [];
-        datosFiltrados = [];
-        aplicarFiltros();
-        showToast('🗑️ Caché local eliminada', 'info');
-      }
-    }
-
-    // ─────────────────────────────────────────────
-    // TOAST
-    // ─────────────────────────────────────────────
-    function showToast(msg, type = 'ok') {
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.className = type; t.style.display = 'block';
-      setTimeout(() => t.style.display = 'none', 4000);
-    }
-
-    // ─────────────────────────────────────────────
-    // INICIAR
-    // ─────────────────────────────────────────────
-    window.addEventListener('DOMContentLoaded', cargarDatos);
-  </script>
+window.addEventListener('DOMContentLoaded', cargarDatos);
+</script>
 </body>
-
 </html>
