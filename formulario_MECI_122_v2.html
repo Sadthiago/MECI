@@ -64,6 +64,65 @@ input.invalid,select.invalid{border-color:var(--err)}
   .sec-body{padding:14px}
   .num-grid{grid-template-columns:1fr 110px}
 }
+
+  /* ---- Sub-bloque por opción ---- */
+  .opt-followup {
+    display: none;
+    margin-top: 6px;
+    margin-left: 28px;
+    background: #f0f6ff;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+    animation: fuFadeIn .2s ease;
+  }
+  .opt-followup.visible { display: block; }
+  @keyframes fuFadeIn { from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)} }
+  .opt-followup .fu-sn {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .opt-followup .fu-sn label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 11px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    transition: background .15s, border-color .15s;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+  .opt-followup .fu-sn label:hover { background: #e0edff; border-color: var(--accent); }
+  .opt-followup .fu-sn label.sel-si  { background: #d4edda; border-color: #27ae60; color: #1a7a3c; }
+  .opt-followup .fu-sn label.sel-no  { background: #fde8e8; border-color: var(--err);  color: #c0392b; }
+  .opt-followup .fu-sn label.sel-na  { background: #fff3cd; border-color: #f0a500; color: #7a5000; }
+  .opt-followup .fu-sn input[type=radio] { accent-color: var(--accent); width:13px; height:13px; margin-top:0; flex-shrink:0; }
+  .opt-followup textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 9px;
+    font-size: .78rem;
+    background: #fff;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color .2s;
+    box-sizing: border-box;
+  }
+  .opt-followup textarea:focus { outline: none; border-color: var(--accent); }
+  .opt-followup .fu-just-lbl {
+    font-size: .72rem;
+    color: var(--muted);
+    margin-bottom: 3px;
+    display: block;
+  }
+
 </style>
 </head>
 <body>
@@ -954,16 +1013,8 @@ function ramificarEntidad() {
 }
 
 // ---- HIGHLIGHT SELECCIÓN ----
-function markSelected(radio) {
-  const group = radio.closest('.radio-group');
-  group.querySelectorAll('label').forEach(l => l.classList.remove('selected'));
-  radio.closest('label').classList.add('selected');
-  actualizarProgreso();
-}
-function markCheck(cb) {
-  cb.closest('label').classList.toggle('selected', cb.checked);
-  actualizarProgreso();
-}
+
+
 
 // ---- PROGRESO ----
 const TOTAL_PREGUNTAS = 42;
@@ -1095,6 +1146,77 @@ document.querySelectorAll('input, select, textarea').forEach(el => {
   el.addEventListener('input', actualizarProgreso);
   el.addEventListener('change', actualizarProgreso);
 });
+
+  /* ---- Sub-bloque Sí/No/No aplica + Justificación por opción ---- */
+  function markSelected(inp) {
+    var grp = inp.closest('.radio-group');
+    if (grp) {
+      grp.querySelectorAll('label').forEach(function(l){ l.classList.remove('selected'); });
+      inp.closest('label').classList.add('selected');
+      // ocultar todos los followups del grupo, mostrar solo el del seleccionado
+      grp.querySelectorAll('.opt-followup').forEach(function(f){ f.classList.remove('visible'); });
+      var fu = inp.closest('label').querySelector('.opt-followup');
+      if (fu) fu.classList.add('visible');
+    }
+  }
+  function markCheck(inp) {
+    var lbl = inp.closest('label');
+    if (inp.checked) {
+      lbl.classList.add('selected');
+      var fu = lbl.querySelector('.opt-followup');
+      if (fu) fu.classList.add('visible');
+    } else {
+      lbl.classList.remove('selected');
+      var fu = lbl.querySelector('.opt-followup');
+      if (fu) fu.classList.remove('visible');
+    }
+  }
+  function markFuBtn(radio, si, no, na) {
+    var wrap = radio.closest('.fu-sn');
+    wrap.querySelectorAll('label').forEach(function(l){
+      l.classList.remove('sel-si','sel-no','sel-na');
+    });
+    var lbl = radio.closest('label');
+    if (radio.value==='si') lbl.classList.add('sel-si');
+    else if (radio.value==='no') lbl.classList.add('sel-no');
+    else lbl.classList.add('sel-na');
+  }
+
+  function buildFollowup(uid) {
+    return '<div class="opt-followup" id="fu_' + uid + '">' +
+      '<div class="fu-sn">' +
+        '<label><input type="radio" name="fu_sn_' + uid + '" value="si" onchange="markFuBtn(this)"> ✅ Sí</label>' +
+        '<label><input type="radio" name="fu_sn_' + uid + '" value="no" onchange="markFuBtn(this)"> ❌ No</label>' +
+        '<label><input type="radio" name="fu_sn_' + uid + '" value="na" onchange="markFuBtn(this)"> ➖ No aplica</label>' +
+      '</div>' +
+      '<span class="fu-just-lbl">Justificación (opcional)</span>' +
+      '<textarea name="fu_just_' + uid + '" rows="2" placeholder="Escriba una justificación..."></textarea>' +
+    '</div>';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var counter = 0;
+    document.querySelectorAll('.radio-group, .check-group').forEach(function(group) {
+      var fieldName = group.querySelector('input') ? group.querySelector('input').name : 'q' + counter;
+      group.querySelectorAll('label').forEach(function(lbl) {
+        var inp = lbl.querySelector('input');
+        if (!inp) return;
+        var optVal = inp.value || ('opt' + counter);
+        var uid = fieldName + '_' + optVal;
+        counter++;
+        // reemplazar onchange existente y agregar el followup
+        inp.removeAttribute('onchange');
+        if (inp.type === 'radio') {
+          inp.addEventListener('change', function(){ markSelected(this); });
+        } else {
+          inp.addEventListener('change', function(){ markCheck(this); });
+        }
+        // insertar followup dentro del label
+        lbl.insertAdjacentHTML('beforeend', buildFollowup(uid));
+      });
+    });
+  });
+
 </script>
 </body>
 </html>
