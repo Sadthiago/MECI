@@ -55,6 +55,7 @@ h1{font-size:1.2rem;margin-bottom:4px}
 </header>
 
 <div class="container">
+  <!-- Filtros -->
   <div class="filters">
     <div>
       <label>Entidad</label>
@@ -74,6 +75,7 @@ h1{font-size:1.2rem;margin-bottom:4px}
     <span id="badge" style="background:var(--a);color:#fff;padding:4px 12px;border-radius:12px;font-size:.78rem;font-weight:700">0 registros</span>
   </div>
 
+  <!-- KPIs -->
   <div class="kpis">
     <div class="kpi"><div class="kpi-val" id="k-total">0</div><div class="kpi-lbl">Total formularios</div></div>
     <div class="kpi"><div class="kpi-val" id="k-eses">0</div><div class="kpi-lbl">ESES</div></div>
@@ -81,6 +83,7 @@ h1{font-size:1.2rem;margin-bottom:4px}
     <div class="kpi"><div class="kpi-val" id="k-muni">0</div><div class="kpi-lbl">Municipios</div></div>
   </div>
 
+  <!-- Tabla -->
   <div class="tabla">
     <table>
       <thead>
@@ -99,6 +102,7 @@ h1{font-size:1.2rem;margin-bottom:4px}
     </table>
   </div>
 
+  <!-- Gráficas -->
   <div class="charts">
     <div class="chart-card">
       <h3>Registros por tipo de entidad</h3>
@@ -119,6 +123,7 @@ let allData = [];
 let filteredData = [];
 let charts = {};
 
+// Toast
 function toast(msg, type = 'ok') {
   const t = document.createElement('div');
   t.className = 'toast ' + type;
@@ -127,6 +132,7 @@ function toast(msg, type = 'ok') {
   setTimeout(() => t.remove(), 4000);
 }
 
+// Cargar datos
 async function cargar(limpiar = false) {
   toast('⏳ Cargando desde Google Sheets...', 'warn');
   if (limpiar) localStorage.removeItem(CACHE_KEY);
@@ -135,15 +141,15 @@ async function cargar(limpiar = false) {
     const url = URL + '?t=' + Date.now();
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    
+
     const text = await res.text();
     console.log('Respuesta raw:', text.substring(0, 200));
-    
+
     const data = JSON.parse(text);
     console.log('Datos parseados:', data.length, 'registros');
-    
+
     if (!Array.isArray(data)) throw new Error('Respuesta no es array');
-    
+
     if (data.length === 0) {
       toast('⚠️ Sheets vacío - usando datos demo', 'warn');
       allData = datosDemo();
@@ -171,42 +177,45 @@ async function cargar(limpiar = false) {
   aplicar();
 }
 
+// Poblar filtros
 function poblarFiltros() {
   const entidades = [...new Set(allData.map(r => r.entidad_nombre).filter(Boolean))].sort();
   const vigencias = [...new Set(allData.map(r => r.entidad_vigencia).filter(Boolean))].sort();
   const tipos = [...new Set(allData.map(r => r.tipo_entidad).filter(Boolean))].sort();
-  
+
   const se = document.getElementById('f-entidad');
   const sv = document.getElementById('f-vigencia');
   const st = document.getElementById('f-tipo');
-  
+
   se.innerHTML = '<option value="">— Todas —</option>' + entidades.map(e => '<option>' + e + '</option>').join('');
   sv.innerHTML = '<option value="">— Todas —</option>' + vigencias.map(v => '<option>' + v + '</option>').join('');
   st.innerHTML = '<option value="">— Todos —</option>' + tipos.map(t => '<option>' + t + '</option>').join('');
-  
+
   se.onchange = aplicar;
   sv.onchange = aplicar;
   st.onchange = aplicar;
 }
 
+// Aplicar filtros
 function aplicar() {
   const fE = document.getElementById('f-entidad').value;
   const fV = document.getElementById('f-vigencia').value;
   const fT = document.getElementById('f-tipo').value;
-  
+
   filteredData = allData.filter(r => {
     if (fE && r.entidad_nombre !== fE) return false;
     if (fV && r.entidad_vigencia !== fV) return false;
     if (fT && r.tipo_entidad !== fT) return false;
     return true;
   });
-  
+
   document.getElementById('badge').textContent = filteredData.length + ' registros';
   renderKPIs();
   renderTabla();
   renderCharts();
 }
 
+// KPIs
 function renderKPIs() {
   const n = filteredData.length;
   document.getElementById('k-total').textContent = n;
@@ -215,13 +224,14 @@ function renderKPIs() {
   document.getElementById('k-muni').textContent = filteredData.filter(r => r.tipo_entidad === 'MUNICIPIO').length;
 }
 
+// Tabla
 function renderTabla() {
   const tbody = document.getElementById('tbody');
   if (!filteredData.length) {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados</p></div></td></tr>';
     return;
   }
-  
+
   tbody.innerHTML = filteredData.map((r, i) => {
     const fecha = r.timestamp ? new Date(r.timestamp).toLocaleDateString('es-CO') : '—';
     return `<tr>
@@ -235,17 +245,18 @@ function renderTabla() {
   }).join('');
 }
 
+// Charts
 function renderCharts() {
   const tipos = filteredData.reduce((acc, r) => {
     acc[r.tipo_entidad] = (acc[r.tipo_entidad] || 0) + 1;
     return acc;
   }, {});
-  
+
   const vigencias = filteredData.reduce((acc, r) => {
     acc[r.entidad_vigencia] = (acc[r.entidad_vigencia] || 0) + 1;
     return acc;
   }, {});
-  
+
   makeChart('chart-tipo', 'pie', Object.keys(tipos), Object.values(tipos), ['#3498db', '#e67e22', '#27ae60']);
   makeChart('chart-vigencia', 'bar', Object.keys(vigencias), Object.values(vigencias), ['#2d7dd2']);
 }
@@ -268,6 +279,7 @@ function makeChart(id, type, labels, data, colors) {
   });
 }
 
+// Diagnóstico
 function diagnostico() {
   const w = window.open('', '_blank', 'width=700,height=500');
   w.document.write('<pre style="padding:20px;font-family:monospace;font-size:13px">');
@@ -276,7 +288,7 @@ function diagnostico() {
   w.document.write('Datos en memoria: ' + allData.length + '\n');
   w.document.write('Datos filtrados: ' + filteredData.length + '\n\n');
   w.document.write('Probando fetch...\n');
-  
+
   fetch(URL + '?t=' + Date.now(), { cache: 'no-store' })
     .then(r => {
       w.document.write('Status: ' + r.status + ' ' + r.statusText + '\n');
@@ -301,6 +313,7 @@ function diagnostico() {
     });
 }
 
+// Datos demo
 function datosDemo() {
   return [
     { timestamp: '2026-03-12T10:00:00Z', entidad_nombre: 'Hospital Demo 1', tipo_entidad: 'ESES', entidad_vigencia: '2025', responsable_nombre: 'Juan Demo', responsable_cargo: 'Jefe CI' },
@@ -309,6 +322,7 @@ function datosDemo() {
   ];
 }
 
+// Auto-cargar al inicio
 window.addEventListener('DOMContentLoaded', () => cargar());
 </script>
 </body>
