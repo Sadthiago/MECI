@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard MECI 122</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--p:#1a3a6b;--a:#2d7dd2;--ok:#27ae60;--warn:#e67e22;--err:#e74c3c;--na:#8e44ad;--bg:#f0f4fb;--card:#fff;--border:#dde3ef;--muted:#6c7a93;--text:#222b3a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+
+header{background:linear-gradient(135deg,var(--p),#2d5a9e);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+header h1{font-size:1.15rem;font-weight:800}
+header p{font-size:.78rem;opacity:.8;margin-top:2px}
+.header-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;border:none;border-radius:20px;font-size:.82rem;font-weight:700;cursor:pointer;transition:transform .15s,opacity .15s}
+.btn:hover{transform:translateY(-1px);opacity:.9}
+.btn-w{background:#fff;color:var(--p)}
+.btn-o{background:var(--warn);color:#fff}
+.btn-g{background:var(--ok);color:#fff}
+.btn-p{background:#9b59b6;color:#fff}
+
+.wrap{max-width:1500px;margin:0 auto;padding:20px 24px}
+
+/* Filtros */
+.filtros{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:.73rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+.fg select,.fg input{border:1.5px solid var(--border);border-radius:8px;padding:7px 11px;font-size:.85rem;background:#f9fbff;min-width:160px;color:var(--text)}
+.fg select:focus,.fg input:focus{outline:none;border-color:var(--a)}
+.badge{background:var(--a);color:#fff;padding:4px 14px;border-radius:20px;font-size:.78rem;font-weight:700;align-self:flex-end;margin-bottom:1px}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;border-left:4px solid var(--a);text-align:center}
+.kpi.ok{border-left-color:var(--ok)}
+.kpi.warn{border-left-color:var(--warn)}
+.kpi.err{border-left-color:var(--err)}
+.kpi-v{font-size:2.2rem;font-weight:800;color:var(--p);line-height:1}
+.kpi-l{font-size:.7rem;color:var(--muted);font-weight:700;margin-top:6px;text-transform:uppercase;letter-spacing:.3px}
+
+/* Tabla principal */
+.tabla-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:22px;overflow-x:auto}
+.tabla-wrap table{width:100%;border-collapse:collapse;min-width:900px}
+.tabla-wrap th{background:var(--p);color:#fff;padding:10px 12px;text-align:left;font-size:.78rem;font-weight:700;white-space:nowrap}
+.tabla-wrap td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:.82rem;vertical-align:middle}
+.tabla-wrap tr:hover td{background:#f4f8ff}
+.tabla-wrap tr:last-child td{border-bottom:none}
+
+/* Barra de avance */
+.bar-wrap{width:140px;background:#eee;border-radius:10px;height:10px;overflow:hidden;display:inline-block;vertical-align:middle}
+.bar-fill{height:100%;border-radius:10px;transition:width .3s}
+.bar-ok{background:var(--ok)}
+.bar-warn{background:var(--warn)}
+.bar-err{background:var(--err)}
+.bar-zero{background:#ccc}
+
+/* Score badge */
+.score{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:800;color:#fff;margin-left:6px}
+.s-ok{background:var(--ok)}
+.s-warn{background:var(--warn)}
+.s-err{background:var(--err)}
+.s-zero{background:#999}
+
+/* Gráficas */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:18px;margin-bottom:22px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.chart-card h3{font-size:.9rem;font-weight:700;color:var(--p);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chart-wrap{height:280px}
+
+/* Categorías */
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:22px}
+.cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.cat-card h4{font-size:.82rem;font-weight:700;color:var(--p);margin-bottom:10px}
+.cat-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:.78rem}
+.cat-bar-bg{flex:1;background:#eee;border-radius:10px;height:8px;overflow:hidden}
+.cat-bar-f{height:100%;border-radius:10px;background:var(--a);transition:width .4s}
+.cat-val{width:36px;text-align:right;font-weight:700;font-size:.78rem;color:var(--muted)}
+.cat-ent{flex:0 0 130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Modal detalle */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--card);border-radius:16px;padding:28px;max-width:700px;width:95%;max-height:85vh;overflow-y:auto}
+.modal h2{color:var(--p);font-size:1rem;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal .close{cursor:pointer;font-size:1.4rem;color:var(--muted)}
+.detalle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detalle-item{background:#f9fbff;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.detalle-item .d-label{font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:3px;text-transform:uppercase}
+.detalle-item .d-val{font-size:.88rem;font-weight:600;color:var(--text)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;color:#fff;font-size:.85rem;font-weight:600;z-index:9999;animation:slideUp .3s;max-width:380px}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--err)}
+.toast.info{background:var(--a)}
+.toast.warn{background:var(--warn)}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Sección headers */
+.sec-header{font-size:.85rem;font-weight:800;color:var(--p);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
+
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:12px}
+
+@media(max-width:700px){
+  .charts-grid,.cats-grid,.detalle-grid{grid-template-columns:1fr}
+  header{padding:14px 16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 Dashboard MECI 122 — Seguimiento Formularios</h1>
+    <p>Análisis de avance y estado por entidad · Evaluación Independiente 2025</p>
+  </div>
+  <div class="header-btns">
+    <button class="btn btn-w" onclick="cargar()">🔄 Actualizar</button>
+    <button class="btn btn-o" onclick="cargar(true)">🔁 Limpiar caché</button>
+    <button class="btn btn-p" onclick="verDiagnostico()">🔬 Diagnóstico</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="fg">
+      <label>Vigencia</label>
+      <select id="f-vig"><option value="">— Todas —</option></select>
+    </div>
+    <div class="fg">
+      <label>Tipo de entidad</label>
+      <select id="f-tipo"><option value="">— Todos —</option></select>
+    </div>
+    <div class="fg">
+      <label>Estado de avance</label>
+      <select id="f-estado">
+        <option value="">— Todos —</option>
+        <option value="alto">🟢 Alto (≥75%)</option>
+        <option value="medio">🟡 Medio (50–74%)</option>
+        <option value="bajo">🔴 Bajo (25–49%)</option>
+        <option value="critico">⚫ Crítico (&lt;25%)</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Buscar entidad</label>
+      <input type="text" id="f-buscar" placeholder="Nombre..." oninput="aplicar()">
+    </div>
+    <span class="badge" id="badge">0 registros</span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-v" id="k-total">0</div><div class="kpi-l">Total formularios</div></div>
+    <div class="kpi ok"><div class="kpi-v" id="k-alto">0</div><div class="kpi-l">🟢 Avance alto ≥75%</div></div>
+    <div class="kpi warn"><div class="kpi-v" id="k-medio">0</div><div class="kpi-l">🟡 Avance medio 50–74%</div></div>
+    <div class="kpi err"><div class="kpi-v" id="k-bajo">0</div><div class="kpi-l">🔴 Bajo / Crítico &lt;50%</div></div>
+    <div class="kpi"><div class="kpi-v" id="k-prom">0%</div><div class="kpi-l">Avance promedio</div></div>
+    <div class="kpi"><div class="kpi-v" id="k-eses">0</div><div class="kpi-l">ESES</div></div>
+    <div class="kpi"><div class="kpi-v" id="k-desc">0</div><div class="kpi-l">Descentralizadas</div></div>
+    <div class="kpi"><div class="kpi-v" id="k-muni">0</div><div class="kpi-l">Municipios</div></div>
+  </div>
+
+  <!-- Gráficas de avance -->
+  <div class="sec-header">📈 Visualización de avance</div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>🏆 Top entidades con mayor avance</h3>
+      <div class="chart-wrap"><canvas id="ch-top"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>⚠️ Entidades que necesitan atención</h3>
+      <div class="chart-wrap"><canvas id="ch-bottom"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>📊 Distribución por nivel de avance</h3>
+      <div class="chart-wrap"><canvas id="ch-dist"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>📋 Promedio de avance por categoría</h3>
+      <div class="chart-wrap"><canvas id="ch-cats"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Análisis por categoría (top/bottom entidades) -->
+  <div class="sec-header">🔎 Categorías con menor cumplimiento por entidad</div>
+  <div class="cats-grid" id="cats-grid">
+    <div class="empty"><div class="empty-icon">⏳</div><p>Cargando análisis...</p></div>
+  </div>
+
+  <!-- Tabla de entidades -->
+  <div class="sec-header">📋 Tabla de estado por entidad</div>
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Entidad</th>
+          <th>Tipo</th>
+          <th>Vigencia</th>
+          <th>Responsable</th>
+          <th>Avance general</th>
+          <th>Integridad</th>
+          <th>Riesgos</th>
+          <th>Auditoría</th>
+          <th>Capacidad</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="11"><div class="empty"><div class="empty-icon">📋</div><p>Cargando datos...</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-overlay" id="modal" onclick="cerrarModal(event)">
+  <div class="modal">
+    <h2 id="modal-titulo">Detalle entidad <span class="close" onclick="document.getElementById('modal').classList.remove('visible')">✕</span></h2>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const APPS_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
+const CACHE_KEY = "meci122_v9";
+
+
+const PREGUNTAS = {"PER201": {"label": "MECI genera valor agregado", "tipo": "radio", "opciones": {"si": 1, "no": 0}, "peso": 1}, "CIN203": {"label": "Política de integridad", "tipo": "check", "max_opts": 5, "peso": 2}, "CIN206": {"label": "Talento Humano", "tipo": "check", "max_opts": 7, "peso": 2}, "CIN207": {"label": "Planeación y Riesgos", "tipo": "check", "max_opts": 8, "peso": 2}, "CIN221": {"label": "Gestión integral de riesgos", "tipo": "radio", "opciones": {"a": 1, "b": 0.5, "c": 0}, "peso": 2}, "CIN222": {"label": "Evaluación riesgo/control", "tipo": "check", "max_opts": 4, "peso": 2}, "CIN233": {"label": "Evaluación gestión info", "tipo": "radio", "opciones": {"a": 1, "b": 0.5, "c": 0}, "peso": 2}, "CIN234": {"label": "Hallazgos comunicados", "tipo": "radio", "opciones": {"a": 1, "b": 0.5, "c": 0}, "peso": 2}, "CIN236": {"label": "Informes contables oportunos", "tipo": "radio", "opciones": {"siempre": 1, "mayoria": 0.75, "pocas": 0.25, "nunca": 0}, "peso": 2}, "CIN238": {"label": "Metodología auditoría", "tipo": "radio", "opciones": {"a": 1, "b": 0.75, "c": 0.25, "d": 0}, "peso": 3}, "CIN239": {"label": "Plan anual auditoras", "tipo": "radio", "opciones": {"a": 1, "b": 0.5, "c": 0}, "peso": 3}, "CIN240": {"label": "Componentes plan anual", "tipo": "check", "max_opts": 6, "peso": 2}, "CIN241": {"label": "Fases de auditoría", "tipo": "check", "max_opts": 4, "peso": 2}, "CIN242": {"label": "Aspectos auditoras programadas", "tipo": "check", "max_opts": 7, "peso": 2}, "CIN243": {"label": "Ejecución plan anual", "tipo": "radio", "opciones": {"a": 1, "b": 0.75, "c": 0.25}, "peso": 3}, "CIN244": {"label": "Universo de auditoría", "tipo": "check", "max_opts": 3, "peso": 2}, "CIN246": {"label": "Acciones eval. SCI", "tipo": "check", "max_opts": 4, "peso": 2}, "CIN247": {"label": "Alcance plan auditoras", "tipo": "check", "max_opts": 9, "peso": 2}, "CIN252": {"label": "Planeación auditoras", "tipo": "check", "max_opts": 4, "peso": 2}, "CIN253": {"label": "Herramientas ejecución", "tipo": "check", "max_opts": 8, "peso": 3}, "CIN254": {"label": "Características informes", "tipo": "check", "max_opts": 6, "peso": 2}, "CIN255": {"label": "Seguimiento planes mejoramiento", "tipo": "radio", "opciones": {"a": 1, "b": 0.5, "c": 0}, "peso": 3}, "CIN264": {"label": "Estructura área CI", "tipo": "radio", "opciones": {"a": 1, "b": 0.75, "c": 0.25, "d": 0.5, "e": 0}, "peso": 3}, "CIN268": {"label": "Tipo vinculación JCI", "tipo": "radio", "opciones": {"periodo": 1, "libre": 1, "carrera": 1, "provisional": 0.5, "temporal": 0.25, "otro": 0.25}, "peso": 1}, "CIN305": {"label": "Total trabajadores CI", "tipo": "numero", "peso": 1}, "CIN306": {"label": "Alertas política integridad", "tipo": "radio", "opciones": {"si": 1, "no": 0, "na": 1}, "peso": 2}, "CIN300": {"label": "Control gestión información", "tipo": "check", "max_opts": 7, "peso": 2}, "CIN301": {"label": "Razones incumplimiento plan", "tipo": "check", "max_opts": 7, "peso": 1}};
+const CATEGORIAS = {"Política de Integridad": ["CIN203", "CIN306"], "Evaluación Riesgos": ["CIN207", "CIN221", "CIN222"], "Proceso Auditor": ["CIN238", "CIN239", "CIN240", "CIN241", "CIN242", "CIN243", "CIN247", "CIN252", "CIN253", "CIN254"], "Comunicación y Hallazgos": ["CIN233", "CIN234", "CIN236"], "Seguimiento y Mejora": ["CIN246", "CIN255", "CIN301"], "Gestión Información": ["CIN300"], "Capacidad Institucional": ["CIN264", "CIN268", "CIN305"]};
+
+function calcAvance(r) {
+  let score = 0, maxScore = 0;
+  const detalle = {};
+
+  for (const [campo, cfg] of Object.entries(PREGUNTAS)) {
+    const val = (r[campo] || '').toString().trim().toLowerCase();
+    maxScore += cfg.peso;
+
+    if (!val) { detalle[campo] = 0; continue; }
+
+    if (cfg.tipo === 'radio') {
+      const pts = cfg.opciones[val] ?? 0;
+      score += pts * cfg.peso;
+      detalle[campo] = pts;
+    } else if (cfg.tipo === 'check') {
+      const opts = val.split(',').map(o=>o.trim()).filter(o=>o && o!=='ninguna');
+      const pts = Math.min(1, opts.length / (cfg.max_opts || 5));
+      score += pts * cfg.peso;
+      detalle[campo] = Math.round(pts * 100) / 100;
+    } else if (cfg.tipo === 'numero') {
+      const n = parseInt(val) || 0;
+      const pts = n > 0 ? 1 : 0;
+      score += pts * cfg.peso;
+      detalle[campo] = pts;
+    }
+  }
+
+  const pct = maxScore > 0 ? Math.round(score / maxScore * 1000) / 10 : 0;
+  return { pct, detalle };
+}
+
+function semaforo(pct) {
+  if (pct >= 75) return '🟢';
+  if (pct >= 50) return '🟡';
+  if (pct >= 25) return '🔴';
+  return '⚫';
+}
+
+function calcCategoria(r, campos) {
+  let s = 0, m = 0;
+  campos.forEach(c => {
+    const cfg = PREGUNTAS[c];
+    if (!cfg) return;
+    m += cfg.peso;
+    const val = (r[c] || '').toString().trim().toLowerCase();
+    if (!val) return;
+    if (cfg.tipo === 'radio') {
+      s += (cfg.opciones[val] ?? 0) * cfg.peso;
+    } else if (cfg.tipo === 'check') {
+      const opts = val.split(',').filter(o=>o.trim()&&o.trim()!=='ninguna');
+      s += Math.min(1, opts.length / (cfg.max_opts||5)) * cfg.peso;
+    } else if (cfg.tipo === 'numero') {
+      s += ((parseInt(val)||0) > 0 ? 1 : 0) * cfg.peso;
+    }
+  });
+  return m > 0 ? Math.round(s / m * 100) : 0;
+}
+
+
+let allData = [];
+let filtData = [];
+let chartInst = {};
+
+// ── TOAST ──
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4500);
+}
+
+// ── CARGAR DATOS ──
+async function cargar(limpiar=false) {
+  toast('⏳ Cargando desde Google Sheets...', 'info');
+  if (limpiar) localStorage.removeItem(CACHE_KEY);
+
+  try {
+    const res = await fetch(APPS_URL + '?t=' + Date.now(), { cache:'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data)) throw new Error('No es array');
+    if (data.length === 0) {
+      toast('⚠️ Sheets vacío — usando datos de demostración', 'warn');
+      allData = datosDemo();
+    } else {
+      allData = data.map(r => { delete r.viewport; return r; });
+      localStorage.setItem(CACHE_KEY, JSON.stringify(allData));
+      toast('✅ ' + allData.length + ' registros cargados', 'ok');
+    }
+  } catch(err) {
+    console.warn('Error sheets:', err.message);
+    const cache = localStorage.getItem(CACHE_KEY);
+    if (cache) {
+      allData = JSON.parse(cache);
+      toast('📦 ' + allData.length + ' desde caché · Error: ' + err.message, 'warn');
+    } else {
+      allData = datosDemo();
+      toast('❌ Error: ' + err.message + ' · Mostrando demo', 'err');
+    }
+  }
+
+  poblarFiltros();
+  aplicar();
+}
+
+// ── POBLAR FILTROS ──
+function poblarFiltros() {
+  const vigs = [...new Set(allData.map(r=>r.entidad_vigencia).filter(Boolean))].sort();
+  const tipos = [...new Set(allData.map(r=>r.tipo_entidad).filter(Boolean))].sort();
+  const fv = document.getElementById('f-vig');
+  const ft = document.getElementById('f-tipo');
+  fv.innerHTML = '<option value="">— Todas —</option>' + vigs.map(v=>`<option>${v}</option>`).join('');
+  ft.innerHTML = '<option value="">— Todos —</option>' + tipos.map(v=>`<option>${v}</option>`).join('');
+  ['f-vig','f-tipo','f-estado'].forEach(id => document.getElementById(id).onchange = aplicar);
+}
+
+// ── APLICAR FILTROS ──
+function aplicar() {
+  const fV = document.getElementById('f-vig').value;
+  const fT = document.getElementById('f-tipo').value;
+  const fE = document.getElementById('f-estado').value;
+  const fB = document.getElementById('f-buscar').value.toLowerCase();
+
+  filtData = allData
+    .map(r => { const {pct, detalle} = calcAvance(r); return {...r, _pct:pct, _det:detalle}; })
+    .filter(r => {
+      if (fV && r.entidad_vigencia !== fV) return false;
+      if (fT && r.tipo_entidad !== fT) return false;
+      if (fB && !(r.entidad_nombre||'').toLowerCase().includes(fB)) return false;
+      if (fE === 'alto'   && r._pct < 75) return false;
+      if (fE === 'medio'  && (r._pct < 50 || r._pct >= 75)) return false;
+      if (fE === 'bajo'   && (r._pct < 25 || r._pct >= 50)) return false;
+      if (fE === 'critico'&& r._pct >= 25) return false;
+      return true;
+    })
+    .sort((a,b) => b._pct - a._pct);
+
+  document.getElementById('badge').textContent = filtData.length + ' registros';
+  renderKPIs();
+  renderTabla();
+  renderCharts();
+  renderCats();
+}
+
+// ── KPIs ──
+function renderKPIs() {
+  const n = filtData.length;
+  const alto  = filtData.filter(r=>r._pct>=75).length;
+  const medio = filtData.filter(r=>r._pct>=50&&r._pct<75).length;
+  const bajo  = filtData.filter(r=>r._pct<50).length;
+  const prom  = n ? Math.round(filtData.reduce((a,r)=>a+r._pct,0)/n*10)/10 : 0;
+
+  document.getElementById('k-total').textContent = n;
+  document.getElementById('k-alto').textContent  = alto;
+  document.getElementById('k-medio').textContent = medio;
+  document.getElementById('k-bajo').textContent  = bajo;
+  document.getElementById('k-prom').textContent  = prom + '%';
+  document.getElementById('k-eses').textContent  = filtData.filter(r=>r.tipo_entidad==='ESES').length;
+  document.getElementById('k-desc').textContent  = filtData.filter(r=>r.tipo_entidad==='DESCENTRALIZADA').length;
+  document.getElementById('k-muni').textContent  = filtData.filter(r=>r.tipo_entidad==='MUNICIPIO').length;
+}
+
+// ── TABLA ──
+function barHtml(pct) {
+  const cls = pct>=75?'bar-ok':pct>=50?'bar-warn':pct>0?'bar-err':'bar-zero';
+  const scls = pct>=75?'s-ok':pct>=50?'s-warn':pct>0?'s-err':'s-zero';
+  return `<div style="display:flex;align-items:center;gap:8px">
+    <div class="bar-wrap"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+    <span class="score ${scls}">${pct}%</span>
+  </div>`;
+}
+
+function catPct(r, campos) {
+  return calcCategoria(r, campos);
+}
+
+function renderTabla() {
+  const tbody = document.getElementById('tbody');
+  if (!filtData.length) {
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados con los filtros actuales.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtData.map((r,i) => {
+    const fecha = r.timestamp ? new Date(r.timestamp).toLocaleDateString('es-CO') : '—';
+    const pInteg = catPct(r, CATEGORIAS['Política de Integridad']);
+    const pRiesg = catPct(r, CATEGORIAS['Evaluación Riesgos']);
+    const pAudit = catPct(r, CATEGORIAS['Proceso Auditor']);
+    const pCap   = catPct(r, CATEGORIAS['Capacidad Institucional']);
+    const sem    = semaforo(r._pct);
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${r.entidad_nombre||'—'}</strong><br><small style="color:var(--muted)">${fecha}</small></td>
+      <td><span style="font-size:.72rem;background:#eaf1fb;color:var(--p);padding:2px 8px;border-radius:8px;font-weight:700">${r.tipo_entidad||'—'}</span></td>
+      <td>${r.entidad_vigencia||'—'}</td>
+      <td style="font-size:.78rem">${r.responsable_nombre||'—'}<br><span style="color:var(--muted)">${r.responsable_cargo||''}</span></td>
+      <td>${sem} ${barHtml(r._pct)}</td>
+      <td>${barHtml(pInteg)}</td>
+      <td>${barHtml(pRiesg)}</td>
+      <td>${barHtml(pAudit)}</td>
+      <td>${barHtml(pCap)}</td>
+      <td><button class="btn btn-w" style="padding:5px 12px;font-size:.75rem" onclick="verDetalle(${i})">🔍 Ver</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── CHARTS ──
+function mkChart(id, type, labels, datasets, opts={}) {
+  if (chartInst[id]) chartInst[id].destroy();
+  const el = document.getElementById(id);
+  if (!el) return;
+  chartInst[id] = new Chart(el, {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: type==='pie'||type==='doughnut', position:'right', labels:{boxWidth:12,font:{size:11}} } },
+      ...opts
+    }
+  });
+}
+
+function renderCharts() {
+  if (!filtData.length) return;
+
+  // Top 8 mayor avance
+  const top8 = [...filtData].sort((a,b)=>b._pct-a._pct).slice(0,8);
+  mkChart('ch-top','bar',
+    top8.map(r=>(r.entidad_nombre||'').substring(0,22)+'…'),
+    [{
+      data: top8.map(r=>r._pct),
+      backgroundColor: top8.map(r=>r._pct>=75?'#27ae60':r._pct>=50?'#e67e22':'#e74c3c'),
+      borderRadius: 6
+    }],
+    { indexAxis:'y', scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}, plugins:{legend:{display:false}} }
+  );
+
+  // Bottom 8 menor avance
+  const bot8 = [...filtData].sort((a,b)=>a._pct-b._pct).slice(0,8);
+  mkChart('ch-bottom','bar',
+    bot8.map(r=>(r.entidad_nombre||'').substring(0,22)+'…'),
+    [{
+      data: bot8.map(r=>r._pct),
+      backgroundColor: bot8.map(r=>r._pct<25?'#c0392b':r._pct<50?'#e74c3c':'#e67e22'),
+      borderRadius: 6
+    }],
+    { indexAxis:'y', scales:{x:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:10}}}}, plugins:{legend:{display:false}} }
+  );
+
+  // Distribución por nivel
+  const niveles = {
+    '🟢 Alto (≥75%)':    filtData.filter(r=>r._pct>=75).length,
+    '🟡 Medio (50–74%)': filtData.filter(r=>r._pct>=50&&r._pct<75).length,
+    '🔴 Bajo (25–49%)':  filtData.filter(r=>r._pct>=25&&r._pct<50).length,
+    '⚫ Crítico (<25%)': filtData.filter(r=>r._pct<25).length,
+  };
+  mkChart('ch-dist','doughnut',
+    Object.keys(niveles),
+    [{ data:Object.values(niveles), backgroundColor:['#27ae60','#e67e22','#e74c3c','#555'] }]
+  );
+
+  // Promedio por categoría
+  const catNames = Object.keys(CATEGORIAS);
+  const catProms = catNames.map(cat => {
+    const vals = filtData.map(r => calcCategoria(r, CATEGORIAS[cat]));
+    return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+  });
+  mkChart('ch-cats','bar',
+    catNames.map(c=>c.substring(0,20)),
+    [{
+      data: catProms,
+      backgroundColor: catProms.map(v=>v>=75?'#27ae60':v>=50?'#e67e22':'#e74c3c'),
+      borderRadius: 6
+    }],
+    {
+      scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{font:{size:10}}}},
+      plugins:{legend:{display:false}}
+    }
+  );
+}
+
+// ── CATEGORÍAS CON MAYOR DEBILIDAD ──
+function renderCats() {
+  const grid = document.getElementById('cats-grid');
+  if (!filtData.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Sin datos</p></div>';
+    return;
+  }
+
+  const catNames = Object.keys(CATEGORIAS);
+  grid.innerHTML = catNames.map(cat => {
+    const campos = CATEGORIAS[cat];
+    const vals = filtData.map(r => ({ ent:r.entidad_nombre||'—', pct:calcCategoria(r,campos) }));
+    const prom = Math.round(vals.reduce((a,b)=>a+b.pct,0)/vals.length);
+    const ordenadas = [...vals].sort((a,b)=>a.pct-b.pct).slice(0,5);
+    const clr = prom>=75?'var(--ok)':prom>=50?'var(--warn)':'var(--err)';
+
+    return `<div class="cat-card">
+      <h4>${cat} <span style="color:${clr};font-size:.85rem;font-weight:800">${prom}% prom</span></h4>
+      ${ordenadas.map(e=>`
+        <div class="cat-bar-row">
+          <span class="cat-ent" title="${e.ent}">${e.ent.substring(0,18)+('...')}</span>
+          <div class="cat-bar-bg"><div class="cat-bar-f" style="width:${e.pct}%;background:${e.pct>=75?'var(--ok)':e.pct>=50?'var(--warn)':'var(--err)'}"></div></div>
+          <span class="cat-val">${e.pct}%</span>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ── DETALLE ENTIDAD ──
+function verDetalle(idx) {
+  const r = filtData[idx];
+  if (!r) return;
+
+  document.getElementById('modal-titulo').innerHTML = 
+    `${semaforo(r._pct)} ${r.entidad_nombre||'Entidad'} · ${r._pct}% avance <span class="close" onclick="document.getElementById('modal').classList.remove('visible')">✕</span>`;
+
+  const catNames = Object.keys(CATEGORIAS);
+  const catHtml = catNames.map(cat => {
+    const pct = calcCategoria(r, CATEGORIAS[cat]);
+    const bar = pct>=75?'var(--ok)':pct>=50?'var(--warn)':'var(--err)';
+    return `<div class="detalle-item">
+      <div class="d-label">${cat}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+        <div class="cat-bar-bg" style="flex:1"><div class="cat-bar-f" style="width:${pct}%;background:${bar}"></div></div>
+        <strong style="color:${bar}">${pct}%</strong>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <div style="margin-bottom:14px;padding:12px;background:#f9fbff;border-radius:10px;font-size:.82rem">
+      <strong>Tipo:</strong> ${r.tipo_entidad||'—'} &nbsp;|&nbsp;
+      <strong>Vigencia:</strong> ${r.entidad_vigencia||'—'} &nbsp;|&nbsp;
+      <strong>Responsable:</strong> ${r.responsable_nombre||'—'} (${r.responsable_cargo||'—'}) &nbsp;|&nbsp;
+      <strong>Fecha:</strong> ${r.timestamp?new Date(r.timestamp).toLocaleString('es-CO'):'—'}
+    </div>
+    <div class="detalle-grid">${catHtml}</div>
+    <div style="margin-top:14px;background:#fffbf0;border:1px solid #f0a500;border-radius:10px;padding:12px">
+      <strong style="font-size:.8rem;color:#856404">⚠️ Áreas que requieren atención:</strong>
+      <ul style="margin-top:6px;padding-left:18px;font-size:.8rem;color:#444">
+        ${catNames.filter(c=>calcCategoria(r,CATEGORIAS[c])<50)
+          .map(c=>`<li><strong>${c}</strong> — ${calcCategoria(r,CATEGORIAS[c])}%</li>`).join('') 
+          || '<li>✅ Todas las categorías superan el 50%</li>'}
+      </ul>
+    </div>`;
+
+  document.getElementById('modal').classList.add('visible');
+}
+
+function cerrarModal(e) {
+  if (e.target.id === 'modal') document.getElementById('modal').classList.remove('visible');
+}
+
+// ── DIAGNÓSTICO ──
+function verDiagnostico() {
+  const w = window.open('','_blank','width=720,height=550');
+  w.document.write(`<pre style="padding:20px;font-family:monospace;font-size:13px;white-space:pre-wrap">
+🔬 DIAGNÓSTICO MECI 122
+
+URL: ${APPS_URL}
+
+Datos en memoria: ${allData.length} registros
+Datos filtrados: ${filtData.length} registros
+Caché local: ${localStorage.getItem(CACHE_KEY)?JSON.parse(localStorage.getItem(CACHE_KEY)).length+' registros':'Vacío'}
+
+Probando conexión...
+  `);
+
+  fetch(APPS_URL+'?t='+Date.now(),{cache:'no-store'})
+    .then(r=>{w.document.write('HTTP: '+r.status+' '+r.statusText+'\n'); return r.text();})
+    .then(t=>{
+      w.document.write('Respuesta (600 chars):\n'+t.substring(0,600)+'\n\n');
+      try{
+        const d=JSON.parse(t);
+        w.document.write('✅ JSON válido: '+(Array.isArray(d)?d.length+' registros':typeof d)+'\n');
+        if(d.length>0) w.document.write('\nKeys primer registro:\n'+Object.keys(d[0]).join(', ')+'\n\nPrimer registro:\n'+JSON.stringify(d[0],null,2));
+      }catch(e){w.document.write('❌ JSON inválido: '+e.message);}
+    })
+    .catch(e=>w.document.write('❌ Error red: '+e.message+'\nPosible causa: CORS o archivo abierto como file://'));
+}
+
+// ── DATOS DEMO ──
+function datosDemo() {
+  const ents = [
+    {n:'Hospital San Rafael Facatativá',t:'ESES',CIN203:'a,b,c,d',CIN221:'a',CIN238:'a',CIN239:'a',CIN243:'a',CIN255:'a',CIN264:'a',PER201:'si',CIN207:'a,b,c,d,e',CIN233:'a',CIN234:'a',CIN236:'siempre',CIN300:'a,b,c,d',CIN240:'a,b,c,d',CIN241:'a,b,c,d',CIN253:'a,b,c,d,e',CIN254:'a,b,c',CIN255:'a',CIN246:'a,b,c',CIN306:'si',CIN305:'3'},
+    {n:'Alcaldía de Cáqueza',t:'MUNICIPIO',CIN203:'a,b',CIN221:'b',CIN238:'b',CIN239:'b',CIN243:'b',CIN255:'b',CIN264:'b',PER201:'si',CIN207:'a,b',CIN233:'b',CIN234:'a',CIN236:'mayoria',CIN300:'a,b',CIN240:'a,b,c',CIN241:'a,b',CIN253:'a,b,c',CIN254:'a,b',CIN246:'a,b',CIN306:'si',CIN305:'1'},
+    {n:'Agencia Catastral de Cundinamarca',t:'DESCENTRALIZADA',CIN203:'a,b,c,d,e',CIN221:'a',CIN238:'a',CIN239:'a',CIN243:'a',CIN255:'a',CIN264:'a',PER201:'si',CIN207:'a,b,c,d,e,f',CIN233:'a',CIN234:'a',CIN236:'siempre',CIN300:'a,b,c,d,e,f',CIN240:'a,b,c,d,e',CIN241:'a,b,c,d',CIN253:'a,b,c,d,e,f',CIN254:'a,b,c,d,e',CIN246:'a,b,c,d',CIN306:'si',CIN305:'5'},
+    {n:'ESE Hospital Santa Rosa Tenjo',t:'ESES',CIN203:'a',CIN221:'c',CIN238:'c',CIN239:'c',CIN243:'c',CIN255:'c',CIN264:'c',PER201:'no',CIN207:'a',CIN233:'c',CIN234:'c',CIN236:'pocas',CIN300:'a',CIN240:'a',CIN241:'a',CIN253:'a',CIN254:'a',CIN246:'ninguna',CIN306:'no',CIN305:'1'},
+    {n:'Hospital San Vicente de Paul Fómeque',t:'ESES',CIN203:'a,b,c',CIN221:'a',CIN238:'b',CIN239:'a',CIN243:'b',CIN255:'b',CIN264:'b',PER201:'si',CIN207:'a,b,c',CIN233:'b',CIN234:'a',CIN236:'mayoria',CIN300:'a,b,c',CIN240:'a,b,c',CIN241:'a,b,c',CIN253:'a,b,c,d',CIN254:'a,b,c',CIN246:'a,b',CIN306:'na',CIN305:'2'},
+    {n:'Beneficencia de Cundinamarca',t:'DESCENTRALIZADA',CIN203:'ninguna',CIN221:'c',CIN238:'d',CIN239:'c',CIN243:'c',CIN255:'c',CIN264:'e',PER201:'no',CIN207:'ninguna',CIN233:'c',CIN234:'c',CIN236:'nunca',CIN300:'ninguna',CIN240:'ninguna',CIN241:'ninguna',CIN253:'ninguna',CIN254:'ninguna',CIN246:'ninguna',CIN306:'no',CIN305:'0'},
+  ];
+  return ents.map((e,i)=>({
+    timestamp: new Date(Date.now()-i*86400000).toISOString(),
+    entidad_nombre: e.n, tipo_entidad: e.t, entidad_vigencia:'2025',
+    responsable_nombre:'Demo Responsable', responsable_cargo:'Jefe CI',
+    ...Object.fromEntries(Object.entries(e).filter(([k])=>!['n','t'].includes(k)))
+  }));
+}
+
+// ── INICIAR ──
+window.addEventListener('DOMContentLoaded', () => cargar());
+</script>
+</body>
+</html>
