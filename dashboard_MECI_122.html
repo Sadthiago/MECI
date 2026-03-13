@@ -173,7 +173,8 @@ header p{font-size:.8rem;opacity:.8;margin-top:2px}
     <p>Evaluación Independiente – Vigencia 2025</p>
   </div>
   <div class="header-btns">
-    <button class="btn btn-reload" onclick="cargarDatos()">🔄 Actualizar</button>
+    <button class="btn btn-reload" onclick="cargarDatos(false)">🔄 Actualizar</button>
+    <button class="btn btn-reload" style="background:#f0a500;color:#fff" onclick="cargarDatos(true)">🔁 Forzar recarga</button>
     <button class="btn btn-excel"  onclick="exportarExcel()">📥 Exportar Excel</button>
     <button class="btn btn-clear"  onclick="confirmarLimpiar()">🗑️ Limpiar datos</button>
   </div>
@@ -455,24 +456,41 @@ function getFuJust(row, campo, optVal) {
   return row[`fu_just_${campo}_${optVal}`] || '';
 }
 
-async function cargarDatos() {
-  showToast('⏳ Cargando datos...', 'info');
+async function cargarDatos(forzarLimpio = false) {
+  showToast('⏳ Cargando datos desde Google Sheets...', 'info');
+  if (forzarLimpio) localStorage.removeItem(STORAGE_KEY);
+
   try {
-    const res = await fetch(APPS_SCRIPT_URL);
+    // Cache-busting para evitar respuestas cacheadas del browser
+    const url = APPS_SCRIPT_URL + '?t=' + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
-      todosLosDatos = data;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      showToast(`✅ ${data.length} registros cargados desde Google Sheets`, 'ok');
-    } else throw new Error('Sin datos');
-  } catch {
+      // Limpiar campo 'viewport' que llega como basura del FormData
+      todosLosDatos = data.map(r => { const {viewport, ...rest} = r; return rest; });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todosLosDatos));
+      showToast(`✅ ${todosLosDatos.length} registros cargados desde Google Sheets`, 'ok');
+    } else if (Array.isArray(data) && data.length === 0) {
+      showToast('⚠️ Google Sheets respondió pero no tiene datos aún', 'info');
+      todosLosDatos = cargarDatosDemostracion();
+    } else {
+      throw new Error('Respuesta inesperada del servidor');
+    }
+  } catch(err) {
+    console.warn('Error al cargar desde Sheets:', err.message);
     const local = localStorage.getItem(STORAGE_KEY);
     if (local) {
-      todosLosDatos = JSON.parse(local);
-      showToast(`📦 ${todosLosDatos.length} registros desde caché local`, 'info');
+      try {
+        todosLosDatos = JSON.parse(local);
+        showToast(`📦 ${todosLosDatos.length} registros desde caché local (Sheets no disponible: ${err.message})`, 'info');
+      } catch {
+        todosLosDatos = cargarDatosDemostracion();
+        showToast('ℹ️ Caché corrupta — mostrando datos de demostración', 'info');
+      }
     } else {
       todosLosDatos = cargarDatosDemostracion();
-      showToast('ℹ️ Mostrando datos de demostración', 'info');
+      showToast('ℹ️ Sin conexión a Sheets — mostrando datos de demostración', 'info');
     }
   }
   poblarFiltros();
@@ -836,7 +854,7 @@ function renderPreguntasBalance() {
 
 // ── Modal detalle entidad ──
 const LABELS = {
-  entidad_nombre:"Entidad", entidad_nit:"NIT", tipo_entidad:"Tipo de entidad",
+  entidad_nombre:"Entidad", entidad_nit:"NIT (no aplica)", tipo_entidad:"Tipo de entidad",
   entidad_vigencia:"Vigencia", responsable_nombre:"Responsable", responsable_cargo:"Cargo",
   responsable_cedula:"Cédula", responsable_correo:"Correo", timestamp:"Fecha envío",
   PER201:"PER201 – MECI genera valor", PER205:"PER205 – Percepción guías DAFP",
