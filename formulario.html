@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario MECI</title>
+  <link rel="stylesheet" href="formulario.css">
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">📋</div>
+    <div>
+      <h1>Formulario MECI</h1>
+      <p></p>
+    </div>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="progress-label"><span id="progress-text">0 de 42 preguntas respondidas</span></div>
+
+  <div class="form-wrap">
+    <form id="form-meci" novalidate>
+
+      <!-- ====== DATOS BÁSICOS ====== -->
+      <div class="seccion">
+        <div class="sec-header">👤 Datos Básicos del Responsable y la Entidad</div>
+        <div class="sec-body">
+
+          <div class="campo" id="campo-nombre">
+            <label>Nombre completo del responsable <span class="req">*</span></label>
+            <input type="text" id="responsable_nombre" name="responsable_nombre"
+              placeholder="Nombres y apellidos completos" required>
+            <div class="err-msg">Este campo es obligatorio.</div>
+          </div>
+
+          <div class="campo" id="campo-cedula">
+            <label>Número de cédula <span class="req">*</span></label>
+            <input type="text" id="responsable_cedula" name="responsable_cedula" placeholder="Sin puntos ni comas"
+              required pattern="[0-9]{6,12}">
+            <div class="err-msg">Ingrese un número de cédula válido.</div>
+          </div>
+
+          <div class="campo" id="campo-cargo">
+            <label>Cargo del responsable <span class="req">*</span></label>
+            <input type="text" id="responsable_cargo" name="responsable_cargo" placeholder="Ej: Jefe de Control Interno"
+              required>
+            <div class="err-msg">Este campo es obligatorio.</div>
+          </div>
+
+          <div class="campo" id="campo-correo">
+            <label>Correo electrónico institucional <span class="req">*</span></label>
+            <input type="email" id="responsable_correo" name="responsable_correo" placeholder="correo@entidad.gov.co"
+              required>
+            <div class="err-msg">Ingrese un correo electrónico válido.</div>
+          </div>
+
+          <div class="campo" id="campo-tipo-entidad">
+            <label>Tipo de entidad <span class="req">*</span></label>
+            <select id="tipo_entidad" name="tipo_entidad" required onchange="ramificarEntidad()">
+              <option value="">— Seleccione el tipo de entidad —</option>
+              <option value="DESCENTRALIZADA">DESCENTRALIZADA DEPARTAMENTO</option>
+              <option value="ESES">EMPRESAS SOCIALES DEL ESTADO – ESES</option>
+              <option value="MUNICIPIO">MUNICIPIOS</option>
+            </select>
+            <div class="err-msg">Seleccione el tipo de entidad.</div>
+          </div>
+
+          <!-- Ramificación DESCENTRALIZADA -->
+          <div class="campo entidad-block" id="bloque-desc">
+            <label>Entidad descentralizada <span class="req">*</span></label>
+            <select id="entidad_desc" name="entidad_nombre" required>
+              <option value="">— Seleccione la entidad —</option>
+              <option value="AGENCIA CATASTRAL DE CUNDINAMARCA">AGENCIA CATASTRAL DE CUNDINAMARCA</option>
+              <option value="AGENCIA DE COMERCIALIZACION E INNOVACION PARA EL DESARROLLO DE CUNDINAMARCA">AGENCIA DE
+                COMERCIALIZACION E INNOVACION PARA EL DESARROLLO DE CUNDINAMARCA</option>
+              <option value="AGENCIA LOGISTICA DE GESTION INMOBILIARIA Y DE SERVICIOS">AGENCIA LOGISTICA DE GESTION
+                INMOBILIARIA Y DE SERVICIOS</option>
+              <option value="BENEFICENCIA DE CUNDINAMARCA">BENEFICENCIA DE CUNDINAMARCA</option>
+              <option value="INSTITUTO DE ACCION COMUNAL Y CAPITAL SOCIAL DE CUNDINAMARCA">INSTITUTO DE ACCION COMUNAL Y
+                CAPITAL SOCIAL DE CUNDINAMARCA</option>
+              <option value="INSTITUTO DE INFRAESTRUCTURA Y CONCESIONES DE CUNDINAMARCA">INSTITUTO DE INFRAESTRUCTURA Y
+                CONCESIONES DE CUNDINAMARCA</option>
+              <option value="INSTITUTO DE PROTECCION Y BIENESTAR ANIMAL DE CUNDINAMARCA">INSTITUTO DE PROTECCION Y
+                BIENESTAR ANIMAL DE CUNDINAMARCA</option>
+              <option value="INSTITUTO DEPARTAMENTAL DE CULTURA Y TURISMO DE CUNDINAMARCA">INSTITUTO DEPARTAMENTAL DE
+                CULTURA Y TURISMO DE CUNDINAMARCA</option>
+              <option value="INSTITUTO DEPARTAMENTAL PARA LA RECREACION Y EL DEPORTE DE CUNDINAMARCA">INSTITUTO
+                DEPARTAMENTAL PARA LA RECREACION Y EL DEPORTE DE CUNDINAMARCA</option>
+              <option value="LOTERIA DE CUNDINAMARCA">LOTERIA DE CUNDINAMARCA</option>
+              <option value="UNIDAD ADMINISTRATIVA ESPECIAL DE PENSIONES DEL DEPARTAMENTO DE CUNDINAMARCA">UNIDAD
+                ADMINISTRATIVA ESPECIAL DE PENSIONES DEL DEPARTAMENTO DE CUNDINAMARCA</option>
+              <option value="EMPRESAS PUBLICAS DE CUNDINAMARCA (EPC)">EMPRESAS PUBLICAS DE CUNDINAMARCA (EPC)</option>
+              <option value="EMPRESA DE LICORES DE CUNDINAMARCA">EMPRESA DE LICORES DE CUNDINAMARCA</option>
+              <option value="CORPORACIÓN SOCIAL DE CUNDINAMARCA - CSC">CORPORACIÓN SOCIAL DE CUNDINAMARCA - CSC</option>
+              <option value="EMPRESA FÉRREA REGIONAL S.A.S.">EMPRESA FÉRREA REGIONAL S.A.S.</option>
+            </select>
+            <div class="err-msg">Seleccione la entidad.</div>
+          </div>
+
+          <!-- Ramificación MUNICIPIO -->
+          <div class="campo entidad-block" id="bloque-muni">
+            <label>Municipio <span class="req">*</span></label>
+            <select id="entidad_muni" name="entidad_nombre" required>
+              <option value="">— Seleccione el municipio —</option>
+              <option value="AGUA DE DIOS">AGUA DE DIOS</option>
+              <option value="ALBÁN">ALBÁN</option>
+              <option value="ANAPOIMA">ANAPOIMA</option>
+              <option value="ANOLAIMA">ANOLAIMA</option>
+              <option value="APULO">APULO</option>
+              <option value="ARBELÁEZ">ARBELÁEZ</option>
+              <option value="BELTRÁN">BELTRÁN</option>
+              <option value="BITUIMA">BITUIMA</option>
+              <option value="BOJACÁ">BOJACÁ</option>
+              <option value="CABRERA">CABRERA</option>
+              <option value="CACHIPAY">CACHIPAY</option>
+              <option value="CAJICÁ">CAJICÁ</option>
+              <option value="CAPARRAPÍ">CAPARRAPÍ</option>
+              <option value="CARMEN DE CARUPA">CARMEN DE CARUPA</option>
+              <option value="CÁQUEZA">CÁQUEZA</option>
+              <option value="CHAGUANÍ">CHAGUANÍ</option>
+              <option value="CHÍA">CHÍA</option>
+              <option value="CHIPAQUE">CHIPAQUE</option>
+              <option value="CHOACHÍ">CHOACHÍ</option>
+              <option value="CHOCONTÁ">CHOCONTÁ</option>
+              <option value="COGUA">COGUA</option>
+              <option value="COTA">COTA</option>
+              <option value="CUCUNUBÁ">CUCUNUBÁ</option>
+              <option value="EL COLEGIO">EL COLEGIO</option>
+              <option value="EL PEÑÓN">EL PEÑÓN</option>
+              <option value="EL ROSAL">EL ROSAL</option>
+              <option value="FACATATIVÁ">FACATATIVÁ</option>
+              <option value="FÓMEQUE">FÓMEQUE</option>
+              <option value="FOSCA">FOSCA</option>
+              <option value="FUNZA">FUNZA</option>
+              <option value="FÚQUENE">FÚQUENE</option>
+              <option value="FUSAGASUGÁ">FUSAGASUGÁ</option>
+              <option value="GACHALÁ">GACHALÁ</option>
+              <option value="GACHANCIPÁ">GACHANCIPÁ</option>
+              <option value="GACHETÁ">GACHETÁ</option>
+              <option value="GAMA">GAMA</option>
+              <option value="GIRARDOT">GIRARDOT</option>
+              <option value="GRANADA">GRANADA</option>
+              <option value="GUACHETÁ">GUACHETÁ</option>
+              <option value="GUADUAS">GUADUAS</option>
+              <option value="GUASCA">GUASCA</option>
+              <option value="GUATAQUÍ">GUATAQUÍ</option>
+              <option value="GUATAVITA">GUATAVITA</option>
+              <option value="GUAYABAL DE SÍQUIMA">GUAYABAL DE SÍQUIMA</option>
+              <option value="GUAYABETAL">GUAYABETAL</option>
+              <option value="GUTIÉRREZ">GUTIÉRREZ</option>
+              <option value="JERUSALÉN">JERUSALÉN</option>
+              <option value="JUNÍN">JUNÍN</option>
+              <option value="LA CALERA">LA CALERA</option>
+              <option value="LA MESA">LA MESA</option>
+              <option value="LA PALMA">LA PALMA</option>
+              <option value="LA PEÑA">LA PEÑA</option>
+              <option value="LA VEGA">LA VEGA</option>
+              <option value="LENGUAZAQUE">LENGUAZAQUE</option>
+              <option value="MACHETÁ">MACHETÁ</option>
+              <option value="MADRID">MADRID</option>
+              <option value="MANTA">MANTA</option>
+              <option value="MEDINA">MEDINA</option>
+              <option value="MOSQUERA">MOSQUERA</option>
+              <option value="NARIÑO">NARIÑO</option>
+              <option value="NEMOCÓN">NEMOCÓN</option>
+              <option value="NIMAIMA">NIMAIMA</option>
+              <option value="NILO">NILO</option>
+              <option value="NOCAIMA">NOCAIMA</option>
+              <option value="PACHO">PACHO</option>
+              <option value="PAIME">PAIME</option>
+              <option value="PANDI">PANDI</option>
+              <option value="PARATEBUENO">PARATEBUENO</option>
+              <option value="PASCA">PASCA</option>
+              <option value="PUERTO SALGAR">PUERTO SALGAR</option>
+              <option value="PULÍ">PULÍ</option>
+              <option value="QUEBRADANEGRA">QUEBRADANEGRA</option>
+              <option value="QUETAME">QUETAME</option>
+              <option value="QUIPILE">QUIPILE</option>
+              <option value="RICAURTE">RICAURTE</option>
+              <option value="SAN ANTONIO DEL TEQUENDAMA">SAN ANTONIO DEL TEQUENDAMA</option>
+              <option value="SAN BERNARDO">SAN BERNARDO</option>
+              <option value="SAN CAYETANO">SAN CAYETANO</option>
+              <option value="SAN FRANCISCO">SAN FRANCISCO</option>
+              <option value="SAN JUAN DE RIOSECO">SAN JUAN DE RIOSECO</option>
+              <option value="SASAIMA">SASAIMA</option>
+              <option value="SESQUILÉ">SESQUILÉ</option>
+              <option value="SIBATÉ">SIBATÉ</option>
+              <option value="SILVANIA">SILVANIA</option>
+              <option value="SIMIJACA">SIMIJACA</option>
+              <option value="SOACHA">SOACHA</option>
+              <option value="SOPÓ">SOPÓ</option>
+              <option value="SUBACHOQUE">SUBACHOQUE</option>
+              <option value="SUESCA">SUESCA</option>
+              <option value="SUPATÁ">SUPATÁ</option>
+              <option value="SUSA">SUSA</option>
+              <option value="SUTATAUSA">SUTATAUSA</option>
+              <option value="TABIO">TABIO</option>
+              <option value="TAUSA">TAUSA</option>
+              <option value="TENA">TENA</option>
+              <option value="TENJO">TENJO</option>
+              <option value="TIBACUY">TIBACUY</option>
+              <option value="TIBIRITA">TIBIRITA</option>
+              <option value="TOCAIMA">TOCAIMA</option>
+              <option value="TOCANCIPÁ">TOCANCIPÁ</option>
+              <option value="TOPAIPÍ">TOPAIPÍ</option>
+              <option value="UBALÁ">UBALÁ</option>
+              <option value="UBAQUE">UBAQUE</option>
+              <option value="UNE">UNE</option>
+              <option value="ÚTICA">ÚTICA</option>
+              <option value="VENECIA">VENECIA</option>
+              <option value="VERGARA">VERGARA</option>
+              <option value="VIANÍ">VIANÍ</option>
+              <option value="VILLA DE SAN DIEGO DE UBATÉ">VILLA DE SAN DIEGO DE UBATÉ</option>
+              <option value="VILLAGÓMEZ">VILLAGÓMEZ</option>
+              <option value="VILLAPINZÓN">VILLAPINZÓN</option>
+              <option value="VIOTÁ">VIOTÁ</option>
+              <option value="VILLETA">VILLETA</option>
+              <option value="YACOPÍ">YACOPÍ</option>
+              <option value="ZIPACÓN">ZIPACÓN</option>
+              <option value="ZIPAQUIRÁ">ZIPAQUIRÁ</option>
+            </select>
+            <div class="err-msg">Seleccione el municipio.</div>
+          </div>
+
+          <!-- Ramificación ESES -->
+          <div class="campo entidad-block" id="bloque-eses">
+            <label>Empresa Social del Estado – ESE <span class="req">*</span></label>
+            <select id="entidad_ese" name="entidad_nombre" required>
+              <option value="">— Seleccione la ESE —</option>
+              <option value="HOSPITAL NUESTRA SEÑORA DE LAS MERCEDES">HOSPITAL NUESTRA SEÑORA DE LAS MERCEDES</option>
+              <option value="CENTRO DE SALUD TIMOTEO RIVEROS CUBILLOS">CENTRO DE SALUD TIMOTEO RIVEROS CUBILLOS</option>
+              <option value="CENTRO DE SALUD (CAYETANO MARIA DE ROJAS)">CENTRO DE SALUD (CAYETANO MARIA DE ROJAS)
+              </option>
+              <option value="CENTRO DE SALUD FOSCA">CENTRO DE SALUD FOSCA</option>
+              <option value="EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN ANTONIO DE GUATAVITA">EMPRESA SOCIAL DEL ESTADO
+                HOSPITAL SAN ANTONIO DE GUATAVITA</option>
+              <option value="HOSPITAL ABACU CALDERON">HOSPITAL ABACU CALDERON</option>
+              <option value="HOSPITAL DIOGENES TRONCOSO">HOSPITAL DIOGENES TRONCOSO</option>
+              <option value="HOSPITAL NUESTRA SEÑORA DEL CARMEN - TABIO">HOSPITAL NUESTRA SEÑORA DEL CARMEN - TABIO
+              </option>
+              <option value="HOSPITAL SAN JOSE DE GUACHETA">HOSPITAL SAN JOSE DE GUACHETA</option>
+              <option value="HOSPITAL SAN VICENTE DE PAUL -- NEMOCON, CUNDINAMARCA">HOSPITAL SAN VICENTE DE PAUL --
+                NEMOCON, CUNDINAMARCA</option>
+              <option value="HOSPITAL SANTA MATILDE">HOSPITAL SANTA MATILDE</option>
+              <option value="MERCEDES TELLEZ DE PRADILLA HOSPITAL VIANI">MERCEDES TELLEZ DE PRADILLA HOSPITAL VIANI
+              </option>
+              <option value="CENTRO DE SALUD - CUCUNUBA">CENTRO DE SALUD - CUCUNUBA</option>
+              <option value="CENTRO DE SALUD DE RICAURTE">CENTRO DE SALUD DE RICAURTE</option>
+              <option value="EMPRESA SOCIAL DEL ESTADO HOSPITAL ISMAEL SILVA">EMPRESA SOCIAL DEL ESTADO HOSPITAL ISMAEL
+                SILVA</option>
+              <option value="EMPRESA SOCIAL DEL ESTADO CENTRO DE SALUD SUESCA">EMPRESA SOCIAL DEL ESTADO CENTRO DE SALUD
+                SUESCA</option>
+              <option value="CENTRO DE SALUD DE TAUSA">CENTRO DE SALUD DE TAUSA</option>
+              <option value="CENTRO DE SALUD SAN FRANCISCO DE SALES">CENTRO DE SALUD SAN FRANCISCO DE SALES</option>
+              <option value="CENTRO DE SALUD SAN JOSE -NIMAIMA">CENTRO DE SALUD SAN JOSE -NIMAIMA</option>
+              <option value="EMPRESA SOCIAL DEL ESTADO DE LA PALMA">EMPRESA SOCIAL DEL ESTADO DE LA PALMA</option>
+              <option value="EMPRESA SOCIAL DEL ESTADO E.S.E. MUNICIPAL DE SOACHA JULIO CESAR PEÑALOZA">EMPRESA SOCIAL
+                DEL ESTADO E.S.E. MUNICIPAL DE SOACHA JULIO CESAR PEÑALOZA</option>
+              <option value="HOSPITAL EL SALVADOR DE UBATE">HOSPITAL EL SALVADOR DE UBATE</option>
+              <option value="HOSPITAL MARIO GAITAN YANGUAS - SOACHA">HOSPITAL MARIO GAITAN YANGUAS - SOACHA</option>
+              <option value="HOSPITAL PEDRO LEON - LA MESA">HOSPITAL PEDRO LEON - LA MESA</option>
+              <option value="HOSPITAL SAN FRANCISCO - GACHETA">HOSPITAL SAN FRANCISCO - GACHETA</option>
+              <option value="EMPRESA SOCIAL DEL ESTADO REGIÓN DE SALUD CENTRO ORIENTE ALMEIDAS">EMPRESA SOCIAL DEL
+                ESTADO REGIÓN DE SALUD CENTRO ORIENTE ALMEIDAS</option>
+              <option value="HOSPITAL SAN RAFAEL - CAQUEZA">HOSPITAL SAN RAFAEL - CAQUEZA</option>
+              <option value="HOSPITAL SAN RAFAEL - FACATATIVA">HOSPITAL SAN RAFAEL - FACATATIVA</option>
+              <option value="HOSPITAL SAN RAFAEL - PACHO">HOSPITAL SAN RAFAEL - PACHO</option>
+              <option value="HOSPITAL SAN RAFAEL - FUSAGASUGA">HOSPITAL SAN RAFAEL - FUSAGASUGA</option>
+              <option value="HOSPITAL SAN VICENTE DE PAUL - SAN JUAN DE RIOSECO">HOSPITAL SAN VICENTE DE PAUL - SAN JUAN
+                DE RIOSECO</option>
+              <option value="ESE HOSPITAL SANTA BARBARA DE VERGARA">ESE HOSPITAL SANTA BARBARA DE VERGARA</option>
+              <option value="HOSPITAL DE GIRARDOT">HOSPITAL DE GIRARDOT</option>
+              <option value="HOSPITAL DIVINO SALVADOR DE SOPO">HOSPITAL DIVINO SALVADOR DE SOPO</option>
+              <option value="HOSPITAL MARCO FELIPE AFANADOR DE TOCAIMA">HOSPITAL MARCO FELIPE AFANADOR DE TOCAIMA
+              </option>
+              <option value="EMPRESA SOCIAL DEL ESTADO REGIÓN DE SALUD MEDINA">EMPRESA SOCIAL DEL ESTADO REGIÓN DE SALUD
+                MEDINA</option>
+              <option value="HOSPITAL PROFESOR JORGE CAVELIER">HOSPITAL PROFESOR JORGE CAVELIER</option>
+              <option value="HOSPITAL SALAZAR DE VILLETA">HOSPITAL SALAZAR DE VILLETA</option>
+              <option value="HOSPITAL SAN ANTONIO DE ANOLAIMA">HOSPITAL SAN ANTONIO DE ANOLAIMA</option>
+              <option value="HOSPITAL SAN ANTONIO DE CHIA">HOSPITAL SAN ANTONIO DE CHIA</option>
+              <option value="HOSPITAL SAN ANTONIO DE SESQUILE">HOSPITAL SAN ANTONIO DE SESQUILE</option>
+              <option value="HOSPITAL SAN ANTONIO DEL TEQUENDAMA I NIVEL">HOSPITAL SAN ANTONIO DEL TEQUENDAMA I NIVEL
+              </option>
+              <option value="HOSPITAL SAN JOSE DE GUADUAS">HOSPITAL SAN JOSE DE GUADUAS</option>
+              <option value="HOSPITAL SAN VICENTE DE PAUL FOMEQUE">HOSPITAL SAN VICENTE DE PAUL FOMEQUE</option>
+              <option value="HOSPITAL UNIVERSITARIO LA SAMARITANA">HOSPITAL UNIVERSITARIO LA SAMARITANA</option>
+              <option value="MARIA AUXILIADORA DEL MUNICIPIO DE MOSQUERA - CUNDINAMARCA">MARIA AUXILIADORA DEL MUNICIPIO
+                DE MOSQUERA - CUNDINAMARCA</option>
+              <option value="EMPRESA SOCIAL DEL ESTADO POLICLINICO DE JUNIN">EMPRESA SOCIAL DEL ESTADO POLICLINICO DE
+                JUNIN</option>
+              <option value="HOSPITAL HILARIO LUGO DE SASAIMA">HOSPITAL HILARIO LUGO DE SASAIMA</option>
+              <option value="HOSPITAL SAN ANTONIO DE ARBELAEZ">HOSPITAL SAN ANTONIO DE ARBELAEZ</option>
+              <option value="HOSPITAL SAN FRANCISCO DE VIOTA">HOSPITAL SAN FRANCISCO DE VIOTA</option>
+              <option value="HOSPITAL SANTA ROSA DE TENJO">HOSPITAL SANTA ROSA DE TENJO</option>
+              <option value="HOSPITAL NUESTRA SEÑORA DEL CARMEN - EL COLEGIO">HOSPITAL NUESTRA SEÑORA DEL CARMEN - EL
+                COLEGIO</option>
+              <option value="EMPRESA DE SOCIAL DEL ESTADO HOSPITAL DE LA VEGA">EMPRESA DE SOCIAL DEL ESTADO HOSPITAL DE
+                LA VEGA</option>
+            </select>
+            <div class="err-msg">Seleccione la ESE.</div>
+          </div>
+
+          <div class="campo" id="campo-vigencia">
+            <label>Vigencia evaluada <span class="req">*</span></label>
+            <select id="entidad_vigencia" name="entidad_vigencia" required>
+              <option value="">— Seleccione la vigencia —</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+            </select>
+            <div class="err-msg">Seleccione la vigencia.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== SECCIÓN GENERAL ====== -->
+      <div class="seccion">
+        <div class="sec-header">📋 Sección General – Política MECI</div>
+        <div class="sec-body">
+
+          <div class="campo" id="campo-PER201">
+            <label>¿Considera que el MECI ha generado valor agregado a la gestión de la entidad? <span
+                class="req">*</span> <span class="codigo">PER201</span></label>
+            <div class="radio-group" id="rg-PER201">
+              <label><input type="radio" name="PER201" value="si" required onchange="markSelected(this)"> Sí</label>
+              <label><input type="radio" name="PER201" value="no" onchange="markSelected(this)"> No</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-PER205">
+            <label>¿Cuál es su percepción sobre la utilidad de las guías y herramientas emitidas por el DAFP para la
+              implementación del Control Interno? <span class="codigo">PER205</span></label>
+            <span class="hint">Justificación – campo opcional</span>
+            <textarea name="PER205" rows="3" placeholder="Escriba su percepción..."></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== CONTROL INTERNO ====== -->
+      <div class="seccion">
+        <div class="sec-header">🔍 Control Interno – Evaluación del Jefe de Control Interno</div>
+        <div class="sec-body">
+
+          <div class="campo" id="campo-CIN203">
+            <label>El jefe de control interno, en cumplimiento de la política de integridad, verificó que la entidad:
+              <span class="req">*</span> <span class="codigo">CIN203</span></label>
+            <div class="check-group" id="cg-CIN203">
+              <label><input type="checkbox" name="CIN203" value="a" onchange="markCheck(this)"> Implementa una
+                estrategia para la apropiación del código de integridad</label>
+              <label><input type="checkbox" name="CIN203" value="b" onchange="markCheck(this)"> Cuenta con un protocolo
+                para la identificación y declaración de conflictos de interés</label>
+              <label><input type="checkbox" name="CIN203" value="c" onchange="markCheck(this)"> Gestiona los conflictos
+                de interés de acuerdo con el protocolo establecido</label>
+              <label><input type="checkbox" name="CIN203" value="d" onchange="markCheck(this)"> Mantiene actualizada la
+                información institucional en el SIGEP</label>
+              <label><input type="checkbox" name="CIN203" value="e" onchange="markCheck(this)"> Garantiza que los
+                sujetos obligados registren información en el aplicativo (Ley 2013/2019 – Decreto 830/2021)</label>
+              <label><input type="checkbox" name="CIN203" value="ninguna" onchange="markCheck(this)"> No cumple con
+                ninguna de las anteriores condiciones</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN206">
+            <label>El jefe de control interno verificó que la entidad (Talento Humano): <span class="req">*</span> <span
+                class="codigo">CIN206</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN206" value="a" onchange="markCheck(this)"> Elaboró y publicó el
+                Plan Estratégico de Talento Humano</label>
+              <label><input type="checkbox" name="CIN206" value="b" onchange="markCheck(this)"> Articuló los planes del
+                Decreto 612 de 2018 en el Plan Estratégico de Talento Humano</label>
+              <label><input type="checkbox" name="CIN206" value="c" onchange="markCheck(this)"> Desarrolló actividades
+                de capacitación</label>
+              <label><input type="checkbox" name="CIN206" value="d" onchange="markCheck(this)"> Desarrolló actividades
+                de bienestar e incentivos</label>
+              <label><input type="checkbox" name="CIN206" value="e" onchange="markCheck(this)"> Desarrolló actividades
+                de clima, convivencia y relaciones laborales</label>
+              <label><input type="checkbox" name="CIN206" value="f" onchange="markCheck(this)"> Desarrolló actividades
+                para la actualización y gestión en el SIGEP</label>
+              <label><input type="checkbox" name="CIN206" value="g" onchange="markCheck(this)"> Otros</label>
+              <label><input type="checkbox" name="CIN206" value="ninguna" onchange="markCheck(this)"> El jefe de control
+                interno no hace seguimiento a la gestión del talento humano</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN207">
+            <label>El jefe de control interno verificó que la entidad (Planeación y Riesgos): <span class="req">*</span>
+              <span class="codigo">CIN207</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN207" value="a" onchange="markCheck(this)"> Estableció objetivos
+                claros, cumplibles y medibles en la planeación institucional</label>
+              <label><input type="checkbox" name="CIN207" value="b" onchange="markCheck(this)"> Estableció responsables,
+                metas y tiempos para el seguimiento y aplicación de controles</label>
+              <label><input type="checkbox" name="CIN207" value="c" onchange="markCheck(this)"> Formuló su política para
+                la gestión integral de riesgos</label>
+              <label><input type="checkbox" name="CIN207" value="d" onchange="markCheck(this)"> Aplica monitoreos a la
+                gestión integral del riesgo</label>
+              <label><input type="checkbox" name="CIN207" value="e" onchange="markCheck(this)"> Monitorea el
+                cumplimiento de metas y objetivos</label>
+              <label><input type="checkbox" name="CIN207" value="f" onchange="markCheck(this)"> Hace seguimiento a la
+                ejecución presupuestal</label>
+              <label><input type="checkbox" name="CIN207" value="g" onchange="markCheck(this)"> Llevaron a cabo otras
+                actividades de revisión, verificación o monitoreo</label>
+              <label><input type="checkbox" name="CIN207" value="ninguna" onchange="markCheck(this)"> El jefe de control
+                interno no lleva a cabo actividades de revisión o monitoreo al SCI</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN221">
+            <label>En la evaluación independiente (tercera línea), el jefe de control interno: <span
+                class="req">*</span> <span class="codigo">CIN221</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN221" value="a" required onchange="markSelected(this)"> Verificó que la
+                entidad realiza una gestión integral de los riesgos y dispone de evidencias</label>
+              <label><input type="radio" name="CIN221" value="b" onchange="markSelected(this)"> Verificó que la entidad
+                realiza una gestión parcial de los riesgos y dispone de evidencias</label>
+              <label><input type="radio" name="CIN221" value="c" onchange="markSelected(this)"> Verificó que la entidad
+                no realiza gestión de los riesgos institucionales</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN222">
+            <label>En la evaluación de la gestión del riesgo y control (tercera línea): <span class="req">*</span> <span
+                class="codigo">CIN222</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN222" value="a" onchange="markCheck(this)"> Se pronunció acerca del
+                diseño de los controles</label>
+              <label><input type="checkbox" name="CIN222" value="b" onchange="markCheck(this)"> Emitió comentarios sobre
+                la implementación de los controles</label>
+              <label><input type="checkbox" name="CIN222" value="c" onchange="markCheck(this)"> Contrastó la información
+                sobre eventos de materialización en los procesos evaluados</label>
+              <label><input type="checkbox" name="CIN222" value="d" onchange="markCheck(this)"> Otra</label>
+              <label><input type="checkbox" name="CIN222" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN233">
+            <label>Frente a la evaluación de la gestión de la información (tercera línea): <span class="req">*</span>
+              <span class="codigo">CIN233</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN233" value="a" required onchange="markSelected(this)"> Evaluó la
+                gestión de la información y cuenta con las evidencias</label>
+              <label><input type="radio" name="CIN233" value="b" onchange="markSelected(this)"> Realizó una evaluación
+                parcial de la gestión de la información y cuenta con evidencias</label>
+              <label><input type="radio" name="CIN233" value="c" onchange="markSelected(this)"> No evaluó la gestión de
+                la información</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN234">
+            <label>En la evaluación de la gestión de la información realizada (tercera línea): <span
+                class="req">*</span> <span class="codigo">CIN234</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN234" value="a" required onchange="markSelected(this)"> Se
+                identificaron debilidades o hallazgos y se comunicaron al comité y/o representante legal</label>
+              <label><input type="radio" name="CIN234" value="b" onchange="markSelected(this)"> Se identificaron
+                debilidades o hallazgos, pero no se comunicaron al comité ni al representante legal</label>
+              <label><input type="radio" name="CIN234" value="c" onchange="markSelected(this)"> Ni se identificaron ni
+                se comunicaron debilidades o hallazgos</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN236">
+            <label>Se entregan oportunamente los informes y reportes contables a la Contaduría General de la Nación y
+              organismos de control: <span class="req">*</span> <span class="codigo">CIN236</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN236" value="siempre" required onchange="markSelected(this)">
+                Siempre</label>
+              <label><input type="radio" name="CIN236" value="mayoria" onchange="markSelected(this)"> La mayoría de las
+                veces</label>
+              <label><input type="radio" name="CIN236" value="pocas" onchange="markSelected(this)"> Pocas veces</label>
+              <label><input type="radio" name="CIN236" value="nunca" onchange="markSelected(this)"> Nunca</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== PROCESO AUDITOR ====== -->
+      <div class="seccion">
+        <div class="sec-header">📝 Proceso Auditor – Plan Anual y Metodología</div>
+        <div class="sec-body">
+
+          <div class="campo" id="campo-CIN238">
+            <label>Para el desarrollo de los procesos de auditoría interna y/o seguimiento, la entidad: <span
+                class="req">*</span> <span class="codigo">CIN238</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN238" value="a" required onchange="markSelected(this)"> Contó con una
+                metodología o lineamientos definidos para el proceso auditor</label>
+              <label><input type="radio" name="CIN238" value="b" onchange="markSelected(this)"> Desarrolló el proceso
+                auditor de acuerdo con un plan de trabajo definido (dada su capacidad administrativa)</label>
+              <label><input type="radio" name="CIN238" value="c" onchange="markSelected(this)"> Solo llevó a cabo
+                ejercicios de seguimiento a aspectos puntuales (dada su capacidad administrativa)</label>
+              <label><input type="radio" name="CIN238" value="d" onchange="markSelected(this)"> No lleva a cabo
+                ejercicios de auditoría interna ni seguimiento a la gestión</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN239">
+            <label>¿El líder de control interno elaboró el plan anual de auditorías o seguimiento a la gestión? <span
+                class="req">*</span> <span class="codigo">CIN239</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN239" value="a" required onchange="markSelected(this)"> Sí y fue
+                aprobado por el Comité Institucional de Coordinación de Control Interno</label>
+              <label><input type="radio" name="CIN239" value="b" onchange="markSelected(this)"> Sí lo definió, pero no
+                fue aprobado</label>
+              <label><input type="radio" name="CIN239" value="c" onchange="markSelected(this)"> No fue definido</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN240">
+            <label>El plan anual de auditorías: <span class="req">*</span> <span class="codigo">CIN240</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN240" value="a" onchange="markCheck(this)"> Definió acciones
+                vinculadas a los roles del jefe de control interno</label>
+              <label><input type="checkbox" name="CIN240" value="b" onchange="markCheck(this)"> Definió un objetivo y
+                alcance alineado con la planeación estratégica</label>
+              <label><input type="checkbox" name="CIN240" value="c" onchange="markCheck(this)"> Tuvo en cuenta el
+                universo de auditoría</label>
+              <label><input type="checkbox" name="CIN240" value="d" onchange="markCheck(this)"> Priorizó los procesos a
+                auditar según riesgos</label>
+              <label><input type="checkbox" name="CIN240" value="e" onchange="markCheck(this)"> Incluyó la programación
+                de los informes de ley</label>
+              <label><input type="checkbox" name="CIN240" value="f" onchange="markCheck(this)"> Contempló el enfoque de
+                auditorías basadas en riesgos</label>
+              <label><input type="checkbox" name="CIN240" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN241">
+            <label>Para el desarrollo de las auditorías, el jefe de control interno aplicó las siguientes fases: <span
+                class="req">*</span> <span class="codigo">CIN241</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN241" value="a" onchange="markCheck(this)"> Planeación de cada
+                auditoría basada en riesgos</label>
+              <label><input type="checkbox" name="CIN241" value="b" onchange="markCheck(this)"> Ejecución o desempeño
+                del trabajo de auditoría</label>
+              <label><input type="checkbox" name="CIN241" value="c" onchange="markCheck(this)"> Comunicación de
+                resultados (informe de auditoría)</label>
+              <label><input type="checkbox" name="CIN241" value="d" onchange="markCheck(this)"> Seguimiento a los planes
+                de mejoramiento derivados del ejercicio auditor</label>
+              <label><input type="checkbox" name="CIN241" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN242">
+            <label>En la determinación de las auditorías programadas, se consideraron los siguientes aspectos: <span
+                class="req">*</span> <span class="codigo">CIN242</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN242" value="a" onchange="markCheck(this)"> Las unidades auditables
+                del universo de auditoría</label>
+              <label><input type="checkbox" name="CIN242" value="b" onchange="markCheck(this)"> El nivel de riesgo
+                inherente de las unidades auditables</label>
+              <label><input type="checkbox" name="CIN242" value="c" onchange="markCheck(this)"> La recurrencia de
+                hallazgos en auditorías internas y externas</label>
+              <label><input type="checkbox" name="CIN242" value="d" onchange="markCheck(this)"> Las solicitudes o
+                intereses de la alta dirección</label>
+              <label><input type="checkbox" name="CIN242" value="e" onchange="markCheck(this)"> La fecha de la última
+                auditoría realizada</label>
+              <label><input type="checkbox" name="CIN242" value="f" onchange="markCheck(this)"> Los resultados de
+                indicadores de gestión</label>
+              <label><input type="checkbox" name="CIN242" value="g" onchange="markCheck(this)"> El impacto en los
+                objetivos estratégicos</label>
+              <label><input type="checkbox" name="CIN242" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN243">
+            <label>Registre el progreso alcanzado en la ejecución del programa anual de auditorías: <span
+                class="req">*</span> <span class="codigo">CIN243</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN243" value="a" required onchange="markSelected(this)"> Se ejecutó
+                entre el 90% y 100% de lo planeado</label>
+              <label><input type="radio" name="CIN243" value="b" onchange="markSelected(this)"> Se ejecutó entre el 60%
+                y 89% de lo planeado</label>
+              <label><input type="radio" name="CIN243" value="c" onchange="markSelected(this)"> La ejecución fue
+                inferior al 60% de lo planeado</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN244">
+            <label>¿Cuáles unidades auditables consideró el jefe de control interno para su universo de auditoría? <span
+                class="req">*</span> <span class="codigo">CIN244</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN244" value="a" onchange="markCheck(this)"> Los procesos
+                estratégicos</label>
+              <label><input type="checkbox" name="CIN244" value="b" onchange="markCheck(this)"> Los procesos
+                misionales</label>
+              <label><input type="checkbox" name="CIN244" value="c" onchange="markCheck(this)"> Los procesos de
+                apoyo</label>
+              <label><input type="checkbox" name="CIN244" value="d" onchange="markCheck(this)"> Otras</label>
+              <label><input type="checkbox" name="CIN244" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN246">
+            <label>¿Qué acciones emprendió el jefe de control interno para la evaluación del sistema de control interno?
+              <span class="req">*</span> <span class="codigo">CIN246</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN246" value="a" onchange="markCheck(this)"> Presentó los informes de
+                auditoría en las instancias de control interno</label>
+              <label><input type="checkbox" name="CIN246" value="b" onchange="markCheck(this)"> Analizó los resultados
+                de autoevaluaciones y evaluaciones independientes</label>
+              <label><input type="checkbox" name="CIN246" value="c" onchange="markCheck(this)"> Examinó los progresos en
+                los planes de mejoramiento</label>
+              <label><input type="checkbox" name="CIN246" value="d" onchange="markCheck(this)"> Desarrolló otras
+                acciones</label>
+              <label><input type="checkbox" name="CIN246" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN247">
+            <label>El jefe de control interno, en el marco de su plan anual de auditorías: <span class="req">*</span>
+              <span class="codigo">CIN247</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN247" value="a" onchange="markCheck(this)"> Llevó a cabo supervisión
+                de la gestión y ejecución presupuestal</label>
+              <label><input type="checkbox" name="CIN247" value="b" onchange="markCheck(this)"> Realizó seguimiento a
+                las políticas de gestión del talento humano</label>
+              <label><input type="checkbox" name="CIN247" value="c" onchange="markCheck(this)"> Verificó que la entidad
+                definió una política de gestión integral de riesgos</label>
+              <label><input type="checkbox" name="CIN247" value="d" onchange="markCheck(this)"> Evaluó la efectividad de
+                los controles de los riesgos asociados</label>
+              <label><input type="checkbox" name="CIN247" value="e" onchange="markCheck(this)"> Analizó la eficacia de
+                las medidas en los planes de mejora</label>
+              <label><input type="checkbox" name="CIN247" value="f" onchange="markCheck(this)"> Desarrolló auditorías al
+                modelo de seguridad y privacidad de la información (MSPI)</label>
+              <label><input type="checkbox" name="CIN247" value="g" onchange="markCheck(this)"> Desarrolló auditorías de
+                accesibilidad web (NTC 5854)</label>
+              <label><input type="checkbox" name="CIN247" value="h" onchange="markCheck(this)"> Llevó a cabo auditorías
+                de gestión (NTC 6047)</label>
+              <label><input type="checkbox" name="CIN247" value="i" onchange="markCheck(this)"> Desarrolló auditorías a
+                otros sistemas de gestión (SST, salud, etc.)</label>
+              <label><input type="checkbox" name="CIN247" value="j" onchange="markCheck(this)"> Evaluó la oportunidad,
+                integralidad y coherencia de la información suministrada a organismos de control</label>
+              <label><input type="checkbox" name="CIN247" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN252">
+            <label>En los procesos de auditoría planificados, se tomaron en cuenta los siguientes aspectos: <span
+                class="req">*</span> <span class="codigo">CIN252</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN252" value="a" onchange="markCheck(this)"> Objetivo de la
+                auditoría</label>
+              <label><input type="checkbox" name="CIN252" value="b" onchange="markCheck(this)"> Alcance de la
+                auditoría</label>
+              <label><input type="checkbox" name="CIN252" value="c" onchange="markCheck(this)"> Consideraciones sobre
+                recursos necesarios</label>
+              <label><input type="checkbox" name="CIN252" value="d" onchange="markCheck(this)"> Programa para el
+                desarrollo de la auditoría</label>
+              <label><input type="checkbox" name="CIN252" value="ninguna" onchange="markCheck(this)"> No se adelantan
+                acciones de planeación para cada auditoría</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN253">
+            <label>En la etapa de ejecución de cada auditoría, se implementaron las siguientes herramientas y
+              actividades: <span class="req">*</span> <span class="codigo">CIN253</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN253" value="a" onchange="markCheck(this)"> Firmó la carta de
+                representación</label>
+              <label><input type="checkbox" name="CIN253" value="b" onchange="markCheck(this)"> Proporcionó al auditado
+                la carta de compromiso</label>
+              <label><input type="checkbox" name="CIN253" value="c" onchange="markCheck(this)"> Desarrolló la reunión
+                inicial con el líder del proceso auditado</label>
+              <label><input type="checkbox" name="CIN253" value="d" onchange="markCheck(this)"> Implementó los
+                procedimientos del programa de auditoría y documentó su aplicación</label>
+              <label><input type="checkbox" name="CIN253" value="e" onchange="markCheck(this)"> Realizó pruebas y
+                verificaciones de información durante la ejecución</label>
+              <label><input type="checkbox" name="CIN253" value="f" onchange="markCheck(this)"> Documentó en los papeles
+                de trabajo el progreso de la auditoría</label>
+              <label><input type="checkbox" name="CIN253" value="g" onchange="markCheck(this)"> Organizó mesas de
+                trabajo anticipadas para compartir resultados preliminares</label>
+              <label><input type="checkbox" name="CIN253" value="h" onchange="markCheck(this)"> Llevó a cabo la reunión
+                de cierre con el líder del proceso auditado</label>
+              <label><input type="checkbox" name="CIN253" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN254">
+            <label>¿Qué características tienen los informes resultado de los procesos de auditoría? <span
+                class="req">*</span> <span class="codigo">CIN254</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN254" value="a" onchange="markCheck(this)"> Estructura de informe
+                ejecutivo para facilitar comunicación y publicación web</label>
+              <label><input type="checkbox" name="CIN254" value="b" onchange="markCheck(this)"> Estructura detallada
+                para conocimiento a fondo por parte de auditados</label>
+              <label><input type="checkbox" name="CIN254" value="c" onchange="markCheck(this)"> Estructura con análisis
+                del cumplimiento del objetivo de la auditoría</label>
+              <label><input type="checkbox" name="CIN254" value="d" onchange="markCheck(this)"> Estructura con análisis
+                del cumplimiento del alcance de la auditoría</label>
+              <label><input type="checkbox" name="CIN254" value="e" onchange="markCheck(this)"> Resumen con los aspectos
+                más importantes (títulos de hallazgos)</label>
+              <label><input type="checkbox" name="CIN254" value="f" onchange="markCheck(this)"> Recomendaciones y
+                conclusiones del proceso auditor</label>
+              <label><input type="checkbox" name="CIN254" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN255">
+            <label>¿El jefe de control interno contó con herramientas para el seguimiento a los planes de mejoramiento?
+              <span class="req">*</span> <span class="codigo">CIN255</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN255" value="a" required onchange="markSelected(this)"> Sí, y cuenta
+                con las evidencias</label>
+              <label><input type="radio" name="CIN255" value="b" onchange="markSelected(this)"> Se hace seguimiento,
+                pero no se cuenta con una herramienta formalizada</label>
+              <label><input type="radio" name="CIN255" value="c" onchange="markSelected(this)"> No se adelanta
+                seguimiento a los planes de mejoramiento</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== CAPACIDAD INSTITUCIONAL ====== -->
+      <div class="seccion">
+        <div class="sec-header">🏛️ Capacidad Institucional del Área de Control Interno</div>
+        <div class="sec-body">
+
+          <div class="campo" id="campo-CIN264">
+            <label>Para el ejercicio de evaluación independiente en la vigencia evaluada, la entidad: <span
+                class="req">*</span> <span class="codigo">CIN264</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN264" value="a" required onchange="markSelected(this)"> Contó con una
+                oficina de control interno (dependencia, jefe y equipo de trabajo)</label>
+              <label><input type="radio" name="CIN264" value="b" onchange="markSelected(this)"> Contó con un grupo
+                interno de trabajo coordinado por un servidor del nivel asesor o profesional</label>
+              <label><input type="radio" name="CIN264" value="c" onchange="markSelected(this)"> No contó con un área
+                responsable, pero el Representante Legal asignó la función a un servidor (sin equipo)</label>
+              <label><input type="radio" name="CIN264" value="d" onchange="markSelected(this)"> Se cuenta con un
+                contrato de apoyo</label>
+              <label><input type="radio" name="CIN264" value="e" onchange="markSelected(this)"> No se contaba con un
+                responsable</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN268">
+            <label>El jefe de control interno o quien haga sus veces: <span class="req">*</span> <span
+                class="codigo">CIN268</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN268" value="periodo" required onchange="markSelected(this)"> Es de
+                periodo fijo</label>
+              <label><input type="radio" name="CIN268" value="libre" onchange="markSelected(this)"> Es de libre
+                nombramiento y remoción</label>
+              <label><input type="radio" name="CIN268" value="carrera" onchange="markSelected(this)"> Está inscrito en
+                la Carrera Administrativa</label>
+              <label><input type="radio" name="CIN268" value="provisional" onchange="markSelected(this)"> Es de
+                nombramiento provisional</label>
+              <label><input type="radio" name="CIN268" value="temporal" onchange="markSelected(this)"> Pertenece a la
+                planta temporal</label>
+              <label><input type="radio" name="CIN268" value="otro" onchange="markSelected(this)"> Otro</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN269">
+            <label>El jefe de control interno pertenece al siguiente nivel jerárquico: <span class="req">*</span> <span
+                class="codigo">CIN269</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN269" value="directivo" required onchange="markSelected(this)">
+                Directivo</label>
+              <label><input type="radio" name="CIN269" value="asesor" onchange="markSelected(this)"> Asesor</label>
+              <label><input type="radio" name="CIN269" value="profesional" onchange="markSelected(this)">
+                Profesional</label>
+              <label><input type="radio" name="CIN269" value="tecnico" onchange="markSelected(this)"> Técnico</label>
+              <label><input type="radio" name="CIN269" value="asistencial" onchange="markSelected(this)">
+                Asistencial</label>
+              <label><input type="radio" name="CIN269" value="otro" onchange="markSelected(this)"> Otro</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN270">
+            <label>El máximo nivel de formación académica del jefe de control interno es: <span class="req">*</span>
+              <span class="codigo">CIN270</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN270" value="doctorado" required onchange="markSelected(this)">
+                Doctorado</label>
+              <label><input type="radio" name="CIN270" value="maestria" onchange="markSelected(this)"> Maestría</label>
+              <label><input type="radio" name="CIN270" value="especializacion" onchange="markSelected(this)">
+                Especialización</label>
+              <label><input type="radio" name="CIN270" value="pregrado" onchange="markSelected(this)"> Pregrado</label>
+              <label><input type="radio" name="CIN270" value="tecnica" onchange="markSelected(this)"> Formación técnica
+                o tecnológica</label>
+              <label><input type="radio" name="CIN270" value="media" onchange="markSelected(this)"> Formación media
+                (bachiller)</label>
+              <label><input type="radio" name="CIN270" value="basica" onchange="markSelected(this)"> Formación básica
+                (noveno grado)</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN271">
+            <label>¿Con cuál disciplina académica está relacionada la formación del jefe de control interno? <span
+                class="req">*</span> <span class="codigo">CIN271</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN271" value="derecho" onchange="markCheck(this)"> Derecho</label>
+              <label><input type="checkbox" name="CIN271" value="economia" onchange="markCheck(this)"> Economía</label>
+              <label><input type="checkbox" name="CIN271" value="estadistica" onchange="markCheck(this)">
+                Estadística</label>
+              <label><input type="checkbox" name="CIN271" value="contaduria" onchange="markCheck(this)">
+                Contaduría</label>
+              <label><input type="checkbox" name="CIN271" value="adm-empresas" onchange="markCheck(this)">
+                Administración de Empresas</label>
+              <label><input type="checkbox" name="CIN271" value="adm-publica" onchange="markCheck(this)"> Administración
+                Pública</label>
+              <label><input type="checkbox" name="CIN271" value="adm-financiera" onchange="markCheck(this)">
+                Administración Financiera</label>
+              <label><input type="checkbox" name="CIN271" value="ing-industrial" onchange="markCheck(this)"> Ingeniería
+                Industrial</label>
+              <label><input type="checkbox" name="CIN271" value="ing-sistemas" onchange="markCheck(this)"> Ingeniería de
+                Sistemas</label>
+              <label><input type="checkbox" name="CIN271" value="otro" onchange="markCheck(this)"> Otro</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN272">
+            <label>La experiencia específica en temas de control interno del jefe de control interno es: <span
+                class="req">*</span> <span class="codigo">CIN272</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN272" value="1" required onchange="markSelected(this)"> Menor a 1
+                año</label>
+              <label><input type="radio" name="CIN272" value="1-3" onchange="markSelected(this)"> Entre 1 – 3
+                años</label>
+              <label><input type="radio" name="CIN272" value="4-6" onchange="markSelected(this)"> Entre 4 – 6
+                años</label>
+              <label><input type="radio" name="CIN272" value="7-10" onchange="markSelected(this)"> Entre 7 – 10
+                años</label>
+              <label><input type="radio" name="CIN272" value="11-20" onchange="markSelected(this)"> Entre 11 – 20
+                años</label>
+              <label><input type="radio" name="CIN272" value="21" onchange="markSelected(this)"> Mayor de 21
+                años</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+          <!-- CIN273 -->
+          <div class="campo" id="campo-CIN273">
+            <label>Número total de trabajadores del área de Control Interno por tipo de empleo (corte 31 dic): <span
+                class="req">*</span> <span class="codigo">CIN273</span></label>
+            <span class="hint">Ingrese 0 si no aplica para alguna categoría.</span>
+            <div class="num-grid">
+              <span class="row-label">Empleados públicos</span> <input type="number" name="CIN273_a" min="0" value="0"
+                required>
+              <span class="row-label">Trabajadores Oficiales</span> <input type="number" name="CIN273_b" min="0"
+                value="0" required>
+              <span class="row-label">Servidores derecho privado</span> <input type="number" name="CIN273_c" min="0"
+                value="0" required>
+              <span class="row-label">Contratistas</span> <input type="number" name="CIN273_d" min="0" value="0"
+                required>
+              <span class="row-label">Otros</span> <input type="number" name="CIN273_e" min="0" value="0" required>
+            </div>
+            <div class="err-msg">Complete todos los campos numéricos.</div>
+          </div>
+
+          <!-- CIN274 -->
+          <div class="campo" id="campo-CIN274">
+            <label>De los empleados públicos de Control Interno, desagréguelos por tipo de vinculación (corte 31 dic):
+              <span class="req">*</span> <span class="codigo">CIN274</span></label>
+            <span class="hint">Ingrese 0 si no aplica.</span>
+            <div class="num-grid">
+              <span class="row-label">Libre nombramiento y remoción</span> <input type="number" name="CIN274_a" min="0"
+                value="0" required>
+              <span class="row-label">Carrera administrativa</span> <input type="number" name="CIN274_b" min="0"
+                value="0" required>
+              <span class="row-label">Nombramiento provisional</span> <input type="number" name="CIN274_c" min="0"
+                value="0" required>
+              <span class="row-label">Nombramiento en planta temporal</span> <input type="number" name="CIN274_d"
+                min="0" value="0" required>
+              <span class="row-label">Otros</span> <input type="number" name="CIN274_e" min="0" value="0" required>
+            </div>
+            <div class="err-msg">Complete todos los campos numéricos.</div>
+          </div>
+
+          <!-- CIN275 -->
+          <div class="campo" id="campo-CIN275">
+            <label>Trabajadores de Control Interno por máximo nivel de formación académica (corte 31 dic): <span
+                class="req">*</span> <span class="codigo">CIN275</span></label>
+            <span class="hint">Ingrese 0 si no aplica.</span>
+            <div class="num-grid">
+              <span class="row-label">Doctorado</span> <input type="number" name="CIN275_a" min="0" value="0" required>
+              <span class="row-label">Maestría</span> <input type="number" name="CIN275_b" min="0" value="0" required>
+              <span class="row-label">Especialización</span> <input type="number" name="CIN275_c" min="0" value="0"
+                required>
+              <span class="row-label">Pregrado</span> <input type="number" name="CIN275_d" min="0" value="0" required>
+              <span class="row-label">Técnica o tecnológica</span> <input type="number" name="CIN275_e" min="0"
+                value="0" required>
+              <span class="row-label">Bachiller</span> <input type="number" name="CIN275_f" min="0" value="0" required>
+              <span class="row-label">Básica</span> <input type="number" name="CIN275_g" min="0" value="0" required>
+            </div>
+            <div class="err-msg">Complete todos los campos numéricos.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN276">
+            <label>¿Cuáles son las disciplinas académicas más comunes en la formación de los servidores de control
+              interno? <span class="req">*</span> <span class="codigo">CIN276</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN276" value="derecho" onchange="markCheck(this)"> Derecho</label>
+              <label><input type="checkbox" name="CIN276" value="economia" onchange="markCheck(this)"> Economía</label>
+              <label><input type="checkbox" name="CIN276" value="estadistica" onchange="markCheck(this)">
+                Estadística</label>
+              <label><input type="checkbox" name="CIN276" value="contaduria" onchange="markCheck(this)">
+                Contaduría</label>
+              <label><input type="checkbox" name="CIN276" value="adm-empresas" onchange="markCheck(this)">
+                Administración de Empresas</label>
+              <label><input type="checkbox" name="CIN276" value="adm-publica" onchange="markCheck(this)"> Administración
+                Pública</label>
+              <label><input type="checkbox" name="CIN276" value="adm-financiera" onchange="markCheck(this)">
+                Administración Financiera</label>
+              <label><input type="checkbox" name="CIN276" value="ing-industrial" onchange="markCheck(this)"> Ingeniería
+                Industrial</label>
+              <label><input type="checkbox" name="CIN276" value="ing-sistemas" onchange="markCheck(this)"> Ingeniería de
+                Sistemas</label>
+              <label><input type="checkbox" name="CIN276" value="otro" onchange="markCheck(this)"> Otro</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN287">
+            <label>¿Cuántos trabajadores de Control Interno tienen certificación del Instituto Internacional de
+              Auditores (IIA)? <span class="req">*</span> <span class="codigo">CIN287</span></label>
+            <input type="number" name="CIN287" min="0" placeholder="Ingrese 0 si ninguno" required>
+            <div class="err-msg">Este campo es obligatorio.</div>
+          </div>
+
+          <!-- CIN288 -->
+          <div class="campo" id="campo-CIN288">
+            <label>Número de trabajadores de Control Interno por rango de edades: <span class="req">*</span> <span
+                class="codigo">CIN288</span></label>
+            <span class="hint">Ingrese 0 si no aplica.</span>
+            <div class="num-grid">
+              <span class="row-label">Entre 18 y 25 años</span> <input type="number" name="CIN288_a" min="0" value="0"
+                required>
+              <span class="row-label">Entre 26 y 35 años</span> <input type="number" name="CIN288_b" min="0" value="0"
+                required>
+              <span class="row-label">Entre 36 y 45 años</span> <input type="number" name="CIN288_c" min="0" value="0"
+                required>
+              <span class="row-label">Entre 46 y 55 años</span> <input type="number" name="CIN288_d" min="0" value="0"
+                required>
+              <span class="row-label">Entre 56 y 65 años</span> <input type="number" name="CIN288_e" min="0" value="0"
+                required>
+              <span class="row-label">Más de 66 años</span> <input type="number" name="CIN288_f" min="0" value="0"
+                required>
+            </div>
+            <div class="err-msg">Complete todos los campos numéricos.</div>
+          </div>
+
+          <!-- CIN289 -->
+          <div class="campo" id="campo-CIN289">
+            <label>Número de trabajadores de Control Interno por rangos de experiencia laboral: <span
+                class="req">*</span> <span class="codigo">CIN289</span></label>
+            <span class="hint">Ingrese 0 si no aplica.</span>
+            <div class="num-grid">
+              <span class="row-label">Menor a 1 año</span> <input type="number" name="CIN289_a" min="0" value="0"
+                required>
+              <span class="row-label">Entre 1 – 3 años</span> <input type="number" name="CIN289_b" min="0" value="0"
+                required>
+              <span class="row-label">Entre 4 – 6 años</span> <input type="number" name="CIN289_c" min="0" value="0"
+                required>
+              <span class="row-label">Entre 7 – 10 años</span> <input type="number" name="CIN289_d" min="0" value="0"
+                required>
+              <span class="row-label">Entre 11 – 20 años</span> <input type="number" name="CIN289_e" min="0" value="0"
+                required>
+              <span class="row-label">Mayor de 21 años</span> <input type="number" name="CIN289_f" min="0" value="0"
+                required>
+            </div>
+            <div class="err-msg">Complete todos los campos numéricos.</div>
+          </div>
+
+          <!-- CIN290 -->
+          <div class="campo" id="campo-CIN290">
+            <label>Número de trabajadores de Control Interno por rangos de experiencia específica en control interno:
+              <span class="req">*</span> <span class="codigo">CIN290</span></label>
+            <span class="hint">Ingrese 0 si no aplica.</span>
+            <div class="num-grid">
+              <span class="row-label">Menor a 1 año</span> <input type="number" name="CIN290_a" min="0" value="0"
+                required>
+              <span class="row-label">Entre 1 – 3 años</span> <input type="number" name="CIN290_b" min="0" value="0"
+                required>
+              <span class="row-label">Entre 4 – 6 años</span> <input type="number" name="CIN290_c" min="0" value="0"
+                required>
+              <span class="row-label">Entre 7 – 10 años</span> <input type="number" name="CIN290_d" min="0" value="0"
+                required>
+              <span class="row-label">Entre 11 – 20 años</span> <input type="number" name="CIN290_e" min="0" value="0"
+                required>
+              <span class="row-label">Mayor de 21 años</span> <input type="number" name="CIN290_f" min="0" value="0"
+                required>
+            </div>
+            <div class="err-msg">Complete todos los campos numéricos.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== GESTIÓN INFORMACIÓN ====== -->
+      <div class="seccion">
+        <div class="sec-header">📊 Gestión de la Información, Riesgos y Alertas</div>
+        <div class="sec-body">
+
+          <div class="campo" id="campo-CIN300">
+            <label>Para el control sobre la gestión de la información en la entidad: <span class="req">*</span> <span
+                class="codigo">CIN300</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN300" value="a" onchange="markCheck(this)"> Se estableció un sistema
+                o procedimiento para el manejo y control de la información</label>
+              <label><input type="checkbox" name="CIN300" value="b" onchange="markCheck(this)"> Se realizó un respaldo
+                de la información de manera periódica y segura</label>
+              <label><input type="checkbox" name="CIN300" value="c" onchange="markCheck(this)"> Se estableció un
+                criterio para la clasificación y acceso a la información sensible</label>
+              <label><input type="checkbox" name="CIN300" value="d" onchange="markCheck(this)"> Se establecieron
+                controles sobre los cambios realizados en la información</label>
+              <label><input type="checkbox" name="CIN300" value="e" onchange="markCheck(this)"> Se asignaron roles y
+                responsabilidades en relación con el acceso y manejo de la información</label>
+              <label><input type="checkbox" name="CIN300" value="f" onchange="markCheck(this)"> Se realizaron revisiones
+                periódicas de la integridad y precisión de la información</label>
+              <label><input type="checkbox" name="CIN300" value="g" onchange="markCheck(this)"> Se mantuvo actualizada
+                la documentación (manuales, políticas, normativas)</label>
+              <label><input type="checkbox" name="CIN300" value="ninguna" onchange="markCheck(this)"> Ninguna de las
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN301">
+            <label>¿Cuáles fueron las principales razones que afectaron el cumplimiento total del plan anual de
+              auditoría? <span class="req">*</span> <span class="codigo">CIN301</span></label>
+            <div class="check-group">
+              <label><input type="checkbox" name="CIN301" value="a" onchange="markCheck(this)"> Disponibilidad de
+                recursos (técnicos, humanos, entre otros)</label>
+              <label><input type="checkbox" name="CIN301" value="b" onchange="markCheck(this)"> Cambios organizacionales
+                o normativos</label>
+              <label><input type="checkbox" name="CIN301" value="c" onchange="markCheck(this)"> Comunicación deficiente
+                entre el auditor y los auditados</label>
+              <label><input type="checkbox" name="CIN301" value="d" onchange="markCheck(this)"> Fallas en la elaboración
+                del plan anual de auditoría</label>
+              <label><input type="checkbox" name="CIN301" value="e" onchange="markCheck(this)"> Falta de acceso a la
+                información clave para el desarrollo de la auditoría</label>
+              <label><input type="checkbox" name="CIN301" value="f" onchange="markCheck(this)"> Conflictos de intereses
+                entre el auditor y los auditados</label>
+              <label><input type="checkbox" name="CIN301" value="g" onchange="markCheck(this)"> Otro</label>
+              <label><input type="checkbox" name="CIN301" value="ninguno" onchange="markCheck(this)"> Ninguno de los
+                anteriores</label>
+            </div>
+            <div class="err-msg">Seleccione al menos una opción.</div>
+          </div>
+
+          <!-- CIN304 -->
+          <div class="campo" id="campo-CIN304">
+            <label>De acuerdo con los resultados del seguimiento a la gestión del riesgo, indique: <span
+                class="req">*</span> <span class="codigo">CIN304</span></label>
+            <span class="hint">Ingrese 0 si no aplica para alguna categoría.</span>
+            <div class="num-grid">
+              <span class="row-label">Total riesgos identificados</span> <input type="number" name="CIN304_a" min="0"
+                value="0" required>
+              <span class="row-label">Riesgos materializados</span> <input type="number" name="CIN304_b" min="0"
+                value="0" required>
+              <span class="row-label">Materializados no identificados</span> <input type="number" name="CIN304_c"
+                min="0" value="0" required>
+              <span class="row-label">Riesgos de corrupción identificados</span> <input type="number" name="CIN304_d"
+                min="0" value="0" required>
+              <span class="row-label">Riesgos de corrupción materializados</span> <input type="number" name="CIN304_e"
+                min="0" value="0" required>
+              <span class="row-label">Riesgos corrupción no identificados previamente</span> <input type="number"
+                name="CIN304_f" min="0" value="0" required>
+            </div>
+            <div class="err-msg">Complete todos los campos numéricos.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN305">
+            <label>Indique el número total de trabajadores del área de Control Interno: <span class="req">*</span> <span
+                class="codigo">CIN305</span></label>
+            <input type="number" name="CIN305" min="0" placeholder="Número total" required>
+            <div class="err-msg">Este campo es obligatorio.</div>
+          </div>
+
+          <div class="campo" id="campo-CIN306">
+            <label>¿El jefe de control interno generó alertas o recomendaciones preventivas respecto a eventuales
+              incumplimientos en la implementación de la política de integridad? <span class="req">*</span> <span
+                class="codigo">CIN306</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="CIN306" value="si" required onchange="markSelected(this)"> Sí, y cuenta
+                con las evidencias</label>
+              <label><input type="radio" name="CIN306" value="no" onchange="markSelected(this)"> No generó las
+                respectivas alertas</label>
+              <label><input type="radio" name="CIN306" value="na" onchange="markSelected(this)"> La entidad no presentó
+                incumplimientos en la implementación de la política de integridad</label>
+            </div>
+            <div class="err-msg">Seleccione una opción.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">✅ Enviar Formulario</button>
+
+    </form>
+
+    <div class="success-screen" id="success-screen">
+      <div class="icon">✅</div>
+      <h2>¡Formulario enviado correctamente!</h2>
+      <p>Gracias por diligenciar el Formulario MECI.<br>Sus respuestas han sido registradas exitosamente.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
+
+    // ---- RAMIFICACIÓN TIPO ENTIDAD ----
+    function ramificarEntidad() {
+      const tipo = document.getElementById('tipo_entidad').value;
+      document.querySelectorAll('.entidad-block').forEach(b => {
+        b.classList.remove('visible');
+        b.querySelector('select').required = false;
+      });
+      if (tipo === 'DESCENTRALIZADA') {
+        document.getElementById('bloque-desc').classList.add('visible');
+        document.getElementById('entidad_desc').required = true;
+      } else if (tipo === 'MUNICIPIO') {
+        document.getElementById('bloque-muni').classList.add('visible');
+        document.getElementById('entidad_muni').required = true;
+      } else if (tipo === 'ESES') {
+        document.getElementById('bloque-eses').classList.add('visible');
+        document.getElementById('entidad_ese').required = true;
+      }
+      actualizarProgreso();
+    }
+
+    // ---- HIGHLIGHT SELECCIÓN ----
+    function markSelected(radio) {
+      const group = radio.closest('.radio-group');
+      group.querySelectorAll('label').forEach(l => l.classList.remove('selected'));
+      radio.closest('label').classList.add('selected');
+      actualizarProgreso();
+    }
+    function markCheck(cb) {
+      cb.closest('label').classList.toggle('selected', cb.checked);
+      actualizarProgreso();
+    }
+
+    // ---- PROGRESO ----
+    const TOTAL_PREGUNTAS = 42;
+    function actualizarProgreso() {
+      let respondidas = 0;
+      // radios
+      document.querySelectorAll('.radio-group').forEach(rg => {
+        if (rg.querySelector('input[type=radio]:checked')) respondidas++;
+      });
+      // checkboxes
+      document.querySelectorAll('.check-group').forEach(cg => {
+        if (cg.querySelector('input[type=checkbox]:checked')) respondidas++;
+      });
+      // text/number/select inputs (excluye entidad_nombre ramificados)
+      ['responsable_nombre', 'responsable_cedula', 'responsable_cargo', 'responsable_correo',
+        'tipo_entidad', 'entidad_vigencia'].forEach(id => {
+          const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+          if (el && el.value.trim()) respondidas++;
+        });
+      const pct = Math.min(100, Math.round(respondidas / TOTAL_PREGUNTAS * 100));
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-text').textContent = respondidas + ' de ' + TOTAL_PREGUNTAS + ' preguntas respondidas';
+    }
+
+    // ---- VALIDACIÓN Y ENVÍO ----
+    document.getElementById('form-meci').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!validarFormulario()) return;
+
+      const btn = document.querySelector('.btn-submit');
+      btn.textContent = '⏳ Enviando...';
+      btn.disabled = true;
+
+      const data = recopilarDatos();
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        document.getElementById('form-meci').style.display = 'none';
+        document.getElementById('success-screen').style.display = 'block';
+        window.scrollTo(0, 0);
+      } catch (err) {
+        alert('Error al enviar. Intente de nuevo.');
+        btn.textContent = '✅ Enviar Formulario';
+        btn.disabled = false;
+      }
+    });
+
+    function validarFormulario() {
+      let ok = true;
+      document.querySelectorAll('.campo.has-error').forEach(c => c.classList.remove('has-error'));
+
+      // Campos de texto/select required
+      document.querySelectorAll('input[required], select[required]').forEach(el => {
+        if (!el.offsetParent) return; // elemento oculto
+        const v = el.value.trim();
+        if (!v || (el.type === 'number' && el.value === '')) {
+          marcarError(el.closest('.campo'));
+          ok = false;
+        }
+      });
+
+      // Radio groups requeridos
+      document.querySelectorAll('.campo').forEach(campo => {
+        const radios = campo.querySelectorAll('input[type=radio][required]');
+        if (radios.length > 0) {
+          const checked = campo.querySelector('input[type=radio]:checked');
+          if (!checked) { marcarError(campo); ok = false; }
+        }
+      });
+
+      // Checkboxes requeridos
+      const checkCampos = ['CIN203', 'CIN206', 'CIN207', 'CIN222', 'CIN240', 'CIN241', 'CIN242', 'CIN244',
+        'CIN246', 'CIN247', 'CIN252', 'CIN253', 'CIN254', 'CIN271', 'CIN276', 'CIN300', 'CIN301'];
+      checkCampos.forEach(nombre => {
+        const campo = document.getElementById('campo-' + nombre);
+        if (!campo) return;
+        const checked = campo.querySelector('input[type=checkbox]:checked');
+        if (!checked) { marcarError(campo); ok = false; }
+      });
+
+      if (!ok) {
+        const firstErr = document.querySelector('.campo.has-error');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return ok;
+    }
+
+    function marcarError(campo) {
+      if (campo) campo.classList.add('has-error');
+    }
+
+    function recopilarDatos() {
+      const data = { timestamp: new Date().toISOString() };
+      const fd = new FormData(document.getElementById('form-meci'));
+
+      // Nombre de entidad según tipo
+      const tipo = document.getElementById('tipo_entidad').value;
+      if (tipo === 'DESCENTRALIZADA') data.entidad_nombre = document.getElementById('entidad_desc').value;
+      else if (tipo === 'MUNICIPIO') data.entidad_nombre = document.getElementById('entidad_muni').value;
+      else if (tipo === 'ESES') data.entidad_nombre = document.getElementById('entidad_ese').value;
+      data.tipo_entidad = tipo;
+
+      const checkNames = {};
+      for (let [k, v] of fd.entries()) {
+        if (['entidad_nombre'].includes(k)) continue;
+        if (data[k]) {
+          if (!checkNames[k]) checkNames[k] = [];
+          checkNames[k].push(v);
+        } else {
+          data[k] = v;
+          checkNames[k] = [v];
+        }
+      }
+      // Para checkboxes múltiples, unir con coma
+      Object.entries(checkNames).forEach(([k, vals]) => {
+        if (vals.length > 1) data[k] = vals.join(',');
+      });
+
+      return data;
+    }
+
+    // Escuchar cambios en inputs numéricos y texto
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      el.addEventListener('input', actualizarProgreso);
+      el.addEventListener('change', actualizarProgreso);
+    });
+
+    // ---- FOLLOW-UP Si/No/Justificación ----
+    function initFollowUps() {
+      // Attach to all radio-group and check-group containers inside a .campo
+      document.querySelectorAll('.campo .radio-group, .campo .check-group').forEach(function (group) {
+        var campo = group.closest('.campo');
+        if (!campo) return;
+        // Avoid duplicating
+        if (campo.querySelector('.followup-block')) return;
+
+        var campoId = campo.id || ('fu-' + Math.random().toString(36).substr(2, 6));
+        var fuId = 'fu_' + campoId;
+
+        var block = document.createElement('div');
+        block.className = 'followup-block';
+        block.id = fuId;
+        block.innerHTML =
+          '<span class="fu-label">📝 Verificación adicional</span>' +
+          '<div class="followup-sn">' +
+          '<label id="' + fuId + '_si_lbl"><input type="radio" name="' + fuId + '_sn" value="si" onchange="markFuSN(this)"> ✅ Sí</label>' +
+          '<label id="' + fuId + '_no_lbl"><input type="radio" name="' + fuId + '_sn" value="no" onchange="markFuSN(this)"> ❌ No</label>' +
+          '</div>' +
+          '<span class="followup-just-label">Justificación (opcional)</span>' +
+          '<textarea class="followup-just" name="' + fuId + '_just" rows="2" placeholder="Escriba una justificación si lo considera necesario..."></textarea>';
+
+        campo.appendChild(block);
+
+        // Show block when any input in the group changes
+        group.querySelectorAll('input').forEach(function (inp) {
+          inp.addEventListener('change', function () {
+            block.classList.add('visible');
+          });
+        });
+      });
+    }
+
+    function markFuSN(radio) {
+      var fuId = radio.name.replace('_sn', '');
+      var siLbl = document.getElementById(fuId + '_si_lbl');
+      var noLbl = document.getElementById(fuId + '_no_lbl');
+      if (siLbl) siLbl.classList.remove('fu-selected-si', 'fu-selected-no');
+      if (noLbl) noLbl.classList.remove('fu-selected-si', 'fu-selected-no');
+      if (radio.value === 'si' && siLbl) siLbl.classList.add('fu-selected-si');
+      if (radio.value === 'no' && noLbl) noLbl.classList.add('fu-selected-no');
+    }
+
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', function () {
+      initFollowUps();
+    });
+    // Also call immediately in case DOMContentLoaded already fired
+    if (document.readyState !== 'loading') {
+      initFollowUps();
+    }
+
+  </script>
+</body>
+
+</html>
