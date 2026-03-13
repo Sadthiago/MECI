@@ -37,6 +37,25 @@ input.invalid,select.invalid{border-color:var(--err)}
 .radio-group input,.check-group input{margin-top:2px;flex-shrink:0;accent-color:var(--accent)}
 .radio-group label.selected,.check-group label.selected{background:#eaf1fb;border-color:var(--accent)}
 
+/* Excluir labels dentro de followup-blocks del estilo de grupo */
+.radio-group .followup-block label,
+.check-group .followup-block label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .84rem; font-weight: 600; cursor: pointer;
+  padding: 6px 14px; border: 1.5px solid var(--border);
+  border-radius: 20px; transition: background .15s, border-color .15s;
+  user-select: none; background: transparent;
+}
+.radio-group .followup-block label:hover,
+.check-group .followup-block label:hover {
+  background: #e0edff; border-color: var(--accent);
+}
+.radio-group .followup-block label.selected,
+.check-group .followup-block label.selected {
+  background: transparent; border-color: var(--border);
+}
+
+
 .num-grid{display:grid;grid-template-columns:1fr 140px;gap:6px 14px;align-items:center;margin-top:4px}
 .num-grid .row-label{font-size:.83rem;color:var(--text)}
 .num-grid input{text-align:center;max-width:140px}

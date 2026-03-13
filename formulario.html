@@ -1312,29 +1312,28 @@
 
     // ---- FOLLOW-UP Si/No/Justificación ----
     function initFollowUps() {
-      // Para cada campo que sea radio o checkbox
       document.querySelectorAll('.campo .radio-group, .campo .check-group').forEach(function (group) {
         var campo = group.closest('.campo');
         if (!campo) return;
-        var inputs = group.querySelectorAll('input');
         var isCheckGroup = group.classList.contains('check-group');
 
+        // Solo los inputs directos del grupo (no los de los follow-up blocks)
+        var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
+
         inputs.forEach(function (inp) {
-          var fuId;
-          if (isCheckGroup) {
-            fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
-          } else {
-            // Para radio, creamos un bloque por cada OPCIÓN físicamente, 
-            // pero solo se verá la del radio marcado.
-            fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
-          }
+          var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
+
+          // Evitar duplicados
+          if (document.getElementById(fuId)) return;
 
           var block = document.createElement('div');
           block.className = 'followup-block';
           block.id = fuId;
-          
-          var labelText = isCheckGroup ? 'Verificación: ' + inp.closest('label').textContent.trim() : 'Verificación adicional';
-          
+
+          var labelText = isCheckGroup
+            ? 'Verificación: ' + inp.closest('label').textContent.trim()
+            : 'Verificación adicional';
+
           block.innerHTML =
             '<span class="fu-label">📝 ' + labelText + '</span>' +
             '<div class="followup-sn">' +
@@ -1344,7 +1343,12 @@
             '<span class="followup-just-label">Justificación (opcional)</span>' +
             '<textarea class="followup-just" name="' + fuId + '_just" rows="2" placeholder="Escriba una justificación para esta opción..."></textarea>';
 
-          // INSERTAR JUSTO DEBAJO DE LA OPCIÓN (el label)
+          // Prevenir que clicks en el bloque de verificación afecten al checkbox/radio padre
+          block.addEventListener('click', function (e) {
+            e.stopPropagation();
+          });
+
+          // Insertar justo debajo de la opción (el label)
           var wrapperLabel = inp.closest('label');
           wrapperLabel.parentNode.insertBefore(block, wrapperLabel.nextSibling);
 
@@ -1357,9 +1361,10 @@
     }
 
     function actualizarVisibilidadFU(group) {
-      var inputs = group.querySelectorAll('input');
-      
-      inputs.forEach(function(inp) {
+      // Solo los inputs directos del grupo (no los de los follow-up blocks)
+      var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
+
+      inputs.forEach(function (inp) {
         var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
         var block = document.getElementById(fuId);
         if (!block) return;
@@ -1369,14 +1374,16 @@
         } else {
           block.classList.remove('visible');
           // Limpiar valores al ocultar
-          block.querySelectorAll('input[type=radio]').forEach(r => {
+          block.querySelectorAll('input[type=radio]').forEach(function (r) {
             r.checked = false;
             markFuSN(r);
           });
-          block.querySelector('textarea').value = '';
+          var ta = block.querySelector('textarea');
+          if (ta) ta.value = '';
         }
       });
     }
+
 
     function markFuSN(radio) {
       var fuId = radio.name.replace('_sn', '');

@@ -288,7 +288,37 @@
     const APPS_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
     const CACHE_KEY = "meci122_v9";
 
-    const PREGUNTAS = { "PER201": { "label": "MECI genera valor agregado", "tipo": "radio", "opciones": { "si": 1, "no": 0 }, "peso": 1 }, "CIN203": { "label": "Política de integridad", "tipo": "check", "max_opts": 5, "peso": 2 }, "CIN206": { "label": "Talento Humano", "tipo": "check", "max_opts": 7, "peso": 2 }, "CIN207": { "label": "Planeación y Riesgos", "tipo": "check", "max_opts": 8, "peso": 2 }, "CIN221": { "label": "Gestión integral de riesgos", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 }, "CIN222": { "label": "Evaluación riesgo/control", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN233": { "label": "Evaluación gestión info", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 }, "CIN234": { "label": "Hallazgos comunicados", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 }, "CIN236": { "label": "Informes contables oportunos", "tipo": "radio", "opciones": { "siempre": 1, "mayoria": 0.75, "pocas": 0.25, "nunca": 0 }, "peso": 2 }, "CIN238": { "label": "Metodología auditoría", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25, "d": 0 }, "peso": 3 }, "CIN239": { "label": "Plan anual auditoras", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 3 }, "CIN240": { "label": "Componentes plan anual", "tipo": "check", "max_opts": 6, "peso": 2 }, "CIN241": { "label": "Fases de auditoría", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN242": { "label": "Aspectos auditoras programadas", "tipo": "check", "max_opts": 7, "peso": 2 }, "CIN243": { "label": "Ejecución plan anual", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25 }, "peso": 3 }, "CIN244": { "label": "Universo de auditoría", "tipo": "check", "max_opts": 3, "peso": 2 }, "CIN246": { "label": "Acciones eval. SCI", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN247": { "label": "Alcance plan auditoras", "tipo": "check", "max_opts": 9, "peso": 2 }, "CIN252": { "label": "Planeación auditoras", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN253": { "label": "Herramientas ejecución", "tipo": "check", "max_opts": 8, "peso": 3 }, "CIN254": { "label": "Características informes", "tipo": "check", "max_opts": 6, "peso": 2 }, "CIN255": { "label": "Seguimiento planes mejoramiento", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 3 }, "CIN264": { "label": "Estructura área CI", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25, "d": 0.5, "e": 0 }, "peso": 3 }, "CIN268": { "label": "Tipo vinculación JCI", "tipo": "radio", "opciones": { "periodo": 1, "libre": 1, "carrera": 1, "provisional": 0.5, "temporal": 0.25, "otro": 0.25 }, "peso": 1 }, "CIN305": { "label": "Total trabajadores CI", "tipo": "numero", "peso": 1 }, "CIN306": { "label": "Alertas política integridad", "tipo": "radio", "opciones": { "si": 1, "no": 0, "na": 1 }, "peso": 2 }, "CIN300": { "label": "Control gestión información", "tipo": "check", "max_opts": 7, "peso": 2 }, "CIN301": { "label": "Razones incumplimiento plan", "tipo": "check", "max_opts": 7, "peso": 1, "ninguna_ok": true } };
+    const PREGUNTAS = {
+      "PER201": { "label": "MECI genera valor agregado", "tipo": "radio", "opciones": { "si": 1, "no": 0 }, "peso": 1 },
+      "CIN203": { "label": "Política de integridad", "tipo": "check", "max_opts": 5, "peso": 2 },
+      "CIN206": { "label": "Talento Humano", "tipo": "check", "max_opts": 6, "no_score": ["g"], "peso": 2 },
+      "CIN207": { "label": "Planeación y Riesgos", "tipo": "check", "max_opts": 6, "no_score": ["g"], "peso": 2 },
+      "CIN221": { "label": "Gestión integral de riesgos", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 },
+      "CIN222": { "label": "Evaluación riesgo/control", "tipo": "check", "max_opts": 3, "no_score": ["d"], "peso": 2 },
+      "CIN233": { "label": "Evaluación gestión info", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 },
+      "CIN234": { "label": "Hallazgos comunicados", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 },
+      "CIN236": { "label": "Informes contables oportunos", "tipo": "radio", "opciones": { "siempre": 1, "mayoria": 0.75, "pocas": 0.25, "nunca": 0 }, "peso": 2 },
+      "CIN238": { "label": "Metodología auditoría", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25, "d": 0 }, "peso": 3 },
+      "CIN239": { "label": "Plan anual auditoras", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 3 },
+      "CIN240": { "label": "Componentes plan anual", "tipo": "check", "max_opts": 6, "peso": 2 },
+      "CIN241": { "label": "Fases de auditoría", "tipo": "check", "max_opts": 4, "peso": 2 },
+      "CIN242": { "label": "Aspectos auditoras programadas", "tipo": "check", "max_opts": 7, "peso": 2 },
+      "CIN243": { "label": "Ejecución plan anual", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25 }, "peso": 3 },
+      "CIN244": { "label": "Universo de auditoría", "tipo": "check", "max_opts": 3, "no_score": ["d"], "peso": 2 },
+      "CIN246": { "label": "Acciones eval. SCI", "tipo": "check", "max_opts": 3, "no_score": ["d"], "peso": 2 },
+      "CIN247": { "label": "Alcance plan auditoras", "tipo": "check", "max_opts": 10, "peso": 2 },
+      "CIN252": { "label": "Planeación auditoras", "tipo": "check", "max_opts": 4, "peso": 2 },
+      "CIN253": { "label": "Herramientas ejecución", "tipo": "check", "max_opts": 8, "peso": 3 },
+      "CIN254": { "label": "Características informes", "tipo": "check", "max_opts": 6, "peso": 2 },
+      "CIN255": { "label": "Seguimiento planes mejoramiento", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 3 },
+      "CIN264": { "label": "Estructura área CI", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25, "d": 0.5, "e": 0 }, "peso": 3 },
+      "CIN268": { "label": "Tipo vinculación JCI", "tipo": "radio", "opciones": { "periodo": 0.75, "libre": 0.75, "carrera": 1, "provisional": 0.5, "temporal": 0.25, "otro": 0.25 }, "peso": 1 },
+      "CIN305": { "label": "Total trabajadores CI", "tipo": "numero", "peso": 1 },
+      "CIN306": { "label": "Alertas política integridad", "tipo": "radio", "opciones": { "si": 1, "no": 0, "na": 1 }, "peso": 2 },
+      "CIN300": { "label": "Control gestión información", "tipo": "check", "max_opts": 7, "peso": 2 },
+      "CIN301": { "label": "Razones incumplimiento plan", "tipo": "check", "max_opts": 6, "no_score": ["g"], "peso": 1, "ninguna_ok": true }
+    };
+
     const CATEGORIAS = { "Política de Integridad": ["CIN203", "CIN306"], "Evaluación Riesgos": ["CIN207", "CIN221", "CIN222"], "Proceso Auditor": ["CIN238", "CIN239", "CIN240", "CIN241", "CIN242", "CIN243", "CIN247", "CIN252", "CIN253", "CIN254"], "Comunicación y Hallazgos": ["CIN233", "CIN234", "CIN236"], "Seguimiento y Mejora": ["CIN246", "CIN255", "CIN301"], "Gestión Información": ["CIN300"], "Capacidad Institucional": ["CIN264", "CIN268", "CIN305"] };
 
     function calcAvance(r) {
@@ -304,7 +334,8 @@
         } else if (cfg.tipo === 'check') {
           const partes = val.split(',').map(o => o.trim()).filter(Boolean);
           const tieneNinguna = partes.includes('ninguna');
-          const opts = partes.filter(o => o !== 'ninguna');
+          const noScore = cfg.no_score || [];
+          const opts = partes.filter(o => o !== 'ninguna' && !noScore.includes(o));
           let pts;
           if (tieneNinguna && opts.length === 0) {
             pts = cfg.ninguna_ok ? 1.0 : 0.0;
@@ -340,7 +371,8 @@
         else if (cfg.tipo === 'check') {
           const partes = val.split(',').map(o => o.trim()).filter(Boolean);
           const tieneNinguna = partes.includes('ninguna');
-          const opts = partes.filter(o => o !== 'ninguna');
+          const noScore = cfg.no_score || [];
+          const opts = partes.filter(o => o !== 'ninguna' && !noScore.includes(o));
           const pts = (tieneNinguna && opts.length === 0) ? (cfg.ninguna_ok ? 1 : 0) : Math.min(1, opts.length / (cfg.max_opts || 5));
           s += pts * cfg.peso;
         }
