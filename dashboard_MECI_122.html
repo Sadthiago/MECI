@@ -127,42 +127,6 @@ header p{font-size:.8rem;opacity:.8;margin-top:2px}
   .charts-grid,.preg-grid{grid-template-columns:1fr}
   .table-wrap{overflow-x:auto}
 }
-
-/* ══ Sección AT-FURAG ══ */
-.furag-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
-.furag-kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:4px solid var(--accent);text-align:center}
-.furag-kpi.ok{border-left-color:var(--success)}
-.furag-kpi.warn{border-left-color:var(--warn)}
-.furag-kpi.danger{border-left-color:var(--danger)}
-.furag-kpi .fk-val{font-size:1.8rem;font-weight:800;color:var(--primary)}
-.furag-kpi .fk-lbl{font-size:.72rem;color:var(--muted);font-weight:600;margin-top:3px}
-
-.furag-filters{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
-.furag-filters label{font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
-.furag-filters select,.furag-filters input{border:1.5px solid var(--border);border-radius:8px;padding:6px 11px;font-size:.84rem;background:#f9fbff;min-width:180px}
-.furag-filters select:focus,.furag-filters input:focus{outline:none;border-color:var(--accent)}
-
-.furag-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px;overflow-x:auto}
-.furag-table-wrap table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:900px}
-.furag-table-wrap th{background:var(--primary);color:#fff;padding:9px 11px;text-align:left;font-weight:600;white-space:nowrap}
-.furag-table-wrap td{padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:top}
-.furag-table-wrap tr:last-child td{border-bottom:none}
-.furag-table-wrap tr:hover td{background:#f4f8ff}
-.furag-table-wrap .grupo-header td{background:#eaf1fb;color:var(--primary);font-weight:700;font-size:.8rem;padding:7px 11px}
-
-.sem{display:inline-block;width:20px;height:20px;border-radius:50%;font-size:.7rem;font-weight:800;color:#fff;text-align:center;line-height:20px}
-.sem.si{background:var(--success)}
-.sem.no{background:var(--danger)}
-.sem.parcial{background:var(--warn)}
-.sem.dash{background:#ccc;color:#888}
-
-.ent-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700}
-.ent-ese{background:#d4edda;color:#155724}
-.ent-desc{background:#cce5ff;color:#004085}
-.ent-muni{background:#fff3cd;color:#856404}
-
-.furag-obs{font-size:.72rem;color:var(--muted);max-width:200px;white-space:normal;line-height:1.3}
-
 </style>
 </head>
 <body>
@@ -173,8 +137,7 @@ header p{font-size:.8rem;opacity:.8;margin-top:2px}
     <p>Evaluación Independiente – Vigencia 2025</p>
   </div>
   <div class="header-btns">
-    <button class="btn btn-reload" onclick="cargarDatos(false)">🔄 Actualizar</button>
-    <button class="btn btn-reload" style="background:#f0a500;color:#fff" onclick="cargarDatos(true)">🔁 Forzar recarga</button>
+    <button class="btn btn-reload" onclick="cargarDatos()">🔄 Actualizar</button>
     <button class="btn btn-excel"  onclick="exportarExcel()">📥 Exportar Excel</button>
     <button class="btn btn-clear"  onclick="confirmarLimpiar()">🗑️ Limpiar datos</button>
   </div>
@@ -190,7 +153,7 @@ header p{font-size:.8rem;opacity:.8;margin-top:2px}
     <select id="filtro-vigencia" onchange="aplicarFiltros()"><option value="">— Todas —</option></select>
   </div>
   <div class="filter-group">
-    <label>Tipo de entidad</label>
+    <label>Municipio</label>
     <select id="filtro-municipio" onchange="aplicarFiltros()"><option value="">— Todos —</option></select>
   </div>
   <div class="filter-group">
@@ -274,93 +237,6 @@ header p{font-size:.8rem;opacity:.8;margin-top:2px}
   </div>
 
 </div>
-
-
-  <!-- ══ SECCIÓN AT-FURAG ══ -->
-  <div class="section-title" style="margin-top:36px">
-    📋 Avances Asistencia Técnica FURAG – Fase 1
-  </div>
-
-  <!-- KPIs FURAG -->
-  <div class="furag-kpi-row" id="furag-kpi-row">
-    <div class="furag-kpi"><div class="fk-val" id="fk-total">0</div><div class="fk-lbl">Entidades convocadas</div></div>
-    <div class="furag-kpi ok"><div class="fk-val" id="fk-asistencia">0%</div><div class="fk-lbl">Con asistencia</div></div>
-    <div class="furag-kpi ok"><div class="fk-val" id="fk-circular">0%</div><div class="fk-lbl">Circular DAFP</div></div>
-    <div class="furag-kpi warn"><div class="fk-val" id="fk-circular003">0%</div><div class="fk-lbl">Circular 003 completa</div></div>
-    <div class="furag-kpi warn"><div class="fk-val" id="fk-acceso">0%</div><div class="fk-lbl">Acceso al aplicativo</div></div>
-    <div class="furag-kpi danger"><div class="fk-val" id="fk-pendientes">0</div><div class="fk-lbl">Pendientes de acceso</div></div>
-  </div>
-
-  <!-- Gráfica actividades Fase 1 + filtros -->
-  <div class="charts-grid" style="margin-bottom:18px">
-    <div class="chart-card">
-      <h3>Cumplimiento por actividad – Fase 1 (todas las entidades)</h3>
-      <div class="chart-wrap" style="height:240px"><canvas id="chart-furag-act"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Estado de asistencia por grupo</h3>
-      <div class="chart-wrap" style="height:240px"><canvas id="chart-furag-grupos"></canvas></div>
-    </div>
-  </div>
-
-  <!-- Filtros FURAG -->
-  <div class="furag-filters">
-    <div>
-      <label>Fecha de sesión</label>
-      <select id="furag-filtro-fecha" onchange="renderFuragTabla()">
-        <option value="">— Todas las fechas —</option>
-        <option value="04-Mar">04 Marzo</option>
-        <option value="05-Mar">05 Marzo</option>
-        <option value="06-Mar">06 Marzo</option>
-        <option value="09-Mar">09 Marzo</option>
-      </select>
-    </div>
-    <div>
-      <label>Tipo de entidad</label>
-      <select id="furag-filtro-tipo" onchange="renderFuragTabla()">
-        <option value="">— Todos —</option>
-        <option value="ESE">ESES</option>
-        <option value="Descentralizada">Descentralizadas</option>
-      </select>
-    </div>
-    <div>
-      <label>Estado acceso aplicativo</label>
-      <select id="furag-filtro-acceso" onchange="renderFuragTabla()">
-        <option value="">— Todos —</option>
-        <option value="si">✅ Con acceso</option>
-        <option value="no">❌ Sin acceso</option>
-        <option value="parcial">⚠️ Parcial</option>
-      </select>
-    </div>
-    <div>
-      <label>Buscar entidad / jefe</label>
-      <input type="text" id="furag-buscar" placeholder="Nombre..." oninput="renderFuragTabla()">
-    </div>
-    <span class="badge-count" id="furag-badge">0 entidades</span>
-  </div>
-
-  <!-- Tabla FURAG -->
-  <div class="furag-table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Entidad</th>
-          <th>Jefe OCI</th>
-          <th title="Asistencia a la sesión">Asist.</th>
-          <th title="Socialización Circular DAFP">Circ. DAFP</th>
-          <th title="Micrositio MECIC">Micrositio</th>
-          <th title="Sesión técnica Gerencia y JCI">Ses. Gerencia</th>
-          <th title="Circular 003 y Compromiso Gerencial">Circ. 003</th>
-          <th title="Usuario y clave activos en Función Pública">Acceso App</th>
-          <th>Observaciones</th>
-        </tr>
-      </thead>
-      <tbody id="furag-tbody">
-        <tr><td colspan="10"><div class="empty"><div class="icon">📋</div><p>Cargando datos FURAG...</p></div></td></tr>
-      </tbody>
-    </table>
-  </div>
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
@@ -456,41 +332,24 @@ function getFuJust(row, campo, optVal) {
   return row[`fu_just_${campo}_${optVal}`] || '';
 }
 
-async function cargarDatos(forzarLimpio = false) {
-  showToast('⏳ Cargando datos desde Google Sheets...', 'info');
-  if (forzarLimpio) localStorage.removeItem(STORAGE_KEY);
-
+async function cargarDatos() {
+  showToast('⏳ Cargando datos...', 'info');
   try {
-    // Cache-busting para evitar respuestas cacheadas del browser
-    const url = APPS_SCRIPT_URL + '?t=' + Date.now();
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const res = await fetch(APPS_SCRIPT_URL);
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
-      // Limpiar campo 'viewport' que llega como basura del FormData
-      todosLosDatos = data.map(r => { const {viewport, ...rest} = r; return rest; });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(todosLosDatos));
-      showToast(`✅ ${todosLosDatos.length} registros cargados desde Google Sheets`, 'ok');
-    } else if (Array.isArray(data) && data.length === 0) {
-      showToast('⚠️ Google Sheets respondió pero no tiene datos aún', 'info');
-      todosLosDatos = cargarDatosDemostracion();
-    } else {
-      throw new Error('Respuesta inesperada del servidor');
-    }
-  } catch(err) {
-    console.warn('Error al cargar desde Sheets:', err.message);
+      todosLosDatos = data;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showToast(`✅ ${data.length} registros cargados desde Google Sheets`, 'ok');
+    } else throw new Error('Sin datos');
+  } catch {
     const local = localStorage.getItem(STORAGE_KEY);
     if (local) {
-      try {
-        todosLosDatos = JSON.parse(local);
-        showToast(`📦 ${todosLosDatos.length} registros desde caché local (Sheets no disponible: ${err.message})`, 'info');
-      } catch {
-        todosLosDatos = cargarDatosDemostracion();
-        showToast('ℹ️ Caché corrupta — mostrando datos de demostración', 'info');
-      }
+      todosLosDatos = JSON.parse(local);
+      showToast(`📦 ${todosLosDatos.length} registros desde caché local`, 'info');
     } else {
       todosLosDatos = cargarDatosDemostracion();
-      showToast('ℹ️ Sin conexión a Sheets — mostrando datos de demostración', 'info');
+      showToast('ℹ️ Mostrando datos de demostración', 'info');
     }
   }
   poblarFiltros();
@@ -500,7 +359,7 @@ async function cargarDatos(forzarLimpio = false) {
 function cargarDatosDemostracion() {
   // Datos demo con campos fu_sn_ incluidos para mostrar el nuevo seguimiento
   return [
-    { timestamp:"2025-11-10T10:00:00Z", entidad_nombre:"Hospital San Rafael Caqueza", entidad_nit:"800.001.001-1", tipo_entidad:"ESES", entidad_vigencia:"2025", responsable_nombre:"Juan Pérez", responsable_cargo:"Jefe Control Interno",
+    { timestamp:"2025-11-10T10:00:00Z", entidad_nombre:"Hospital San Rafael Caqueza", entidad_nit:"800.001.001-1", entidad_municipio:"Caqueza", entidad_vigencia:"2025", entidad_responsable:"Juan Pérez", entidad_cargo:"Jefe Control Interno",
       PER201:"si", fu_sn_PER201_si:"si",
       CIN203:"a,b,c", fu_sn_CIN203_a:"si", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"no",
       CIN221:"a", fu_sn_CIN221_a:"si",
@@ -512,7 +371,7 @@ function cargarDatosDemostracion() {
       CIN270:"especializacion", fu_sn_CIN270_especializacion:"na",
       CIN272:"4-6", fu_sn_CIN272_4-6:"si",
       CIN306:"si", fu_sn_CIN306_si:"si" },
-    { timestamp:"2025-11-12T14:30:00Z", entidad_nombre:"Alcaldía de Fómeque", entidad_nit:"800.002.002-2", tipo_entidad:"MUNICIPIO", entidad_vigencia:"2025", responsable_nombre:"María López", responsable_cargo:"Jefe CI",
+    { timestamp:"2025-11-12T14:30:00Z", entidad_nombre:"Alcaldía de Fómeque", entidad_nit:"800.002.002-2", entidad_municipio:"Fómeque", entidad_vigencia:"2025", entidad_responsable:"María López", entidad_cargo:"Jefe CI",
       PER201:"si", fu_sn_PER201_si:"si",
       CIN203:"a,d", fu_sn_CIN203_a:"si", fu_sn_CIN203_d:"no",
       CIN221:"b", fu_sn_CIN221_b:"no",
@@ -524,7 +383,7 @@ function cargarDatosDemostracion() {
       CIN270:"pregrado", fu_sn_CIN270_pregrado:"si",
       CIN272:"1-3", fu_sn_CIN272_1-3:"na",
       CIN306:"si", fu_sn_CIN306_si:"si" },
-    { timestamp:"2025-11-15T09:15:00Z", entidad_nombre:"Alcaldía de Choachí", entidad_nit:"800.003.003-3", tipo_entidad:"MUNICIPIO", entidad_vigencia:"2025", responsable_nombre:"Carlos Rojas", responsable_cargo:"Asesor CI",
+    { timestamp:"2025-11-15T09:15:00Z", entidad_nombre:"Alcaldía de Choachí", entidad_nit:"800.003.003-3", entidad_municipio:"Choachí", entidad_vigencia:"2025", entidad_responsable:"Carlos Rojas", entidad_cargo:"Asesor CI",
       PER201:"no", fu_sn_PER201_no:"no",
       CIN203:"ninguna", fu_sn_CIN203_ninguna:"no",
       CIN221:"c", fu_sn_CIN221_c:"no",
@@ -536,7 +395,7 @@ function cargarDatosDemostracion() {
       CIN270:"pregrado", fu_sn_CIN270_pregrado:"si",
       CIN272:"1-3", fu_sn_CIN272_1-3:"si",
       CIN306:"no", fu_sn_CIN306_no:"no" },
-    { timestamp:"2025-11-18T11:00:00Z", entidad_nombre:"ESE Hospital de Ubaque", entidad_nit:"800.004.004-4", tipo_entidad:"ESES", entidad_vigencia:"2025", responsable_nombre:"Ana Torres", responsable_cargo:"Jefe CI",
+    { timestamp:"2025-11-18T11:00:00Z", entidad_nombre:"ESE Hospital de Ubaque", entidad_nit:"800.004.004-4", entidad_municipio:"Ubaque", entidad_vigencia:"2025", entidad_responsable:"Ana Torres", entidad_cargo:"Jefe CI",
       PER201:"si", fu_sn_PER201_si:"si",
       CIN203:"a,b,c,d,e", fu_sn_CIN203_a:"si", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"si", fu_sn_CIN203_d:"si", fu_sn_CIN203_e:"na",
       CIN221:"a", fu_sn_CIN221_a:"si",
@@ -548,7 +407,7 @@ function cargarDatosDemostracion() {
       CIN270:"maestria", fu_sn_CIN270_maestria:"si",
       CIN272:"7-10", fu_sn_CIN272_7-10:"si",
       CIN306:"si", fu_sn_CIN306_si:"si" },
-    { timestamp:"2025-11-20T16:45:00Z", entidad_nombre:"Personería Caqueza", entidad_nit:"800.005.005-5", tipo_entidad:"DESCENTRALIZADA", entidad_vigencia:"2025", responsable_nombre:"Luis García", responsable_cargo:"Profesional CI",
+    { timestamp:"2025-11-20T16:45:00Z", entidad_nombre:"Personería Caqueza", entidad_nit:"800.005.005-5", entidad_municipio:"Caqueza", entidad_vigencia:"2025", entidad_responsable:"Luis García", entidad_cargo:"Profesional CI",
       PER201:"si", fu_sn_PER201_si:"si",
       CIN203:"b,c", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"na",
       CIN221:"b", fu_sn_CIN221_b:"na",
@@ -563,7 +422,7 @@ function cargarDatosDemostracion() {
   ];
 }
 
-const CAMPOS_IMPORTANTES = ['entidad_nombre','entidad_vigencia','tipo_entidad','responsable_nombre','responsable_cargo',
+const CAMPOS_IMPORTANTES = ['entidad_nombre','entidad_nit','entidad_municipio','entidad_vigencia','entidad_responsable','entidad_cargo',
   'PER201','PER205','CIN203','CIN206','CIN207','CIN221','CIN222','CIN233','CIN234','CIN236',
   'CIN238','CIN239','CIN240','CIN241','CIN242','CIN243','CIN244','CIN246','CIN247','CIN252','CIN253','CIN254','CIN255',
   'CIN264','CIN268','CIN269','CIN270','CIN271','CIN272','CIN273_a','CIN274_a','CIN275_a','CIN276','CIN287','CIN288_a','CIN289_a','CIN290_a',
@@ -576,14 +435,12 @@ function calcularAvance(row) {
 }
 
 function poblarFiltros() {
-  // Soporta tanto keys del Apps Script como keys de demo
-  const getVal = (r, ...keys) => { for(const k of keys){ if(r[k]) return r[k]; } return null; };
-  const entidades  = [...new Set(todosLosDatos.map(r => getVal(r,'entidad_nombre')).filter(Boolean))].sort();
-  const vigencias  = [...new Set(todosLosDatos.map(r => getVal(r,'entidad_vigencia')).filter(Boolean))].sort();
-  const tipos      = [...new Set(todosLosDatos.map(r => getVal(r,'tipo_entidad')).filter(Boolean))].sort();
+  const entidades  = [...new Set(todosLosDatos.map(r => r.entidad_nombre).filter(Boolean))].sort();
+  const vigencias  = [...new Set(todosLosDatos.map(r => r.entidad_vigencia).filter(Boolean))].sort();
+  const municipios = [...new Set(todosLosDatos.map(r => r.entidad_municipio).filter(Boolean))].sort();
   poblarSelect('filtro-entidad',  entidades);
   poblarSelect('filtro-vigencia', vigencias);
-  poblarSelect('filtro-municipio', tipos);
+  poblarSelect('filtro-municipio',municipios);
 }
 function poblarSelect(id, valores) {
   const sel = document.getElementById(id);
@@ -598,11 +455,10 @@ function aplicarFiltros() {
   const fV = document.getElementById('filtro-vigencia').value;
   const fM = document.getElementById('filtro-municipio').value;
   const fT = document.getElementById('filtro-texto').value.toLowerCase();
-  const getVal = (r, ...keys) => { for(const k of keys){ if(r[k] && r[k]!=='—') return r[k]; } return null; };
   datosFiltrados = todosLosDatos.filter(r => {
-    if (fE && getVal(r,'entidad_nombre')           !== fE) return false;
-    if (fV && getVal(r,'entidad_vigencia')          !== fV) return false;
-    if (fM && getVal(r,'tipo_entidad','tipoentidad')!== fM) return false;
+    if (fE && r.entidad_nombre    !== fE) return false;
+    if (fV && r.entidad_vigencia  !== fV) return false;
+    if (fM && r.entidad_municipio !== fM) return false;
     if (fT && !JSON.stringify(r).toLowerCase().includes(fT)) return false;
     return true;
   });
@@ -633,13 +489,12 @@ function actualizarTabla() {
     const av = calcularAvance(row);
     const bc = av>=90?'badge-ok':av>=50?'badge-warn':'badge-bad';
     const fecha = row.timestamp ? new Date(row.timestamp).toLocaleDateString('es-CO') : '—';
-    const gv = (r,...keys) => { for(const k of keys){ if(r[k] && r[k]!=='—') return r[k]; } return '—'; };
     return `<tr>
       <td>${i+1}</td>
-      <td><strong>${gv(row,'entidad_nombre')||'—'}</strong><br><small style="color:var(--muted)">${gv(row,'entidad_nit')||''}</small></td>
-      <td>${gv(row,'tipo_entidad','entidad_municipio')}</td>
-      <td>${gv(row,'entidad_vigencia')}</td>
-      <td>${gv(row,'responsable_nombre','responsablenombre','entidad_responsable')}<br><small style="color:var(--muted)">${gv(row,'responsable_cargo','responsablecargo','entidad_cargo')}</small></td>
+      <td><strong>${row.entidad_nombre||'—'}</strong><br><small style="color:var(--muted)">${row.entidad_nit||''}</small></td>
+      <td>${row.entidad_municipio||'—'}</td>
+      <td>${row.entidad_vigencia||'—'}</td>
+      <td>${row.entidad_responsable||'—'}<br><small style="color:var(--muted)">${row.entidad_cargo||''}</small></td>
       <td><div class="progress-cell"><div class="prog-bar"><div class="prog-fill" style="width:${av}%"></div></div><span class="badge ${bc}">${av}%</span></div></td>
       <td>${fecha}</td>
       <td><button class="btn btn-reload" style="padding:5px 14px;font-size:.78rem" onclick="verDetalle(${i})">👁️ Ver</button></td>
@@ -653,16 +508,14 @@ function buildChart(id, type, labels, datasets, opts={}) {
   if (chartInstances[id]) chartInstances[id].destroy();
   const el = document.getElementById(id);
   if (!el) return;
-  const defaultScales = (type==='bar' && !opts.scales) ? { y:{beginAtZero:true} } : undefined;
-  const legendPos = opts.plugins?.legend?.position || (type==='bar'?'top':'right');
   chartInstances[id] = new Chart(el.getContext('2d'), {
     type,
     data: { labels, datasets },
     options: {
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ position:legendPos, labels:{boxWidth:12,font:{size:11}} } },
-      scales: opts.scales || defaultScales,
-      ...(({scales, plugins, ...rest})=>rest)(opts)
+      plugins:{ legend:{ position:type==='bar'?'top':'right', labels:{boxWidth:12,font:{size:11}} } },
+      scales: type==='bar' ? { y:{beginAtZero:true, ticks:{callback:v=>typeof opts._pct!='undefined'?v+'%':v}} } : undefined,
+      ...opts
     }
   });
 }
@@ -854,9 +707,8 @@ function renderPreguntasBalance() {
 
 // ── Modal detalle entidad ──
 const LABELS = {
-  entidad_nombre:"Entidad", entidad_nit:"NIT (no aplica)", tipo_entidad:"Tipo de entidad",
-  entidad_vigencia:"Vigencia", responsable_nombre:"Responsable", responsable_cargo:"Cargo",
-  responsable_cedula:"Cédula", responsable_correo:"Correo", timestamp:"Fecha envío",
+  entidad_nombre:"Entidad", entidad_nit:"NIT", entidad_municipio:"Municipio",
+  entidad_vigencia:"Vigencia", entidad_responsable:"Responsable", entidad_cargo:"Cargo", timestamp:"Fecha envío",
   PER201:"PER201 – MECI genera valor", PER205:"PER205 – Percepción guías DAFP",
   CIN221:"CIN221 – Gestión integral riesgos", CIN236:"CIN236 – Informes oportunos",
   CIN238:"CIN238 – Metodología auditora", CIN239:"CIN239 – Plan anual elaborado",
@@ -924,165 +776,7 @@ function showToast(msg, type='ok') {
   setTimeout(()=>t.style.display='none', 4000);
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-  await cargarDatos();
-  initFurag();
-});
-
-// ══ DATOS AT-FURAG EMBEBIDOS ══
-const FURAG_DATA = [{"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia Catastral de Cundinamarca", "jefe": "Ángela Yineth Bravo Tapias", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "En trámite usuario y clave"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia de Comercialización y Competitividad para el Desarrollo Regional – ACODER", "jefe": "Yetica Jhasvelly Hernández Ariza", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Parcial", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia Logística de Gestión Inmobiliaria y Servicios", "jefe": "Luis Miguel Pirela Castañeda", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Bárbara de Vergara", "jefe": "Graciela Andrea Zamudio Sopó", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y acceso, debido a que la página se encuentra caída."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Matilde", "jefe": "Clara Liliana Jiménez Celis", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Manifiesta haber leído la circular y contar con usuario y contraseña."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Rosa", "jefe": "Yamidy Catalina Mosquera Lozano", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Cuenta con usuario y contraseña para el diligenciamiento del formulario FURAG."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. La Vega", "jefe": "Paula Alejandra Rodríguez Ayala", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Cuenta con usuario y contraseña para el diligenciamiento del FURAG."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San Francisco de Gachetá", "jefe": "Andrés Felipe Cepeda Salazar", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no poder solicitar usuario y contraseña, debido a que la página se encuentra caída."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Pedro León Álvarez - La Mesa", "jefe": "Elis Segundo Argumedo Villadiego", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Diogenes Troncoso de Puerto Salgar", "jefe": "Antonio José Zamudio Méndez", "asistencia": "Sí", "circular_dafp": "SI", "micrositio": "No", "sesion_gerencia": "SI", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el diligenciamoento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Salazar de Villeta", "jefe": "David Orlando Vidal González", "asistencia": "Sí", "circular_dafp": "SI", "micrositio": "No", "sesion_gerencia": "No", "circular_003": "SI", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el cargue del formulario."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Arbeláez", "jefe": "Wendy Julieth Jara Castellanos", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "No", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usurario y contraseña para realizar el diligenciamiento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Universitario de La Samaritana", "jefe": "Edwin Alcides González Coy", "asistencia": "Sí", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "Asistió, pero no participó."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital de Girardot", "jefe": "Orlando Velásquez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital del Salvador - Ubaté", "jefe": "Juan Carlos Chaparro Laverde", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En proceso de creación de usuario"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Divino Salvador - Sopó", "jefe": "Wilson Andrés Villamil Dueñas", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En creación del usuario"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Chia", "jefe": "Yenny Angélica Rincón Martínez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Guatativa", "jefe": "Lourdes Sierra Uparella", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "No", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el diligenciamiento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio de Anolaima", "jefe": "Ana Ximena Gómez Ramos", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio de Sesquilé", "jefe": "Edwin Leonardo Reyes Manjarres", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Francisco de Viotá", "jefe": "Heidy Tatiana Martínez Contreras", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "SI", "acceso_app": "Sí", "obs": "Manifiesta que cuenta con usuario y contraseña, tiene conocimiento de las circulares."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Marco Felipe Afanador - Tocaima", "jefe": "Ildilbrando Suescun Bustos", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Mario Gaitan Yanguas - Soacha", "jefe": "Camila Andrea Ávila Millán", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora de Las Mercedes - Funza", "jefe": "José Yessid Calderón Roa", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Carmen - El Colegio", "jefe": "Diego Armando Pinzón Peña", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Se conecto el profesional universitario de apoyo Diego Andres Cucaita"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Pilar - Medina", "jefe": "Wilmar Joaquín Zambrano Pulecio", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Beneficencia de Cundinamarca", "jefe": "Omar Gerardo Díaz Espinosa", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "Parcial", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "SI", "obs": "No aplica"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Corporación Social de Cundinamarca - CSC", "jefe": "Carlos Eduardo Hernández", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En la consecución de clave y usuario."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Asamblea de Cundinamarca", "jefe": "Laura Isabel Carvajal Gonzalez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa de Licores de Cundinamarca - ELC", "jefe": "Oscar Felipe Vega Prieto", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa Férrea Regional S.A.S.", "jefe": "Raúl Antonio Barriga Castiblanco", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Fue la jefe de OCI departamental"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa Industrial y Comercial Lotería de Cundinamarca", "jefe": "Julián Alfredo Rodríguez Montaño", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Caminos y Construcciones de Cundinamarca - ICCU", "jefe": "Julio Andrés Nieves Torres", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Protección y Bienestar Animal de Cundinamarca", "jefe": "Mónica Lorena Avellaneda Lasso", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto Departamental de Cultura y Turismo - IDECUT", "jefe": "Vilma Durley Castro Herrera", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresas Públicas de Cundinamarca S.A.- ESP", "jefe": "Martha Leonor Aponte Suárez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Fondo de Desarrollo de Proyectos de Cundinamarca - FONDECUN", "jefe": "Ángela Milena Hoyos Pulido", "asistencia": "Sí", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Acción Comunal y Capital Social de Cundinamarca - IDACO", "jefe": "Yeni Carolina Ortiz Castiblanco", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Inician el próximo lunes"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto para la Recreación y el Deporte de Cundinamarca - INDEPORTES", "jefe": "Ricardo Arturo Narváez Isurieta", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin Observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Unidad Administrativa Especial de Pensiones del Departamento de Cundinamarca", "jefe": "Julio Enrique Aguilera Jiménez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin Observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Región Metropolitana Bogotá Cundinamarca", "jefe": "-", "asistencia": "-", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San José de Guacheta", "jefe": "Iván Darío Escallón Garzón", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Plataforma congestionada para crear usuario y contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Jose de Guaduas - Guaduas", "jefe": "Jaime Omar Garcia Bautista", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Hoy van a crear usuario y contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Martin de Porres - Chocontá", "jefe": "Cesar Augusto Robayo Melo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Hoy crean el usuario y la contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael - Cáqueza", "jefe": "Fanny Sabogal Agudelo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael - Facatativá", "jefe": "Gloria Marcela Gaitan Chirivi", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ya compartieron los formularios con planeación y se esta verificando toda las evidencias"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael de Pacho - Pacho", "jefe": "Pedro Pablo Velasquez Cortes", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul - Fómeque", "jefe": "Clara Liliana Jiménez Celis", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul - Nemocón", "jefe": "Nelson Eduardo Rivera Bermúdez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul de San Juan de Ríoseco", "jefe": "Ángela Maritza López Barrero", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San José de La Palma", "jefe": "Eduardo López Cuervo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna."}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San Rafael - Fusagasugá", "jefe": "Rene Rolando Romero", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Habacuc Calderón - Carmen de Carupa", "jefe": "Diana Milena Robayo Pachón", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "Ya se solicitó el usuario de control interno, ya se cuenta con el rol planeación"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Hilario Lugo - Sasaima", "jefe": "Paula Alejandra Rodríguez Ayala", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "Esta en proceso de solicitud."}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Carmen - Tabio", "jefe": "Zaira Alejandra Mena Ovalle", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna."}];
-
-function normSem(v) {
-  if (!v) return 'dash';
-  const s = v.toString().trim().toLowerCase();
-  if (['sí','si','yes','s','✓'].includes(s)) return 'si';
-  if (['no','n','✗'].includes(s)) return 'no';
-  if (['parcial','partial'].includes(s)) return 'parcial';
-  return 'dash';
-}
-function semHtml(v) {
-  const t = normSem(v);
-  const icon = t==='si'?'✓':t==='no'?'✗':t==='parcial'?'~':'–';
-  return `<span class="sem ${t}" title="${v}">${icon}</span>`;
-}
-function tipoClase(grupo) {
-  const g = grupo.toUpperCase();
-  if (g.includes('ESE') || g.includes('SOCIAL')) return 'ent-ese';
-  if (g.includes('DESCENT') || g.includes('DESCENTRALI')) return 'ent-desc';
-  return 'ent-muni';
-}
-function tipoLabel(grupo) {
-  const g = grupo.toUpperCase();
-  if (g.includes('ESE') || g.includes('SOCIAL')) return 'ESE';
-  if (g.includes('DESCENT') || g.includes('DESCENTRALI')) return 'Descentralizada';
-  return 'Municipio';
-}
-
-function initFurag() {
-  renderFuragTabla();
-  renderFuragCharts();
-}
-
-function getFuragFiltrado() {
-  const fFecha  = document.getElementById('furag-filtro-fecha').value;
-  const fTipo   = document.getElementById('furag-filtro-tipo').value;
-  const fAcceso = document.getElementById('furag-filtro-acceso').value;
-  const fBuscar = document.getElementById('furag-buscar').value.toLowerCase();
-
-  return FURAG_DATA.filter(r => {
-    if (fFecha  && r.fecha         !== fFecha)  return false;
-    if (fTipo   && r.tipo_entidad  !== fTipo)   return false;
-    if (fAcceso && normSem(r.acceso_app) !== fAcceso) return false;
-    if (fBuscar && !r.entidad.toLowerCase().includes(fBuscar) && !r.jefe.toLowerCase().includes(fBuscar)) return false;
-    return true;
-  });
-}
-
-function renderFuragTabla() {
-  const datos = getFuragFiltrado();
-  document.getElementById('furag-badge').textContent = datos.length + ' entidades';
-
-  // KPIs
-  const n = datos.length;
-  const pct = (campo, val) => n ? Math.round(datos.filter(r=>normSem(r[campo])===val).length/n*100) : 0;
-  document.getElementById('fk-total').textContent      = n;
-  document.getElementById('fk-asistencia').textContent = pct('asistencia','si') + '%';
-  document.getElementById('fk-circular').textContent   = pct('circular_dafp','si') + '%';
-  document.getElementById('fk-circular003').textContent= pct('circular_003','si') + '%';
-  document.getElementById('fk-acceso').textContent     = pct('acceso_app','si') + '%';
-  document.getElementById('fk-pendientes').textContent = datos.filter(r=>normSem(r.acceso_app)==='no').length;
-
-  if (!datos.length) {
-    document.getElementById('furag-tbody').innerHTML =
-      `<tr><td colspan="10"><div class="empty"><div class="icon">🔍</div><p>Sin resultados con los filtros actuales.</p></div></td></tr>`;
-    return;
-  }
-
-  // Agrupar por grupo para mostrar separadores
-  let html = '';
-  let grupoActual = null;
-  let idx = 0;
-  datos.forEach(r => {
-    if (r.grupo !== grupoActual) {
-      grupoActual = r.grupo;
-      const label = r.grupo.replace('AVANCE  ','').replace('AVANCE ','');
-      html += `<tr class="grupo-header"><td colspan="10">📅 ${label}</td></tr>`;
-    }
-    idx++;
-    const tipo = r.tipo_entidad;
-    const cls  = r.tipo_entidad === 'ESE' ? 'ent-ese' : r.tipo_entidad === 'Descentralizada' ? 'ent-desc' : 'ent-muni';
-    const obsText = r.obs !== '-' && r.obs ? r.obs : '';
-    html += `<tr>
-      <td>${idx}</td>
-      <td><strong>${r.entidad}</strong><br><span class="ent-badge ${cls}">${tipo}</span></td>
-      <td style="font-size:.75rem;color:var(--muted)">${r.jefe}</td>
-      <td style="text-align:center">${semHtml(r.asistencia)}</td>
-      <td style="text-align:center">${semHtml(r.circular_dafp)}</td>
-      <td style="text-align:center">${semHtml(r.micrositio)}</td>
-      <td style="text-align:center">${semHtml(r.sesion_gerencia)}</td>
-      <td style="text-align:center">${semHtml(r.circular_003)}</td>
-      <td style="text-align:center">${semHtml(r.acceso_app)}</td>
-      <td class="furag-obs">${obsText}</td>
-    </tr>`;
-  });
-  document.getElementById('furag-tbody').innerHTML = html;
-}
-
-function renderFuragCharts() {
-  const actividades = [
-    { key:'asistencia',     label:'Asistencia' },
-    { key:'circular_dafp',  label:'Circ. DAFP' },
-    { key:'micrositio',     label:'Micrositio' },
-    { key:'sesion_gerencia',label:'Ses. Gerencia' },
-    { key:'circular_003',   label:'Circ. 003' },
-    { key:'acceso_app',     label:'Acceso App' },
-  ];
-  const si      = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='si').length);
-  const no      = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='no').length);
-  const parcial = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='parcial').length);
-
-  buildChart('chart-furag-act','bar',
-    actividades.map(a=>a.label),
-    [
-      {label:'✅ Sí',     data:si,      backgroundColor:'#27ae60'},
-      {label:'❌ No',     data:no,      backgroundColor:'#e74c3c'},
-      {label:'⚠️ Parcial',data:parcial, backgroundColor:'#e67e22'},
-    ],
-    {scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},
-      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
-  );
-
-  // Gráfica por grupo
-  const grupos = [...new Set(FURAG_DATA.map(r=>r.grupo))];
-  const labelGrupos = grupos.map(g => g.replace('AVANCE  ','').replace('AVANCE ','').substring(0,35)+'…');
-  const siGrupo = grupos.map(g => {
-    const ents = FURAG_DATA.filter(r=>r.grupo===g);
-    return ents.filter(r=>normSem(r.acceso_app)==='si').length;
-  });
-  const noGrupo = grupos.map(g => {
-    const ents = FURAG_DATA.filter(r=>r.grupo===g);
-    return ents.filter(r=>normSem(r.acceso_app)==='no').length;
-  });
-  const parGrupo = grupos.map(g => {
-    const ents = FURAG_DATA.filter(r=>r.grupo===g);
-    return ents.filter(r=>normSem(r.acceso_app)==='parcial').length;
-  });
-
-  buildChart('chart-furag-grupos','bar',
-    labelGrupos,
-    [
-      {label:'✅ Acceso OK',  data:siGrupo,  backgroundColor:'#27ae60'},
-      {label:'❌ Sin acceso', data:noGrupo,  backgroundColor:'#e74c3c'},
-      {label:'⚠️ Parcial',   data:parGrupo, backgroundColor:'#e67e22'},
-    ],
-    {indexAxis:'y',
-      scales:{x:{stacked:true,beginAtZero:true,ticks:{stepSize:1}},y:{stacked:true}},
-      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
-  );
-}
-
-// initFurag se llama desde el listener principal
-
+window.addEventListener('DOMContentLoaded', cargarDatos);
 </script>
 </body>
 </html>
