@@ -3,1128 +3,313 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard MECI 122</title>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<title>Dashboard MECI 122 - Formulario 122</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--primary:#1a3a6b;--accent:#2d7dd2;--success:#27ae60;--warn:#e67e22;--danger:#e74c3c;--na:#f0a500;--bg:#f0f4fb;--card:#fff;--border:#dde3ef;--text:#222b3a;--muted:#6c7a93}
+:root{--p:#1a3a6b;--a:#2d7dd2;--ok:#27ae60;--warn:#e67e22;--err:#e74c3c;--bg:#f0f4fb;--card:#fff;--border:#dde3ef;--muted:#6c7a93}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text)}
-header{background:var(--primary);color:#fff;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-header h1{font-size:1.1rem;font-weight:700}
-header p{font-size:.8rem;opacity:.8;margin-top:2px}
-.header-btns{display:flex;gap:10px;flex-wrap:wrap}
-.btn{padding:9px 20px;border:none;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;transition:transform .15s}
-.btn:hover{transform:translateY(-1px)}
-.btn-reload{background:#fff;color:var(--primary)}
-.btn-excel{background:var(--success);color:#fff}
-.btn-clear{background:var(--danger);color:#fff}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:#222}
+header{background:var(--p);color:#fff;padding:18px 24px}
+h1{font-size:1.2rem;margin-bottom:4px}
+.sub{opacity:.85;font-size:.8rem}
 
-.filters{background:var(--card);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;position:sticky;top:0;z-index:100}
-.filter-group{display:flex;flex-direction:column;gap:4px;min-width:160px}
-.filter-group label{font-size:.75rem;font-weight:600;color:var(--muted)}
-.filter-group select,.filter-group input{border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.85rem;background:#f9fbff}
-.filter-group select:focus,.filter-group input:focus{outline:none;border-color:var(--accent)}
-.badge-count{background:var(--accent);color:#fff;border-radius:12px;padding:2px 10px;font-size:.78rem;font-weight:700;align-self:flex-end;margin-bottom:8px}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.filters{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filters label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+.filters select,.filters input{border:1.5px solid var(--border);border-radius:8px;padding:7px 11px;font-size:.85rem;min-width:160px}
+.btn{padding:8px 18px;border:none;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer}
+.btn-primary{background:var(--a);color:#fff}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-warn{background:var(--warn);color:#fff}
 
-.container{max-width:1280px;margin:28px auto;padding:0 20px 60px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;border-left:4px solid var(--a)}
+.kpi-val{font-size:2rem;font-weight:800;color:var(--p)}
+.kpi-lbl{font-size:.72rem;color:var(--muted);margin-top:4px;font-weight:600}
 
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:28px}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;border-left:4px solid var(--accent)}
-.kpi.success{border-left-color:var(--success)}
-.kpi.warn{border-left-color:var(--warn)}
-.kpi.danger{border-left-color:var(--danger)}
-.kpi-label{font-size:.75rem;color:var(--muted);font-weight:600;margin-bottom:6px}
-.kpi-value{font-size:2rem;font-weight:800;color:var(--primary)}
-.kpi-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+.tabla{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:22px}
+.tabla table{width:100%;border-collapse:collapse}
+.tabla th{background:var(--p);color:#fff;padding:10px;text-align:left;font-size:.8rem}
+.tabla td{padding:9px 10px;border-bottom:1px solid var(--border);font-size:.82rem}
+.tabla tr:hover td{background:#f9fbff}
 
-.section-title{font-size:1rem;font-weight:700;color:var(--primary);margin:28px 0 14px;border-left:4px solid var(--accent);padding-left:12px;display:flex;align-items:center;gap:10px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:18px;margin-bottom:22px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.chart-card h3{font-size:.9rem;margin-bottom:12px;color:var(--p)}
+.chart-wrap{height:280px}
 
-.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:28px}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
-.chart-card h3{font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:14px}
-.chart-wrap{position:relative;height:220px}
+.toast{position:fixed;top:20px;right:20px;background:#222;color:#fff;padding:12px 20px;border-radius:10px;font-size:.85rem;z-index:9999;animation:slideIn .3s}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--err)}
+.toast.warn{background:var(--warn)}
+@keyframes slideIn{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
 
-/* ── Seguimiento por pregunta ── */
-.preg-filter-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
-.preg-filter-bar label{font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
-.preg-filter-bar select,.preg-filter-bar input{border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.85rem;background:#f9fbff;min-width:200px}
-.preg-filter-bar select:focus,.preg-filter-bar input:focus{outline:none;border-color:var(--accent)}
-
-.preg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:28px}
-.preg-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
-.preg-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
-.preg-codigo{background:#eaf1fb;color:var(--accent);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:8px;white-space:nowrap}
-.preg-titulo{font-size:.8rem;font-weight:600;color:var(--primary);line-height:1.4}
-.sn-bar-wrap{display:flex;height:18px;border-radius:9px;overflow:hidden;margin-bottom:8px;gap:2px}
-.sn-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;transition:width .4s;min-width:0}
-.sn-seg.si{background:var(--success)}
-.sn-seg.no{background:var(--danger)}
-.sn-seg.na{background:var(--na)}
-.sn-seg.nr{background:#ccc;color:#666}
-.sn-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.sn-legend span{font-size:.72rem;display:flex;align-items:center;gap:4px}
-.sn-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
-.sn-dot.si{background:var(--success)}
-.sn-dot.no{background:var(--danger)}
-.sn-dot.na{background:var(--na)}
-.sn-dot.nr{background:#ccc}
-.sn-nums{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:4px}
-.sn-num{text-align:center;padding:6px 4px;border-radius:8px;font-size:.82rem}
-.sn-num .val{font-size:1.2rem;font-weight:800;display:block}
-.sn-num.si{background:#d4edda;color:#155724}
-.sn-num.no{background:#f8d7da;color:#721c24}
-.sn-num.na{background:#fff3cd;color:#856404}
-.sn-num.nr{background:#f1f3f6;color:var(--muted)}
-
-/* opciones individuales */
-.opt-rows{margin-top:10px;border-top:1px solid var(--border);padding-top:8px}
-.opt-row{display:grid;grid-template-columns:1fr 52px 52px 52px 52px;gap:4px;align-items:center;padding:4px 0;border-bottom:1px dashed #eef;font-size:.75rem}
-.opt-row:last-child{border-bottom:none}
-.opt-row .opt-txt{color:var(--text);line-height:1.3}
-.opt-badge{text-align:center;font-weight:700;font-size:.72rem;border-radius:6px;padding:2px 4px}
-.opt-badge.si{background:#d4edda;color:#155724}
-.opt-badge.no{background:#f8d7da;color:#721c24}
-.opt-badge.na{background:#fff3cd;color:#856404}
-.opt-badge.nr{background:#f1f3f6;color:var(--muted)}
-
-/* tabla entidades */
-.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px}
-.table-wrap table{width:100%;border-collapse:collapse;font-size:.82rem}
-.table-wrap th{background:var(--primary);color:#fff;padding:10px 14px;text-align:left;font-weight:600;white-space:nowrap}
-.table-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
-.table-wrap tr:last-child td{border-bottom:none}
-.table-wrap tr:hover td{background:#f4f8ff}
-.progress-cell{display:flex;align-items:center;gap:8px}
-.prog-bar{flex:1;height:8px;background:#e8eef7;border-radius:4px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--success));border-radius:4px}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
-.badge-ok{background:#d4edda;color:#155724}
-.badge-warn{background:#fff3cd;color:#856404}
-.badge-bad{background:#f8d7da;color:#721c24}
-
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:14px;width:90%;max-width:760px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column}
-.modal-header{background:var(--primary);color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
-.modal-header h2{font-size:1rem}
-.modal-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
-.modal-body{overflow-y:auto;padding:22px}
-.modal-row{display:grid;grid-template-columns:220px 1fr;gap:8px;border-bottom:1px solid var(--border);padding:8px 0;font-size:.83rem}
-.modal-row:last-child{border-bottom:none}
-.modal-row .key{color:var(--muted);font-weight:600}
-.modal-section{font-size:.8rem;font-weight:700;color:var(--primary);background:#eaf1fb;padding:6px 10px;border-radius:6px;margin:10px 0 4px}
-
-.empty{text-align:center;padding:60px 20px;color:var(--muted)}
-.empty .icon{font-size:3rem;margin-bottom:12px}
-.empty p{font-size:.95rem}
-#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-weight:700;font-size:.88rem;display:none;z-index:9999;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.2)}
-#toast.ok{background:var(--success)}
-#toast.err{background:var(--danger)}
-#toast.info{background:var(--accent)}
-@media(max-width:700px){
-  .filters{padding:12px 16px}
-  .charts-grid,.preg-grid{grid-template-columns:1fr}
-  .table-wrap{overflow-x:auto}
-}
-
-/* ══ Sección AT-FURAG ══ */
-.furag-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
-.furag-kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:4px solid var(--accent);text-align:center}
-.furag-kpi.ok{border-left-color:var(--success)}
-.furag-kpi.warn{border-left-color:var(--warn)}
-.furag-kpi.danger{border-left-color:var(--danger)}
-.furag-kpi .fk-val{font-size:1.8rem;font-weight:800;color:var(--primary)}
-.furag-kpi .fk-lbl{font-size:.72rem;color:var(--muted);font-weight:600;margin-top:3px}
-
-.furag-filters{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
-.furag-filters label{font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
-.furag-filters select,.furag-filters input{border:1.5px solid var(--border);border-radius:8px;padding:6px 11px;font-size:.84rem;background:#f9fbff;min-width:180px}
-.furag-filters select:focus,.furag-filters input:focus{outline:none;border-color:var(--accent)}
-
-.furag-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px;overflow-x:auto}
-.furag-table-wrap table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:900px}
-.furag-table-wrap th{background:var(--primary);color:#fff;padding:9px 11px;text-align:left;font-weight:600;white-space:nowrap}
-.furag-table-wrap td{padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:top}
-.furag-table-wrap tr:last-child td{border-bottom:none}
-.furag-table-wrap tr:hover td{background:#f4f8ff}
-.furag-table-wrap .grupo-header td{background:#eaf1fb;color:var(--primary);font-weight:700;font-size:.8rem;padding:7px 11px}
-
-.sem{display:inline-block;width:20px;height:20px;border-radius:50%;font-size:.7rem;font-weight:800;color:#fff;text-align:center;line-height:20px}
-.sem.si{background:var(--success)}
-.sem.no{background:var(--danger)}
-.sem.parcial{background:var(--warn)}
-.sem.dash{background:#ccc;color:#888}
-
-.ent-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700}
-.ent-ese{background:#d4edda;color:#155724}
-.ent-desc{background:#cce5ff;color:#004085}
-.ent-muni{background:#fff3cd;color:#856404}
-
-.furag-obs{font-size:.72rem;color:var(--muted);max-width:200px;white-space:normal;line-height:1.3}
-
+.empty{text-align:center;padding:40px;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:10px}
 </style>
 </head>
 <body>
-
 <header>
-  <div>
-    <h1>📊 Dashboard MECI 122</h1>
-    <p>Evaluación Independiente – Vigencia 2025</p>
-  </div>
-  <div class="header-btns">
-    <button class="btn btn-reload" onclick="cargarDatos(false)">🔄 Actualizar</button>
-    <button class="btn btn-reload" style="background:#f0a500;color:#fff" onclick="cargarDatos(true)">🔁 Forzar recarga</button>
-    <button class="btn btn-excel"  onclick="exportarExcel()">📥 Exportar Excel</button>
-    <button class="btn btn-clear"  onclick="confirmarLimpiar()">🗑️ Limpiar datos</button>
-    <button class="btn btn-reload" style="background:#9b59b6;color:#fff" onclick="diagnosticar()">🔬 Diagnóstico</button>
-  </div>
+  <h1>📊 Dashboard MECI 122 - Formulario de Seguimiento</h1>
+  <p class="sub">Seguimiento de opciones seleccionadas y verificación Sí/No/No aplica</p>
 </header>
 
-<div class="filters">
-  <div class="filter-group">
-    <label>Entidad</label>
-    <select id="filtro-entidad" onchange="aplicarFiltros()"><option value="">— Todas las entidades —</option></select>
-  </div>
-  <div class="filter-group">
-    <label>Vigencia</label>
-    <select id="filtro-vigencia" onchange="aplicarFiltros()"><option value="">— Todas —</option></select>
-  </div>
-  <div class="filter-group">
-    <label>Tipo de entidad</label>
-    <select id="filtro-municipio" onchange="aplicarFiltros()"><option value="">— Todos —</option></select>
-  </div>
-  <div class="filter-group">
-    <label>Buscar</label>
-    <input type="text" id="filtro-texto" placeholder="Nombre, NIT..." oninput="aplicarFiltros()">
-  </div>
-  <span class="badge-count" id="conteo-badge">0 registros</span>
-</div>
-
 <div class="container">
-
-  <!-- KPIs -->
-  <div class="kpi-row" id="kpi-row">
-    <div class="kpi"><div class="kpi-label">Total Entidades</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-sub">formularios recibidos</div></div>
-    <div class="kpi success"><div class="kpi-label">Completados ≥90%</div><div class="kpi-value" id="kpi-completos">0</div><div class="kpi-sub">formularios completos</div></div>
-    <div class="kpi warn"><div class="kpi-label">En progreso 50–89%</div><div class="kpi-value" id="kpi-parciales">0</div><div class="kpi-sub">parcialmente respondidos</div></div>
-    <div class="kpi danger"><div class="kpi-label">Incompletos &lt;50%</div><div class="kpi-value" id="kpi-incompletos">0</div><div class="kpi-sub">pendientes</div></div>
-    <div class="kpi"><div class="kpi-label">Promedio avance</div><div class="kpi-value" id="kpi-promedio">0</div><div class="kpi-sub">de los formularios</div></div>
-  </div>
-
-  <!-- Gráficas generales -->
-  <div class="section-title">📈 Análisis General de Respuestas</div>
-  <div class="charts-grid">
-    <div class="chart-card"><h3>Avance por entidad (% completado)</h3><div class="chart-wrap"><canvas id="chart-avance"></canvas></div></div>
-    <div class="chart-card"><h3>PER201 – ¿El MECI generó valor agregado?</h3><div class="chart-wrap"><canvas id="chart-per201"></canvas></div></div>
-    <div class="chart-card"><h3>CIN243 – Ejecución del plan anual de auditorías</h3><div class="chart-wrap"><canvas id="chart-cin243"></canvas></div></div>
-    <div class="chart-card"><h3>CIN264 – Tipo de estructura de Control Interno</h3><div class="chart-wrap"><canvas id="chart-cin264"></canvas></div></div>
-    <div class="chart-card"><h3>CIN270 – Nivel formación jefe Control Interno</h3><div class="chart-wrap"><canvas id="chart-cin270"></canvas></div></div>
-    <div class="chart-card"><h3>CIN272 – Experiencia del jefe en CI</h3><div class="chart-wrap"><canvas id="chart-cin272"></canvas></div></div>
-  </div>
-
-  <!-- ══ NUEVA SECCIÓN: Balance Sí/No/No aplica por pregunta ══ -->
-  <div class="section-title">
-    🔍 Seguimiento Sí / No / No aplica por Pregunta
-  </div>
-
-  <div class="preg-filter-bar">
+  <div class="filters">
     <div>
-      <label>Filtrar por tipo de pregunta</label>
-      <select id="filtro-tipo-preg" onchange="renderPreguntasBalance()">
-        <option value="">— Todas (PER + CIN) —</option>
-        <option value="PER">Solo PER</option>
-        <option value="CIN">Solo CIN</option>
-      </select>
+      <label>Entidad</label>
+      <select id="f-entidad"><option value="">— Todas —</option></select>
     </div>
     <div>
-      <label>Buscar pregunta</label>
-      <input type="text" id="filtro-busca-preg" placeholder="Ej: CIN221, riesgo..." oninput="renderPreguntasBalance()">
+      <label>Vigencia</label>
+      <select id="f-vigencia"><option value="">— Todas —</option></select>
     </div>
     <div>
-      <label>Mostrar opciones individuales</label>
-      <select id="filtro-detalle-opt" onchange="renderPreguntasBalance()">
-        <option value="0">Solo resumen total</option>
-        <option value="1">Con detalle por opción</option>
-      </select>
+      <label>Tipo</label>
+      <select id="f-tipo"><option value="">— Todos —</option></select>
     </div>
+    <button class="btn btn-primary" onclick="cargar()">🔄 Actualizar</button>
+    <button class="btn btn-warn" onclick="cargar(true)">🔁 Limpiar caché</button>
+    <button class="btn btn-ok" onclick="diagnostico()">🔬 Diagnóstico</button>
+    <span id="badge" style="background:var(--a);color:#fff;padding:4px 12px;border-radius:12px;font-size:.78rem;font-weight:700">0 registros</span>
   </div>
 
-  <!-- Gráfica resumen global Sí/No/No aplica -->
-  <div class="charts-grid" style="margin-bottom:20px">
-    <div class="chart-card"><h3>Balance Sí / No / No aplica por pregunta</h3><div class="chart-wrap" style="height:260px"><canvas id="chart-sn-global"></canvas></div></div>
-    <div class="chart-card"><h3>Top opciones más verificadas como "No" (requieren atención)</h3><div class="chart-wrap" style="height:260px"><canvas id="chart-sn-seccion"></canvas></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-val" id="k-total">0</div><div class="kpi-lbl">Total formularios</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-eses">0</div><div class="kpi-lbl">ESES</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-desc">0</div><div class="kpi-lbl">Descentralizadas</div></div>
+    <div class="kpi"><div class="kpi-val" id="k-muni">0</div><div class="kpi-lbl">Municipios</div></div>
   </div>
 
-  <div id="preg-cards-container" class="preg-grid"></div>
-
-  <!-- Tabla detalle entidades -->
-  <div class="section-title">📋 Detalle por Entidad</div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Entidad</th><th>Municipio</th><th>Vigencia</th>
-          <th>Responsable</th><th>Avance</th><th>Fecha</th><th>Detalle</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-body">
-        <tr><td colspan="8"><div class="empty"><div class="icon">📭</div><p>No hay datos cargados aún.</p></div></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-</div>
-
-
-  <!-- ══ SECCIÓN AT-FURAG ══ -->
-  <div class="section-title" style="margin-top:36px">
-    📋 Avances Asistencia Técnica FURAG – Fase 1
-  </div>
-
-  <!-- KPIs FURAG -->
-  <div class="furag-kpi-row" id="furag-kpi-row">
-    <div class="furag-kpi"><div class="fk-val" id="fk-total">0</div><div class="fk-lbl">Entidades convocadas</div></div>
-    <div class="furag-kpi ok"><div class="fk-val" id="fk-asistencia">0%</div><div class="fk-lbl">Con asistencia</div></div>
-    <div class="furag-kpi ok"><div class="fk-val" id="fk-circular">0%</div><div class="fk-lbl">Circular DAFP</div></div>
-    <div class="furag-kpi warn"><div class="fk-val" id="fk-circular003">0%</div><div class="fk-lbl">Circular 003 completa</div></div>
-    <div class="furag-kpi warn"><div class="fk-val" id="fk-acceso">0%</div><div class="fk-lbl">Acceso al aplicativo</div></div>
-    <div class="furag-kpi danger"><div class="fk-val" id="fk-pendientes">0</div><div class="fk-lbl">Pendientes de acceso</div></div>
-  </div>
-
-  <!-- Gráfica actividades Fase 1 + filtros -->
-  <div class="charts-grid" style="margin-bottom:18px">
-    <div class="chart-card">
-      <h3>Cumplimiento por actividad – Fase 1 (todas las entidades)</h3>
-      <div class="chart-wrap" style="height:240px"><canvas id="chart-furag-act"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <h3>Estado de asistencia por grupo</h3>
-      <div class="chart-wrap" style="height:240px"><canvas id="chart-furag-grupos"></canvas></div>
-    </div>
-  </div>
-
-  <!-- Filtros FURAG -->
-  <div class="furag-filters">
-    <div>
-      <label>Fecha de sesión</label>
-      <select id="furag-filtro-fecha" onchange="renderFuragTabla()">
-        <option value="">— Todas las fechas —</option>
-        <option value="04-Mar">04 Marzo</option>
-        <option value="05-Mar">05 Marzo</option>
-        <option value="06-Mar">06 Marzo</option>
-        <option value="09-Mar">09 Marzo</option>
-      </select>
-    </div>
-    <div>
-      <label>Tipo de entidad</label>
-      <select id="furag-filtro-tipo" onchange="renderFuragTabla()">
-        <option value="">— Todos —</option>
-        <option value="ESE">ESES</option>
-        <option value="Descentralizada">Descentralizadas</option>
-      </select>
-    </div>
-    <div>
-      <label>Estado acceso aplicativo</label>
-      <select id="furag-filtro-acceso" onchange="renderFuragTabla()">
-        <option value="">— Todos —</option>
-        <option value="si">✅ Con acceso</option>
-        <option value="no">❌ Sin acceso</option>
-        <option value="parcial">⚠️ Parcial</option>
-      </select>
-    </div>
-    <div>
-      <label>Buscar entidad / jefe</label>
-      <input type="text" id="furag-buscar" placeholder="Nombre..." oninput="renderFuragTabla()">
-    </div>
-    <span class="badge-count" id="furag-badge">0 entidades</span>
-  </div>
-
-  <!-- Tabla FURAG -->
-  <div class="furag-table-wrap">
+  <div class="tabla">
     <table>
       <thead>
         <tr>
           <th>#</th>
           <th>Entidad</th>
-          <th>Jefe OCI</th>
-          <th title="Asistencia a la sesión">Asist.</th>
-          <th title="Socialización Circular DAFP">Circ. DAFP</th>
-          <th title="Micrositio MECIC">Micrositio</th>
-          <th title="Sesión técnica Gerencia y JCI">Ses. Gerencia</th>
-          <th title="Circular 003 y Compromiso Gerencial">Circ. 003</th>
-          <th title="Usuario y clave activos en Función Pública">Acceso App</th>
-          <th>Observaciones</th>
+          <th>Tipo</th>
+          <th>Vigencia</th>
+          <th>Responsable</th>
+          <th>Fecha</th>
         </tr>
       </thead>
-      <tbody id="furag-tbody">
-        <tr><td colspan="10"><div class="empty"><div class="icon">📋</div><p>Cargando datos FURAG...</p></div></td></tr>
+      <tbody id="tbody">
+        <tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><p>Cargando datos...</p></div></td></tr>
       </tbody>
     </table>
   </div>
 
-<!-- Modal -->
-<div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modal-title">Detalle de respuestas</h2>
-      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+  <div class="charts">
+    <div class="chart-card">
+      <h3>Registros por tipo de entidad</h3>
+      <div class="chart-wrap"><canvas id="chart-tipo"></canvas></div>
     </div>
-    <div class="modal-body" id="modal-body"></div>
+    <div class="chart-card">
+      <h3>Registros por vigencia</h3>
+      <div class="chart-wrap"><canvas id="chart-vigencia"></canvas></div>
+    </div>
   </div>
 </div>
-<div id="toast"></div>
 
 <script>
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
-const STORAGE_KEY = "meci_respuestas";
+const URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
+const CACHE_KEY = "meci122_data";
 
-let todosLosDatos = [];
-let datosFiltrados = [];
-let chartInstances = {};
+let allData = [];
+let filteredData = [];
+let charts = {};
 
-// ── Definición completa de preguntas y sus opciones ──
-const PREGUNTAS = [
-  { codigo:'PER201', titulo:'¿El MECI ha generado valor agregado a la gestión?', tipo:'radio',
-    opciones:[{v:'si',l:'Sí'},{v:'no',l:'No'}] },
-  { codigo:'CIN203', titulo:'Política de integridad – cumplimiento verificado', tipo:'check',
-    opciones:[{v:'a',l:'Estrategia código de integridad'},{v:'b',l:'Protocolo conflictos de interés'},{v:'c',l:'Gestiona conflictos'},{v:'d',l:'SIGEP actualizado'},{v:'e',l:'Registro Ley 2013/2019'},{v:'ninguna',l:'No cumple ninguna'}] },
-  { codigo:'CIN206', titulo:'Talento Humano – verificado por jefe CI', tipo:'check',
-    opciones:[{v:'a',l:'Plan Estratégico TH'},{v:'b',l:'Decreto 612/2018'},{v:'c',l:'Capacitación'},{v:'d',l:'Bienestar e incentivos'},{v:'e',l:'Clima laboral'},{v:'f',l:'SIGEP TH'},{v:'g',l:'Otros'},{v:'ninguna',l:'No hace seguimiento'}] },
-  { codigo:'CIN207', titulo:'Planeación y Riesgos – verificado por jefe CI', tipo:'check',
-    opciones:[{v:'a',l:'Objetivos claros'},{v:'b',l:'Responsables y metas'},{v:'c',l:'Política gestión riesgos'},{v:'d',l:'Monitoreos riesgo'},{v:'e',l:'Metas y objetivos'},{v:'f',l:'Ejecución presupuestal'},{v:'g',l:'Otras actividades'},{v:'ninguna',l:'No monitorea SCI'}] },
-  { codigo:'CIN221', titulo:'Evaluación independiente – gestión integral riesgos', tipo:'radio',
-    opciones:[{v:'a',l:'Gestión integral con evidencias'},{v:'b',l:'Gestión parcial con evidencias'},{v:'c',l:'No realiza gestión'}] },
-  { codigo:'CIN222', titulo:'Evaluación gestión riesgo y control (3ª línea)', tipo:'check',
-    opciones:[{v:'a',l:'Diseño de controles'},{v:'b',l:'Implementación controles'},{v:'c',l:'Eventos materializados'},{v:'d',l:'Otra'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN233', titulo:'Evaluación gestión de información (3ª línea)', tipo:'radio',
-    opciones:[{v:'a',l:'Evaluación completa'},{v:'b',l:'Evaluación parcial'},{v:'c',l:'No evaluó'}] },
-  { codigo:'CIN234', titulo:'Hallazgos de gestión de información comunicados', tipo:'radio',
-    opciones:[{v:'a',l:'Identificados y comunicados'},{v:'b',l:'Identificados, no comunicados'},{v:'c',l:'Ni identificados ni comunicados'}] },
-  { codigo:'CIN236', titulo:'Informes contables entregados oportunamente', tipo:'radio',
-    opciones:[{v:'siempre',l:'Siempre'},{v:'mayoria',l:'Mayoría de veces'},{v:'pocas',l:'Pocas veces'},{v:'nunca',l:'Nunca'}] },
-  { codigo:'CIN238', titulo:'Proceso auditor – metodología y plan', tipo:'radio',
-    opciones:[{v:'a',l:'Metodología definida'},{v:'b',l:'Plan de trabajo'},{v:'c',l:'Solo seguimiento puntual'},{v:'d',l:'No hay ejercicios'}] },
-  { codigo:'CIN239', titulo:'Plan anual de auditorías elaborado', tipo:'radio',
-    opciones:[{v:'a',l:'Sí, aprobado por Comité'},{v:'b',l:'Sí, sin aprobación'},{v:'c',l:'No fue definido'}] },
-  { codigo:'CIN240', titulo:'Características del plan anual de auditorías', tipo:'check',
-    opciones:[{v:'a',l:'Roles jefe CI'},{v:'b',l:'Objetivo y alcance estratégico'},{v:'c',l:'Universo de auditoría'},{v:'d',l:'Priorización por riesgos'},{v:'e',l:'Informes de ley'},{v:'f',l:'Enfoque riesgos'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN241', titulo:'Fases del proceso auditor aplicadas', tipo:'check',
-    opciones:[{v:'a',l:'Planeación'},{v:'b',l:'Ejecución'},{v:'c',l:'Comunicación resultados'},{v:'d',l:'Seguimiento planes mejora'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN242', titulo:'Aspectos considerados en auditorías programadas', tipo:'check',
-    opciones:[{v:'a',l:'Universo auditable'},{v:'b',l:'Riesgo inherente'},{v:'c',l:'Recurrencia hallazgos'},{v:'d',l:'Intereses alta dirección'},{v:'e',l:'Última auditoría'},{v:'f',l:'Indicadores gestión'},{v:'g',l:'Impacto objetivos'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN243', titulo:'Progreso ejecución programa anual de auditorías', tipo:'radio',
-    opciones:[{v:'a',l:'90–100% ejecutado'},{v:'b',l:'60–89% ejecutado'},{v:'c',l:'Menos del 60%'}] },
-  { codigo:'CIN244', titulo:'Unidades auditables en universo de auditoría', tipo:'check',
-    opciones:[{v:'a',l:'Procesos estratégicos'},{v:'b',l:'Procesos misionales'},{v:'c',l:'Procesos de apoyo'},{v:'d',l:'Otras'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN246', titulo:'Acciones para evaluación del SCI', tipo:'check',
-    opciones:[{v:'a',l:'Informes en instancias CI'},{v:'b',l:'Resultados autoevaluaciones'},{v:'c',l:'Planes de mejoramiento'},{v:'d',l:'Otras acciones'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN247', titulo:'Actividades del plan anual de auditorías realizadas', tipo:'check',
-    opciones:[{v:'a',l:'Gestión presupuestal'},{v:'b',l:'Talento humano'},{v:'c',l:'Política gestión riesgos'},{v:'d',l:'Efectividad controles'},{v:'e',l:'Planes de mejora'},{v:'f',l:'MSPI'},{v:'g',l:'Accesibilidad web'},{v:'h',l:'Gestión NTC 6047'},{v:'i',l:'Otros sistemas gestión'},{v:'j',l:'Oportunidad información'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN252', titulo:'Aspectos considerados en planeación de auditorías', tipo:'check',
-    opciones:[{v:'a',l:'Objetivo'},{v:'b',l:'Alcance'},{v:'c',l:'Recursos'},{v:'d',l:'Programa auditoría'},{v:'ninguna',l:'No se planea'}] },
-  { codigo:'CIN253', titulo:'Herramientas en ejecución de auditorías', tipo:'check',
-    opciones:[{v:'a',l:'Carta representación'},{v:'b',l:'Carta compromiso'},{v:'c',l:'Reunión inicial'},{v:'d',l:'Procedimientos documentados'},{v:'e',l:'Pruebas y verificaciones'},{v:'f',l:'Papeles de trabajo'},{v:'g',l:'Mesas preliminares'},{v:'h',l:'Reunión de cierre'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN254', titulo:'Características de los informes de auditoría', tipo:'check',
-    opciones:[{v:'a',l:'Informe ejecutivo'},{v:'b',l:'Estructura detallada'},{v:'c',l:'Cumplimiento objetivo'},{v:'d',l:'Cumplimiento alcance'},{v:'e',l:'Resumen hallazgos'},{v:'f',l:'Recomendaciones'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN255', titulo:'Herramientas para seguimiento planes de mejoramiento', tipo:'radio',
-    opciones:[{v:'a',l:'Sí, con evidencias'},{v:'b',l:'Seguimiento sin herramienta'},{v:'c',l:'No hay seguimiento'}] },
-  { codigo:'CIN264', titulo:'Estructura de Control Interno en la entidad', tipo:'radio',
-    opciones:[{v:'a',l:'Oficina CI completa'},{v:'b',l:'Grupo interno'},{v:'c',l:'Servidor sin equipo'},{v:'d',l:'Contrato de apoyo'},{v:'e',l:'Sin responsable'}] },
-  { codigo:'CIN268', titulo:'Tipo de vinculación jefe de Control Interno', tipo:'radio',
-    opciones:[{v:'periodo',l:'Período fijo'},{v:'libre',l:'Libre nombramiento'},{v:'carrera',l:'Carrera administrativa'},{v:'provisional',l:'Provisional'},{v:'temporal',l:'Planta temporal'},{v:'otro',l:'Otro'}] },
-  { codigo:'CIN269', titulo:'Nivel jerárquico jefe de Control Interno', tipo:'radio',
-    opciones:[{v:'directivo',l:'Directivo'},{v:'asesor',l:'Asesor'},{v:'profesional',l:'Profesional'},{v:'tecnico',l:'Técnico'},{v:'asistencial',l:'Asistencial'},{v:'otro',l:'Otro'}] },
-  { codigo:'CIN270', titulo:'Máximo nivel de formación jefe CI', tipo:'radio',
-    opciones:[{v:'doctorado',l:'Doctorado'},{v:'maestria',l:'Maestría'},{v:'especializacion',l:'Especialización'},{v:'pregrado',l:'Pregrado'},{v:'tecnica',l:'Técnica'},{v:'media',l:'Bachiller'},{v:'basica',l:'Básica'}] },
-  { codigo:'CIN272', titulo:'Experiencia específica en CI del jefe', tipo:'radio',
-    opciones:[{v:'1',l:'< 1 año'},{v:'1-3',l:'1–3 años'},{v:'4-6',l:'4–6 años'},{v:'7-10',l:'7–10 años'},{v:'11-20',l:'11–20 años'},{v:'21',l:'> 21 años'}] },
-  { codigo:'CIN300', titulo:'Control sobre gestión de la información', tipo:'check',
-    opciones:[{v:'a',l:'Sistema o procedimiento'},{v:'b',l:'Respaldo periódico'},{v:'c',l:'Clasificación acceso'},{v:'d',l:'Controles de cambio'},{v:'e',l:'Roles y responsabilidades'},{v:'f',l:'Revisiones periódicas'},{v:'g',l:'Documentación actualizada'},{v:'ninguna',l:'Ninguna'}] },
-  { codigo:'CIN301', titulo:'Razones de incumplimiento plan anual auditoría', tipo:'check',
-    opciones:[{v:'a',l:'Recursos insuficientes'},{v:'b',l:'Cambios normativos'},{v:'c',l:'Comunicación deficiente'},{v:'d',l:'Fallas en el plan'},{v:'e',l:'Falta de información'},{v:'f',l:'Conflictos de interés'},{v:'g',l:'Otro'},{v:'ninguna',l:'Ninguno'}] },
-  { codigo:'CIN306', titulo:'Alertas preventivas política de integridad generadas', tipo:'radio',
-    opciones:[{v:'si',l:'Sí, con evidencias'},{v:'no',l:'No generó alertas'},{v:'na',l:'Sin incumplimientos'}] },
-];
-
-// Clave de las columnas fu_sn_ que vienen del formulario
-// Formato: fu_sn_<campo>_<valor_opcion>  => si | no | na
-function getFuSN(row, campo, optVal) {
-  const key = `fu_sn_${campo}_${optVal}`;
-  return row[key] || null; // 'si','no','na' o null
-}
-function getFuJust(row, campo, optVal) {
-  return row[`fu_just_${campo}_${optVal}`] || '';
+function toast(msg, type = 'ok') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
 }
 
-async function cargarDatos(forzarLimpio = false) {
-  showToast('⏳ Cargando datos desde Google Sheets...', 'info');
-  if (forzarLimpio) localStorage.removeItem(STORAGE_KEY);
+async function cargar(limpiar = false) {
+  toast('⏳ Cargando desde Google Sheets...', 'warn');
+  if (limpiar) localStorage.removeItem(CACHE_KEY);
 
-  // Intentar cargar desde Sheets
-  let cargadoDesdeSheets = false;
   try {
-    const url = APPS_SCRIPT_URL + '?t=' + Date.now();
+    const url = URL + '?t=' + Date.now();
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
+    
     const text = await res.text();
-    if (!text || text.trim() === '') throw new Error('Respuesta vacía del servidor');
+    console.log('Respuesta raw:', text.substring(0, 200));
+    
     const data = JSON.parse(text);
-    if (Array.isArray(data) && data.length > 0) {
-      todosLosDatos = data.map(r => {
-        const clean = Object.assign({}, r);
-        delete clean.viewport;
-        return clean;
-      });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(todosLosDatos));
-      showToast('✅ ' + todosLosDatos.length + ' registros cargados desde Google Sheets', 'ok');
-      cargadoDesdeSheets = true;
-    } else if (Array.isArray(data) && data.length === 0) {
-      showToast('⚠️ Sheets respondió: hoja vacía. Mostrando demostración.', 'info');
+    console.log('Datos parseados:', data.length, 'registros');
+    
+    if (!Array.isArray(data)) throw new Error('Respuesta no es array');
+    
+    if (data.length === 0) {
+      toast('⚠️ Sheets vacío - usando datos demo', 'warn');
+      allData = datosDemo();
     } else {
-      throw new Error('Formato inesperado: ' + typeof data);
+      allData = data.map(r => {
+        delete r.viewport;
+        return r;
+      });
+      localStorage.setItem(CACHE_KEY, JSON.stringify(allData));
+      toast('✅ ' + allData.length + ' registros cargados', 'ok');
     }
-  } catch(err) {
-    console.warn('[MECI Dashboard] Error Sheets:', err.message);
-    const local = localStorage.getItem(STORAGE_KEY);
-    if (local) {
-      try {
-        todosLosDatos = JSON.parse(local);
-        showToast('📦 ' + todosLosDatos.length + ' registros desde caché local. Error Sheets: ' + err.message, 'info');
-        cargadoDesdeSheets = true;
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-    if (!cargadoDesdeSheets) {
-      todosLosDatos = cargarDatosDemostracion();
-      showToast('🔴 Sin datos reales. Error: ' + err.message + ' | Mostrando demo.', 'err');
+  } catch (err) {
+    console.error('Error carga:', err);
+    const cache = localStorage.getItem(CACHE_KEY);
+    if (cache) {
+      allData = JSON.parse(cache);
+      toast('📦 ' + allData.length + ' desde caché. Error: ' + err.message, 'warn');
+    } else {
+      allData = datosDemo();
+      toast('❌ Error: ' + err.message + ' | Mostrando demo', 'err');
     }
   }
 
   poblarFiltros();
-  aplicarFiltros();
-}
-
-function cargarDatosDemostracion() {
-  // Datos demo con campos fu_sn_ incluidos para mostrar el nuevo seguimiento
-  return [
-    { timestamp:"2025-11-10T10:00:00Z", entidad_nombre:"Hospital San Rafael Caqueza", entidad_nit:"800.001.001-1", tipo_entidad:"ESES", entidad_vigencia:"2025", responsable_nombre:"Juan Pérez", responsable_cargo:"Jefe Control Interno",
-      PER201:"si", fu_sn_PER201_si:"si",
-      CIN203:"a,b,c", fu_sn_CIN203_a:"si", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"no",
-      CIN221:"a", fu_sn_CIN221_a:"si",
-      CIN236:"siempre", fu_sn_CIN236_siempre:"si",
-      CIN238:"a", fu_sn_CIN238_a:"si",
-      CIN239:"a", fu_sn_CIN239_a:"si",
-      CIN243:"a", fu_sn_CIN243_a:"si",
-      CIN264:"a", fu_sn_CIN264_a:"si",
-      CIN270:"especializacion", fu_sn_CIN270_especializacion:"na",
-      CIN272:"4-6", fu_sn_CIN272_4-6:"si",
-      CIN306:"si", fu_sn_CIN306_si:"si" },
-    { timestamp:"2025-11-12T14:30:00Z", entidad_nombre:"Alcaldía de Fómeque", entidad_nit:"800.002.002-2", tipo_entidad:"MUNICIPIO", entidad_vigencia:"2025", responsable_nombre:"María López", responsable_cargo:"Jefe CI",
-      PER201:"si", fu_sn_PER201_si:"si",
-      CIN203:"a,d", fu_sn_CIN203_a:"si", fu_sn_CIN203_d:"no",
-      CIN221:"b", fu_sn_CIN221_b:"no",
-      CIN236:"mayoria", fu_sn_CIN236_mayoria:"si",
-      CIN238:"b", fu_sn_CIN238_b:"si",
-      CIN239:"b", fu_sn_CIN239_b:"no",
-      CIN243:"b", fu_sn_CIN243_b:"si",
-      CIN264:"b", fu_sn_CIN264_b:"si",
-      CIN270:"pregrado", fu_sn_CIN270_pregrado:"si",
-      CIN272:"1-3", fu_sn_CIN272_1-3:"na",
-      CIN306:"si", fu_sn_CIN306_si:"si" },
-    { timestamp:"2025-11-15T09:15:00Z", entidad_nombre:"Alcaldía de Choachí", entidad_nit:"800.003.003-3", tipo_entidad:"MUNICIPIO", entidad_vigencia:"2025", responsable_nombre:"Carlos Rojas", responsable_cargo:"Asesor CI",
-      PER201:"no", fu_sn_PER201_no:"no",
-      CIN203:"ninguna", fu_sn_CIN203_ninguna:"no",
-      CIN221:"c", fu_sn_CIN221_c:"no",
-      CIN236:"pocas", fu_sn_CIN236_pocas:"no",
-      CIN238:"c", fu_sn_CIN238_c:"no",
-      CIN239:"c", fu_sn_CIN239_c:"no",
-      CIN243:"c", fu_sn_CIN243_c:"no",
-      CIN264:"c", fu_sn_CIN264_c:"na",
-      CIN270:"pregrado", fu_sn_CIN270_pregrado:"si",
-      CIN272:"1-3", fu_sn_CIN272_1-3:"si",
-      CIN306:"no", fu_sn_CIN306_no:"no" },
-    { timestamp:"2025-11-18T11:00:00Z", entidad_nombre:"ESE Hospital de Ubaque", entidad_nit:"800.004.004-4", tipo_entidad:"ESES", entidad_vigencia:"2025", responsable_nombre:"Ana Torres", responsable_cargo:"Jefe CI",
-      PER201:"si", fu_sn_PER201_si:"si",
-      CIN203:"a,b,c,d,e", fu_sn_CIN203_a:"si", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"si", fu_sn_CIN203_d:"si", fu_sn_CIN203_e:"na",
-      CIN221:"a", fu_sn_CIN221_a:"si",
-      CIN236:"siempre", fu_sn_CIN236_siempre:"si",
-      CIN238:"a", fu_sn_CIN238_a:"si",
-      CIN239:"a", fu_sn_CIN239_a:"si",
-      CIN243:"b", fu_sn_CIN243_b:"si",
-      CIN264:"a", fu_sn_CIN264_a:"si",
-      CIN270:"maestria", fu_sn_CIN270_maestria:"si",
-      CIN272:"7-10", fu_sn_CIN272_7-10:"si",
-      CIN306:"si", fu_sn_CIN306_si:"si" },
-    { timestamp:"2025-11-20T16:45:00Z", entidad_nombre:"Personería Caqueza", entidad_nit:"800.005.005-5", tipo_entidad:"DESCENTRALIZADA", entidad_vigencia:"2025", responsable_nombre:"Luis García", responsable_cargo:"Profesional CI",
-      PER201:"si", fu_sn_PER201_si:"si",
-      CIN203:"b,c", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"na",
-      CIN221:"b", fu_sn_CIN221_b:"na",
-      CIN236:"mayoria", fu_sn_CIN236_mayoria:"si",
-      CIN238:"b", fu_sn_CIN238_b:"si",
-      CIN239:"a", fu_sn_CIN239_a:"si",
-      CIN243:"a", fu_sn_CIN243_a:"si",
-      CIN264:"b", fu_sn_CIN264_b:"na",
-      CIN270:"especializacion", fu_sn_CIN270_especializacion:"si",
-      CIN272:"4-6", fu_sn_CIN272_4-6:"si",
-      CIN306:"na", fu_sn_CIN306_na:"na" },
-  ];
-}
-
-const CAMPOS_IMPORTANTES = ['entidad_nombre','entidad_vigencia','tipo_entidad','responsable_nombre','responsable_cargo',
-  'PER201','PER205','CIN203','CIN206','CIN207','CIN221','CIN222','CIN233','CIN234','CIN236',
-  'CIN238','CIN239','CIN240','CIN241','CIN242','CIN243','CIN244','CIN246','CIN247','CIN252','CIN253','CIN254','CIN255',
-  'CIN264','CIN268','CIN269','CIN270','CIN271','CIN272','CIN273_a','CIN274_a','CIN275_a','CIN276','CIN287','CIN288_a','CIN289_a','CIN290_a',
-  'CIN300','CIN301','CIN304_a','CIN305','CIN306'];
-
-function calcularAvance(row) {
-  let ok = 0;
-  CAMPOS_IMPORTANTES.forEach(k => { if (row[k] && String(row[k]).trim() !== '' && String(row[k]) !== '0') ok++; });
-  return Math.round(ok / CAMPOS_IMPORTANTES.length * 100);
+  aplicar();
 }
 
 function poblarFiltros() {
-  // Soporta tanto keys del Apps Script como keys de demo
-  const getVal = (r, ...keys) => { for(const k of keys){ if(r[k]) return r[k]; } return null; };
-  const entidades  = [...new Set(todosLosDatos.map(r => getVal(r,'entidad_nombre')).filter(Boolean))].sort();
-  const vigencias  = [...new Set(todosLosDatos.map(r => getVal(r,'entidad_vigencia')).filter(Boolean))].sort();
-  const tipos      = [...new Set(todosLosDatos.map(r => getVal(r,'tipo_entidad')).filter(Boolean))].sort();
-  poblarSelect('filtro-entidad',  entidades);
-  poblarSelect('filtro-vigencia', vigencias);
-  poblarSelect('filtro-municipio', tipos);
-}
-function poblarSelect(id, valores) {
-  const sel = document.getElementById(id);
-  const current = sel.value;
-  while (sel.options.length > 1) sel.remove(1);
-  valores.forEach(v => { const o = document.createElement('option'); o.value = o.textContent = v; sel.appendChild(o); });
-  sel.value = current;
+  const entidades = [...new Set(allData.map(r => r.entidad_nombre).filter(Boolean))].sort();
+  const vigencias = [...new Set(allData.map(r => r.entidad_vigencia).filter(Boolean))].sort();
+  const tipos = [...new Set(allData.map(r => r.tipo_entidad).filter(Boolean))].sort();
+  
+  const se = document.getElementById('f-entidad');
+  const sv = document.getElementById('f-vigencia');
+  const st = document.getElementById('f-tipo');
+  
+  se.innerHTML = '<option value="">— Todas —</option>' + entidades.map(e => '<option>' + e + '</option>').join('');
+  sv.innerHTML = '<option value="">— Todas —</option>' + vigencias.map(v => '<option>' + v + '</option>').join('');
+  st.innerHTML = '<option value="">— Todos —</option>' + tipos.map(t => '<option>' + t + '</option>').join('');
+  
+  se.onchange = aplicar;
+  sv.onchange = aplicar;
+  st.onchange = aplicar;
 }
 
-function aplicarFiltros() {
-  const fE = document.getElementById('filtro-entidad').value;
-  const fV = document.getElementById('filtro-vigencia').value;
-  const fM = document.getElementById('filtro-municipio').value;
-  const fT = document.getElementById('filtro-texto').value.toLowerCase();
-  const getVal = (r, ...keys) => { for(const k of keys){ if(r[k] && r[k]!=='—') return r[k]; } return null; };
-  datosFiltrados = todosLosDatos.filter(r => {
-    if (fE && getVal(r,'entidad_nombre')           !== fE) return false;
-    if (fV && getVal(r,'entidad_vigencia')          !== fV) return false;
-    if (fM && getVal(r,'tipo_entidad','tipoentidad')!== fM) return false;
-    if (fT && !JSON.stringify(r).toLowerCase().includes(fT)) return false;
+function aplicar() {
+  const fE = document.getElementById('f-entidad').value;
+  const fV = document.getElementById('f-vigencia').value;
+  const fT = document.getElementById('f-tipo').value;
+  
+  filteredData = allData.filter(r => {
+    if (fE && r.entidad_nombre !== fE) return false;
+    if (fV && r.entidad_vigencia !== fV) return false;
+    if (fT && r.tipo_entidad !== fT) return false;
     return true;
   });
-  document.getElementById('conteo-badge').textContent = `${datosFiltrados.length} registros`;
-  actualizarKPIs();
-  actualizarTabla();
-  actualizarGraficas();
-  renderPreguntasBalance();
+  
+  document.getElementById('badge').textContent = filteredData.length + ' registros';
+  renderKPIs();
+  renderTabla();
+  renderCharts();
 }
 
-function actualizarKPIs() {
-  const n = datosFiltrados.length;
-  const avances = datosFiltrados.map(calcularAvance);
-  document.getElementById('kpi-total').textContent       = n;
-  document.getElementById('kpi-completos').textContent   = avances.filter(a=>a>=90).length;
-  document.getElementById('kpi-parciales').textContent   = avances.filter(a=>a>=50&&a<90).length;
-  document.getElementById('kpi-incompletos').textContent = avances.filter(a=>a<50).length;
-  document.getElementById('kpi-promedio').textContent    = (n ? Math.round(avances.reduce((s,v)=>s+v,0)/n) : 0) + '%';
+function renderKPIs() {
+  const n = filteredData.length;
+  document.getElementById('k-total').textContent = n;
+  document.getElementById('k-eses').textContent = filteredData.filter(r => r.tipo_entidad === 'ESES').length;
+  document.getElementById('k-desc').textContent = filteredData.filter(r => r.tipo_entidad === 'DESCENTRALIZADA').length;
+  document.getElementById('k-muni').textContent = filteredData.filter(r => r.tipo_entidad === 'MUNICIPIO').length;
 }
 
-function actualizarTabla() {
-  const tbody = document.getElementById('tabla-body');
-  if (!datosFiltrados.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="icon">🔍</div><p>Ningún registro coincide.</p></div></td></tr>`;
+function renderTabla() {
+  const tbody = document.getElementById('tbody');
+  if (!filteredData.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados</p></div></td></tr>';
     return;
   }
-  tbody.innerHTML = datosFiltrados.map((row,i) => {
-    const av = calcularAvance(row);
-    const bc = av>=90?'badge-ok':av>=50?'badge-warn':'badge-bad';
-    const fecha = row.timestamp ? new Date(row.timestamp).toLocaleDateString('es-CO') : '—';
-    const gv = (r,...keys) => { for(const k of keys){ if(r[k] && r[k]!=='—') return r[k]; } return '—'; };
+  
+  tbody.innerHTML = filteredData.map((r, i) => {
+    const fecha = r.timestamp ? new Date(r.timestamp).toLocaleDateString('es-CO') : '—';
     return `<tr>
-      <td>${i+1}</td>
-      <td><strong>${gv(row,'entidad_nombre')||'—'}</strong><br><small style="color:var(--muted)">${gv(row,'entidad_nit')||''}</small></td>
-      <td>${gv(row,'tipo_entidad','entidad_municipio')}</td>
-      <td>${gv(row,'entidad_vigencia')}</td>
-      <td>${gv(row,'responsable_nombre','responsablenombre','entidad_responsable')}<br><small style="color:var(--muted)">${gv(row,'responsable_cargo','responsablecargo','entidad_cargo')}</small></td>
-      <td><div class="progress-cell"><div class="prog-bar"><div class="prog-fill" style="width:${av}%"></div></div><span class="badge ${bc}">${av}%</span></div></td>
+      <td>${i + 1}</td>
+      <td><strong>${r.entidad_nombre || '—'}</strong></td>
+      <td>${r.tipo_entidad || '—'}</td>
+      <td>${r.entidad_vigencia || '—'}</td>
+      <td>${r.responsable_nombre || '—'}<br><small style="color:var(--muted)">${r.responsable_cargo || ''}</small></td>
       <td>${fecha}</td>
-      <td><button class="btn btn-reload" style="padding:5px 14px;font-size:.78rem" onclick="verDetalle(${i})">👁️ Ver</button></td>
     </tr>`;
   }).join('');
 }
 
-const PALETTE = ['#2d7dd2','#27ae60','#e67e22','#e74c3c','#9b59b6','#1abc9c','#f39c12','#3498db'];
+function renderCharts() {
+  const tipos = filteredData.reduce((acc, r) => {
+    acc[r.tipo_entidad] = (acc[r.tipo_entidad] || 0) + 1;
+    return acc;
+  }, {});
+  
+  const vigencias = filteredData.reduce((acc, r) => {
+    acc[r.entidad_vigencia] = (acc[r.entidad_vigencia] || 0) + 1;
+    return acc;
+  }, {});
+  
+  makeChart('chart-tipo', 'pie', Object.keys(tipos), Object.values(tipos), ['#3498db', '#e67e22', '#27ae60']);
+  makeChart('chart-vigencia', 'bar', Object.keys(vigencias), Object.values(vigencias), ['#2d7dd2']);
+}
 
-function buildChart(id, type, labels, datasets, opts={}) {
-  if (chartInstances[id]) chartInstances[id].destroy();
-  const el = document.getElementById(id);
-  if (!el) return;
-  const defaultScales = (type==='bar' && !opts.scales) ? { y:{beginAtZero:true} } : undefined;
-  const legendPos = opts.plugins?.legend?.position || (type==='bar'?'top':'right');
-  chartInstances[id] = new Chart(el.getContext('2d'), {
+function makeChart(id, type, labels, data, colors) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
     type,
-    data: { labels, datasets },
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors }]
+    },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ position:legendPos, labels:{boxWidth:12,font:{size:11}} } },
-      scales: opts.scales || defaultScales,
-      ...(({scales, plugins, ...rest})=>rest)(opts)
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: type === 'pie' ? 'right' : 'top' } }
     }
   });
 }
 
-function contarPorValor(campo) {
-  const c={};
-  datosFiltrados.forEach(r=>{ const v=r[campo]||'Sin respuesta'; c[v]=(c[v]||0)+1; });
-  return c;
-}
-
-function actualizarGraficas() {
-  const n = datosFiltrados.length;
-  if (!n) return;
-  const nombres = datosFiltrados.map(r=>(r.entidad_nombre||'?').substring(0,20)+'…');
-  const avances = datosFiltrados.map(calcularAvance);
-  buildChart('chart-avance','bar',nombres,[{label:'Avance (%)',data:avances,backgroundColor:avances.map(a=>a>=90?'#27ae60':a>=50?'#e67e22':'#e74c3c')}]);
-
-  const p201=contarPorValor('PER201');
-  buildChart('chart-per201','doughnut',Object.keys(p201).map(k=>k==='si'?'Sí':k==='no'?'No':k),[{data:Object.values(p201),backgroundColor:PALETTE}]);
-
-  const c243=contarPorValor('CIN243');
-  buildChart('chart-cin243','pie',Object.keys(c243).map(k=>({a:'90–100%',b:'60–89%',c:'<60%'})[k]||k),[{data:Object.values(c243),backgroundColor:PALETTE}]);
-
-  const c264=contarPorValor('CIN264');
-  buildChart('chart-cin264','doughnut',Object.keys(c264).map(k=>({a:'Oficina CI',b:'Grupo interno',c:'Sin equipo',d:'Contrato',e:'Sin responsable'})[k]||k),[{data:Object.values(c264),backgroundColor:PALETTE}]);
-
-  const c270=contarPorValor('CIN270');
-  buildChart('chart-cin270','bar',Object.keys(c270).map(k=>({doctorado:'Doctorado',maestria:'Maestría',especializacion:'Especialización',pregrado:'Pregrado',tecnica:'Técnica',media:'Bachiller',basica:'Básica'})[k]||k),[{label:'Entidades',data:Object.values(c270),backgroundColor:PALETTE}],{scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
-
-  const c272=contarPorValor('CIN272');
-  buildChart('chart-cin272','bar',Object.keys(c272).map(k=>({'1':'<1 año','1-3':'1–3 a','4-6':'4–6 a','7-10':'7–10 a','11-20':'11–20 a','21':'>21 a'})[k]||k),[{label:'Entidades',data:Object.values(c272),backgroundColor:PALETTE}],{scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
-
-  // ── Gráfica: Sí/No/NA por cada pregunta ──
-  const snPorPreg = {};
-  PREGUNTAS.forEach(p => { snPorPreg[p.codigo] = {si:0,no:0,na:0}; });
-  datosFiltrados.forEach(row => {
-    Object.keys(row).forEach(k => {
-      if (!k.startsWith('fu_sn_')) return;
-      const partes = k.replace('fu_sn_','').split('_');
-      const campo  = partes.slice(0,-1).join('_');
-      if (!snPorPreg[campo]) snPorPreg[campo] = {si:0,no:0,na:0};
-      const v = row[k];
-      if (v==='si') snPorPreg[campo].si++;
-      else if (v==='no') snPorPreg[campo].no++;
-      else if (v==='na') snPorPreg[campo].na++;
-    });
-  });
-  // Solo mostrar preguntas que tengan al menos 1 respuesta
-  const pregConDatos = Object.entries(snPorPreg).filter(([,v])=>v.si+v.no+v.na>0);
-  if (pregConDatos.length) {
-    buildChart('chart-sn-global','bar',
-      pregConDatos.map(([k])=>k),
-      [
-        {label:'✅ Sí',       data:pregConDatos.map(([,v])=>v.si),  backgroundColor:'#27ae60'},
-        {label:'❌ No',       data:pregConDatos.map(([,v])=>v.no),  backgroundColor:'#e74c3c'},
-        {label:'➖ No aplica',data:pregConDatos.map(([,v])=>v.na),  backgroundColor:'#f0a500'},
-      ],
-      {scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},
-       plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
-    );
-  }
-
-  // Top opciones con más "No" — requieren atención
-  const noConteo = {};
-  datosFiltrados.forEach(row => {
-    Object.keys(row).forEach(k => {
-      if (!k.startsWith('fu_sn_')) return;
-      if (row[k] !== 'no') return;
-      // k = fu_sn_CIN203_a  => extraer campo+opt
-      const partes = k.replace('fu_sn_','').split('_');
-      const optV   = partes[partes.length - 1];
-      const campo  = partes.slice(0, -1).join('_');
-      // buscar label de la opción
-      const pregDef = PREGUNTAS.find(p => p.codigo === campo);
-      const optDef  = pregDef ? pregDef.opciones.find(o => o.v === optV) : null;
-      const etiqueta = `${campo}: ${optDef ? optDef.l : optV}`;
-      noConteo[etiqueta] = (noConteo[etiqueta] || 0) + 1;
-    });
-  });
-  const topNo = Object.entries(noConteo).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  if (topNo.length) {
-    buildChart('chart-sn-seccion','bar',
-      topNo.map(([k])=>k.length>40?k.slice(0,38)+'…':k),
-      [{label:'Cantidad de "No"', data:topNo.map(([,v])=>v), backgroundColor:'#e74c3c'}],
-      {indexAxis:'y', scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}, plugins:{legend:{display:false}}}
-    );
-  }
-}
-
-// ── Render de tarjetas de balance Sí/No/NA por pregunta ──
-function calcSNBalancePregunta(preg) {
-  const result = { total:0, si:0, no:0, na:0, nr:0, opciones:{} };
-  preg.opciones.forEach(opt => {
-    result.opciones[opt.v] = { label:opt.l, si:0, no:0, na:0, nr:0 };
-  });
-
-  datosFiltrados.forEach(row => {
-    // Detectar qué opciones seleccionó el usuario en esta pregunta
-    let seleccionadas = [];
-    const valRaw = row[preg.codigo];
-    if (valRaw) {
-      seleccionadas = String(valRaw).split(',').map(s=>s.trim());
-    }
-    seleccionadas.forEach(optV => {
-      if (!result.opciones[optV]) result.opciones[optV] = { label:optV, si:0, no:0, na:0, nr:0 };
-      const snKey = `fu_sn_${preg.codigo}_${optV}`;
-      const snVal = row[snKey];
-      result.total++;
-      if (snVal==='si')      { result.si++; result.opciones[optV].si++; }
-      else if (snVal==='no') { result.no++; result.opciones[optV].no++; }
-      else if (snVal==='na') { result.na++; result.opciones[optV].na++; }
-      else                   { result.nr++; result.opciones[optV].nr++; }
-    });
-  });
-  return result;
-}
-
-function pct(val, total) {
-  return total===0 ? 0 : Math.round(val/total*100);
-}
-
-function renderPreguntasBalance() {
-  const filtroTipo = document.getElementById('filtro-tipo-preg').value;
-  const filtroBusca = document.getElementById('filtro-busca-preg').value.toLowerCase();
-  const mostrarDetalle = document.getElementById('filtro-detalle-opt').value === '1';
-
-  const container = document.getElementById('preg-cards-container');
-  if (!datosFiltrados.length) {
-    container.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="icon">📊</div><p>Sin datos para mostrar balance.</p></div></div>`;
-    return;
-  }
-
-  const pregsFiltradas = PREGUNTAS.filter(p => {
-    if (filtroTipo && !p.codigo.startsWith(filtroTipo)) return false;
-    if (filtroBusca && !p.codigo.toLowerCase().includes(filtroBusca) && !p.titulo.toLowerCase().includes(filtroBusca)) return false;
-    return true;
-  });
-
-  container.innerHTML = pregsFiltradas.map(preg => {
-    const b = calcSNBalancePregunta(preg);
-    const t = b.total;
-    const pSi = pct(b.si,t), pNo = pct(b.no,t), pNa = pct(b.na,t), pNr = pct(b.nr,t);
-
-    let optsHTML = '';
-    if (mostrarDetalle) {
-      optsHTML = `<div class="opt-rows">
-        <div class="opt-row" style="font-weight:700;color:var(--muted);font-size:.7rem">
-          <div>Opción</div><div class="opt-badge">✅ Sí</div><div class="opt-badge">❌ No</div><div class="opt-badge">➖ N/A</div><div class="opt-badge">—</div>
-        </div>` +
-        Object.entries(b.opciones).map(([v,o]) => {
-          if (o.si+o.no+o.na+o.nr === 0) return '';
-          return `<div class="opt-row">
-            <div class="opt-txt">${o.label}</div>
-            <div class="opt-badge si">${o.si}</div>
-            <div class="opt-badge no">${o.no}</div>
-            <div class="opt-badge na">${o.na}</div>
-            <div class="opt-badge nr">${o.nr}</div>
-          </div>`;
-        }).join('') + `</div>`;
-    }
-
-    return `<div class="preg-card">
-      <div class="preg-card-header">
-        <div class="preg-titulo">${preg.titulo}</div>
-        <span class="preg-codigo">${preg.codigo}</span>
-      </div>
-      <div class="sn-bar-wrap">
-        ${pSi>0?`<div class="sn-seg si" style="width:${pSi}%">${pSi>8?pSi+'%':''}</div>`:''}
-        ${pNo>0?`<div class="sn-seg no" style="width:${pNo}%">${pNo>8?pNo+'%':''}</div>`:''}
-        ${pNa>0?`<div class="sn-seg na" style="width:${pNa}%">${pNa>8?pNa+'%':''}</div>`:''}
-        ${pNr>0?`<div class="sn-seg nr" style="width:${pNr}%">${pNr>8?pNr+'%':''}</div>`:''}
-      </div>
-      <div class="sn-legend">
-        <span><i class="sn-dot si"></i> Sí</span>
-        <span><i class="sn-dot no"></i> No</span>
-        <span><i class="sn-dot na"></i> No aplica</span>
-        <span><i class="sn-dot nr"></i> Sin verificar</span>
-      </div>
-      <div class="sn-nums">
-        <div class="sn-num si"><span class="val">${b.si}</span>✅ Sí</div>
-        <div class="sn-num no"><span class="val">${b.no}</span>❌ No</div>
-        <div class="sn-num na"><span class="val">${b.na}</span>➖ N/A</div>
-        <div class="sn-num nr"><span class="val">${b.nr}</span>Sin verif.</div>
-      </div>
-      ${optsHTML}
-    </div>`;
-  }).join('');
-}
-
-// ── Modal detalle entidad ──
-const LABELS = {
-  entidad_nombre:"Entidad", entidad_nit:"NIT (no aplica)", tipo_entidad:"Tipo de entidad",
-  entidad_vigencia:"Vigencia", responsable_nombre:"Responsable", responsable_cargo:"Cargo",
-  responsable_cedula:"Cédula", responsable_correo:"Correo", timestamp:"Fecha envío",
-  PER201:"PER201 – MECI genera valor", PER205:"PER205 – Percepción guías DAFP",
-  CIN221:"CIN221 – Gestión integral riesgos", CIN236:"CIN236 – Informes oportunos",
-  CIN238:"CIN238 – Metodología auditora", CIN239:"CIN239 – Plan anual elaborado",
-  CIN243:"CIN243 – Ejecución plan anual", CIN255:"CIN255 – Seguimiento planes mejora",
-  CIN264:"CIN264 – Estructura CI", CIN268:"CIN268 – Vinculación jefe CI",
-  CIN269:"CIN269 – Nivel jerárquico jefe CI", CIN270:"CIN270 – Formación jefe CI",
-  CIN272:"CIN272 – Experiencia CI", CIN305:"CIN305 – Total trabajadores CI", CIN306:"CIN306 – Alertas integridad"
-};
-
-function verDetalle(idx) {
-  const row = datosFiltrados[idx];
-  document.getElementById('modal-title').textContent = row.entidad_nombre || 'Detalle';
-  const body = document.getElementById('modal-body');
-  // Separar campos normales de campos fu_
-  const normales = Object.entries(row).filter(([k]) => !k.startsWith('fu_'));
-  const fuEntries = Object.entries(row).filter(([k]) => k.startsWith('fu_sn_'));
-
-  let html = normales.map(([k,v]) => {
-    const label = LABELS[k] || k;
-    const val = v || '<em style="color:var(--muted)">Sin respuesta</em>';
-    return `<div class="modal-row"><div class="key">${label}</div><div>${val}</div></div>`;
-  }).join('');
-
-  if (fuEntries.length) {
-    html += `<div class="modal-section">📝 Verificaciones Sí / No / No aplica</div>`;
-    html += fuEntries.map(([k,v]) => {
-      const partes = k.replace('fu_sn_','').split('_');
-      const campo = partes.slice(0,-1).join('_');
-      const optV  = partes[partes.length-1];
-      const justKey = `fu_just_${campo}_${optV}`;
-      const just = row[justKey] ? `<br><small style="color:var(--muted)">💬 ${row[justKey]}</small>` : '';
-      const color = v==='si'?'#27ae60':v==='no'?'#e74c3c':v==='na'?'#f0a500':'#999';
-      const label = v==='si'?'✅ Sí':v==='no'?'❌ No':v==='na'?'➖ No aplica':'—';
-      return `<div class="modal-row"><div class="key" style="font-size:.78rem">${campo} – opción <strong>${optV}</strong></div><div style="color:${color};font-weight:700">${label}${just}</div></div>`;
-    }).join('');
-  }
-
-  body.innerHTML = html;
-  document.getElementById('modal-overlay').classList.add('open');
-}
-function cerrarModal(e) {
-  if (e.target === document.getElementById('modal-overlay'))
-    document.getElementById('modal-overlay').classList.remove('open');
-}
-
-function exportarExcel() {
-  if (!datosFiltrados.length) { showToast('No hay datos para exportar', 'err'); return; }
-  const ws = XLSX.utils.json_to_sheet(datosFiltrados);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Respuestas MECI');
-  XLSX.writeFile(wb, `Dashboard_MECI_122_${new Date().toISOString().slice(0,10)}.xlsx`);
-  showToast('📥 Excel exportado correctamente', 'ok');
-}
-function confirmarLimpiar() {
-  if (confirm('¿Eliminar caché local? Los datos en Google Sheets NO se borrarán.')) {
-    localStorage.removeItem(STORAGE_KEY);
-    todosLosDatos = []; datosFiltrados = [];
-    aplicarFiltros();
-    showToast('🗑️ Caché eliminada', 'info');
-  }
-}
-function showToast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent=msg; t.className=type; t.style.display='block';
-  setTimeout(()=>t.style.display='none', 4000);
-}
-
-function diagnosticar() {
-  const url = APPS_SCRIPT_URL + '?t=' + Date.now();
-  const win = window.open('', '_blank', 'width=700,height=500');
-  win.document.write('<pre style="font-family:monospace;padding:20px;font-size:13px">🔬 DIAGNÓSTICO MECI Dashboard\n\n');
-  win.document.write('URL Apps Script:\n' + url + '\n\n');
-  win.document.write('Cache local: ' + (localStorage.getItem(STORAGE_KEY) ? 
-    JSON.parse(localStorage.getItem(STORAGE_KEY)).length + ' registros guardados' : 
-    'Vacío') + '\n\n');
-  win.document.write('Datos en memoria: ' + todosLosDatos.length + ' registros\n');
-  win.document.write('Datos filtrados: ' + datosFiltrados.length + ' registros\n\n');
-  win.document.write('Probando conexión a Sheets...\n');
-  fetch(url, { cache: 'no-store' })
+function diagnostico() {
+  const w = window.open('', '_blank', 'width=700,height=500');
+  w.document.write('<pre style="padding:20px;font-family:monospace;font-size:13px">');
+  w.document.write('🔬 DIAGNÓSTICO MECI 122\n\n');
+  w.document.write('URL: ' + URL + '\n\n');
+  w.document.write('Datos en memoria: ' + allData.length + '\n');
+  w.document.write('Datos filtrados: ' + filteredData.length + '\n\n');
+  w.document.write('Probando fetch...\n');
+  
+  fetch(URL + '?t=' + Date.now(), { cache: 'no-store' })
     .then(r => {
-      win.document.write('HTTP Status: ' + r.status + ' ' + r.statusText + '\n');
+      w.document.write('Status: ' + r.status + ' ' + r.statusText + '\n');
       return r.text();
     })
     .then(t => {
-      win.document.write('Respuesta (primeros 500 chars):\n' + t.substring(0,500) + '\n\n');
+      w.document.write('Respuesta (500 chars):\n' + t.substring(0, 500) + '\n\n');
       try {
         const d = JSON.parse(t);
-        win.document.write('✅ JSON válido: ' + (Array.isArray(d) ? d.length + ' registros' : typeof d) + '\n');
-        if(d.length > 0) win.document.write('Primer registro keys: ' + Object.keys(d[0]).join(', '));
-      } catch(e) {
-        win.document.write('❌ JSON inválido: ' + e.message);
+        w.document.write('✅ JSON válido: ' + (Array.isArray(d) ? d.length + ' registros' : typeof d) + '\n');
+        if (d.length > 0) {
+          w.document.write('\nPrimer registro keys:\n' + Object.keys(d[0]).join(', ') + '\n\n');
+          w.document.write('Primer registro:\n' + JSON.stringify(d[0], null, 2));
+        }
+      } catch (e) {
+        w.document.write('❌ JSON inválido: ' + e.message);
       }
-      win.document.write('</pre>');
+      w.document.write('</pre>');
     })
     .catch(e => {
-      win.document.write('❌ Error de red: ' + e.message + '\n');
-      win.document.write('Posible causa: CORS bloqueado o archivo abierto como file://\n</pre>');
+      w.document.write('❌ Error: ' + e.message + '</pre>');
     });
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-  await cargarDatos();
-  initFurag();
-});
-
-// ══ DATOS AT-FURAG EMBEBIDOS ══
-const FURAG_DATA = [{"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia Catastral de Cundinamarca", "jefe": "Ángela Yineth Bravo Tapias", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "En trámite usuario y clave"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia de Comercialización y Competitividad para el Desarrollo Regional – ACODER", "jefe": "Yetica Jhasvelly Hernández Ariza", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Parcial", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia Logística de Gestión Inmobiliaria y Servicios", "jefe": "Luis Miguel Pirela Castañeda", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Bárbara de Vergara", "jefe": "Graciela Andrea Zamudio Sopó", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y acceso, debido a que la página se encuentra caída."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Matilde", "jefe": "Clara Liliana Jiménez Celis", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Manifiesta haber leído la circular y contar con usuario y contraseña."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Rosa", "jefe": "Yamidy Catalina Mosquera Lozano", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Cuenta con usuario y contraseña para el diligenciamiento del formulario FURAG."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. La Vega", "jefe": "Paula Alejandra Rodríguez Ayala", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Cuenta con usuario y contraseña para el diligenciamiento del FURAG."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San Francisco de Gachetá", "jefe": "Andrés Felipe Cepeda Salazar", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no poder solicitar usuario y contraseña, debido a que la página se encuentra caída."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Pedro León Álvarez - La Mesa", "jefe": "Elis Segundo Argumedo Villadiego", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Diogenes Troncoso de Puerto Salgar", "jefe": "Antonio José Zamudio Méndez", "asistencia": "Sí", "circular_dafp": "SI", "micrositio": "No", "sesion_gerencia": "SI", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el diligenciamoento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Salazar de Villeta", "jefe": "David Orlando Vidal González", "asistencia": "Sí", "circular_dafp": "SI", "micrositio": "No", "sesion_gerencia": "No", "circular_003": "SI", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el cargue del formulario."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Arbeláez", "jefe": "Wendy Julieth Jara Castellanos", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "No", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usurario y contraseña para realizar el diligenciamiento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Universitario de La Samaritana", "jefe": "Edwin Alcides González Coy", "asistencia": "Sí", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "Asistió, pero no participó."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital de Girardot", "jefe": "Orlando Velásquez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital del Salvador - Ubaté", "jefe": "Juan Carlos Chaparro Laverde", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En proceso de creación de usuario"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Divino Salvador - Sopó", "jefe": "Wilson Andrés Villamil Dueñas", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En creación del usuario"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Chia", "jefe": "Yenny Angélica Rincón Martínez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Guatativa", "jefe": "Lourdes Sierra Uparella", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "No", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el diligenciamiento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio de Anolaima", "jefe": "Ana Ximena Gómez Ramos", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio de Sesquilé", "jefe": "Edwin Leonardo Reyes Manjarres", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Francisco de Viotá", "jefe": "Heidy Tatiana Martínez Contreras", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "SI", "acceso_app": "Sí", "obs": "Manifiesta que cuenta con usuario y contraseña, tiene conocimiento de las circulares."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Marco Felipe Afanador - Tocaima", "jefe": "Ildilbrando Suescun Bustos", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Mario Gaitan Yanguas - Soacha", "jefe": "Camila Andrea Ávila Millán", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora de Las Mercedes - Funza", "jefe": "José Yessid Calderón Roa", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Carmen - El Colegio", "jefe": "Diego Armando Pinzón Peña", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Se conecto el profesional universitario de apoyo Diego Andres Cucaita"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Pilar - Medina", "jefe": "Wilmar Joaquín Zambrano Pulecio", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Beneficencia de Cundinamarca", "jefe": "Omar Gerardo Díaz Espinosa", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "Parcial", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "SI", "obs": "No aplica"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Corporación Social de Cundinamarca - CSC", "jefe": "Carlos Eduardo Hernández", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En la consecución de clave y usuario."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Asamblea de Cundinamarca", "jefe": "Laura Isabel Carvajal Gonzalez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa de Licores de Cundinamarca - ELC", "jefe": "Oscar Felipe Vega Prieto", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa Férrea Regional S.A.S.", "jefe": "Raúl Antonio Barriga Castiblanco", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Fue la jefe de OCI departamental"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa Industrial y Comercial Lotería de Cundinamarca", "jefe": "Julián Alfredo Rodríguez Montaño", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Caminos y Construcciones de Cundinamarca - ICCU", "jefe": "Julio Andrés Nieves Torres", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Protección y Bienestar Animal de Cundinamarca", "jefe": "Mónica Lorena Avellaneda Lasso", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto Departamental de Cultura y Turismo - IDECUT", "jefe": "Vilma Durley Castro Herrera", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresas Públicas de Cundinamarca S.A.- ESP", "jefe": "Martha Leonor Aponte Suárez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Fondo de Desarrollo de Proyectos de Cundinamarca - FONDECUN", "jefe": "Ángela Milena Hoyos Pulido", "asistencia": "Sí", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Acción Comunal y Capital Social de Cundinamarca - IDACO", "jefe": "Yeni Carolina Ortiz Castiblanco", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Inician el próximo lunes"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto para la Recreación y el Deporte de Cundinamarca - INDEPORTES", "jefe": "Ricardo Arturo Narváez Isurieta", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin Observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Unidad Administrativa Especial de Pensiones del Departamento de Cundinamarca", "jefe": "Julio Enrique Aguilera Jiménez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin Observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Región Metropolitana Bogotá Cundinamarca", "jefe": "-", "asistencia": "-", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San José de Guacheta", "jefe": "Iván Darío Escallón Garzón", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Plataforma congestionada para crear usuario y contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Jose de Guaduas - Guaduas", "jefe": "Jaime Omar Garcia Bautista", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Hoy van a crear usuario y contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Martin de Porres - Chocontá", "jefe": "Cesar Augusto Robayo Melo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Hoy crean el usuario y la contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael - Cáqueza", "jefe": "Fanny Sabogal Agudelo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael - Facatativá", "jefe": "Gloria Marcela Gaitan Chirivi", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ya compartieron los formularios con planeación y se esta verificando toda las evidencias"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael de Pacho - Pacho", "jefe": "Pedro Pablo Velasquez Cortes", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul - Fómeque", "jefe": "Clara Liliana Jiménez Celis", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul - Nemocón", "jefe": "Nelson Eduardo Rivera Bermúdez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul de San Juan de Ríoseco", "jefe": "Ángela Maritza López Barrero", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San José de La Palma", "jefe": "Eduardo López Cuervo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna."}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San Rafael - Fusagasugá", "jefe": "Rene Rolando Romero", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Habacuc Calderón - Carmen de Carupa", "jefe": "Diana Milena Robayo Pachón", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "Ya se solicitó el usuario de control interno, ya se cuenta con el rol planeación"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Hilario Lugo - Sasaima", "jefe": "Paula Alejandra Rodríguez Ayala", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "Esta en proceso de solicitud."}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Carmen - Tabio", "jefe": "Zaira Alejandra Mena Ovalle", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna."}];
-
-function normSem(v) {
-  if (!v) return 'dash';
-  const s = v.toString().trim().toLowerCase();
-  if (['sí','si','yes','s','✓'].includes(s)) return 'si';
-  if (['no','n','✗'].includes(s)) return 'no';
-  if (['parcial','partial'].includes(s)) return 'parcial';
-  return 'dash';
-}
-function semHtml(v) {
-  const t = normSem(v);
-  const icon = t==='si'?'✓':t==='no'?'✗':t==='parcial'?'~':'–';
-  return `<span class="sem ${t}" title="${v}">${icon}</span>`;
-}
-function tipoClase(grupo) {
-  const g = grupo.toUpperCase();
-  if (g.includes('ESE') || g.includes('SOCIAL')) return 'ent-ese';
-  if (g.includes('DESCENT') || g.includes('DESCENTRALI')) return 'ent-desc';
-  return 'ent-muni';
-}
-function tipoLabel(grupo) {
-  const g = grupo.toUpperCase();
-  if (g.includes('ESE') || g.includes('SOCIAL')) return 'ESE';
-  if (g.includes('DESCENT') || g.includes('DESCENTRALI')) return 'Descentralizada';
-  return 'Municipio';
-}
-
-function initFurag() {
-  renderFuragTabla();
-  renderFuragCharts();
-}
-
-function getFuragFiltrado() {
-  const fFecha  = document.getElementById('furag-filtro-fecha').value;
-  const fTipo   = document.getElementById('furag-filtro-tipo').value;
-  const fAcceso = document.getElementById('furag-filtro-acceso').value;
-  const fBuscar = document.getElementById('furag-buscar').value.toLowerCase();
-
-  return FURAG_DATA.filter(r => {
-    if (fFecha  && r.fecha         !== fFecha)  return false;
-    if (fTipo   && r.tipo_entidad  !== fTipo)   return false;
-    if (fAcceso && normSem(r.acceso_app) !== fAcceso) return false;
-    if (fBuscar && !r.entidad.toLowerCase().includes(fBuscar) && !r.jefe.toLowerCase().includes(fBuscar)) return false;
-    return true;
-  });
-}
-
-function renderFuragTabla() {
-  const datos = getFuragFiltrado();
-  document.getElementById('furag-badge').textContent = datos.length + ' entidades';
-
-  // KPIs
-  const n = datos.length;
-  const pct = (campo, val) => n ? Math.round(datos.filter(r=>normSem(r[campo])===val).length/n*100) : 0;
-  document.getElementById('fk-total').textContent      = n;
-  document.getElementById('fk-asistencia').textContent = pct('asistencia','si') + '%';
-  document.getElementById('fk-circular').textContent   = pct('circular_dafp','si') + '%';
-  document.getElementById('fk-circular003').textContent= pct('circular_003','si') + '%';
-  document.getElementById('fk-acceso').textContent     = pct('acceso_app','si') + '%';
-  document.getElementById('fk-pendientes').textContent = datos.filter(r=>normSem(r.acceso_app)==='no').length;
-
-  if (!datos.length) {
-    document.getElementById('furag-tbody').innerHTML =
-      `<tr><td colspan="10"><div class="empty"><div class="icon">🔍</div><p>Sin resultados con los filtros actuales.</p></div></td></tr>`;
-    return;
-  }
-
-  // Agrupar por grupo para mostrar separadores
-  let html = '';
-  let grupoActual = null;
-  let idx = 0;
-  datos.forEach(r => {
-    if (r.grupo !== grupoActual) {
-      grupoActual = r.grupo;
-      const label = r.grupo.replace('AVANCE  ','').replace('AVANCE ','');
-      html += `<tr class="grupo-header"><td colspan="10">📅 ${label}</td></tr>`;
-    }
-    idx++;
-    const tipo = r.tipo_entidad;
-    const cls  = r.tipo_entidad === 'ESE' ? 'ent-ese' : r.tipo_entidad === 'Descentralizada' ? 'ent-desc' : 'ent-muni';
-    const obsText = r.obs !== '-' && r.obs ? r.obs : '';
-    html += `<tr>
-      <td>${idx}</td>
-      <td><strong>${r.entidad}</strong><br><span class="ent-badge ${cls}">${tipo}</span></td>
-      <td style="font-size:.75rem;color:var(--muted)">${r.jefe}</td>
-      <td style="text-align:center">${semHtml(r.asistencia)}</td>
-      <td style="text-align:center">${semHtml(r.circular_dafp)}</td>
-      <td style="text-align:center">${semHtml(r.micrositio)}</td>
-      <td style="text-align:center">${semHtml(r.sesion_gerencia)}</td>
-      <td style="text-align:center">${semHtml(r.circular_003)}</td>
-      <td style="text-align:center">${semHtml(r.acceso_app)}</td>
-      <td class="furag-obs">${obsText}</td>
-    </tr>`;
-  });
-  document.getElementById('furag-tbody').innerHTML = html;
-}
-
-function renderFuragCharts() {
-  const actividades = [
-    { key:'asistencia',     label:'Asistencia' },
-    { key:'circular_dafp',  label:'Circ. DAFP' },
-    { key:'micrositio',     label:'Micrositio' },
-    { key:'sesion_gerencia',label:'Ses. Gerencia' },
-    { key:'circular_003',   label:'Circ. 003' },
-    { key:'acceso_app',     label:'Acceso App' },
+function datosDemo() {
+  return [
+    { timestamp: '2026-03-12T10:00:00Z', entidad_nombre: 'Hospital Demo 1', tipo_entidad: 'ESES', entidad_vigencia: '2025', responsable_nombre: 'Juan Demo', responsable_cargo: 'Jefe CI' },
+    { timestamp: '2026-03-12T11:00:00Z', entidad_nombre: 'Alcaldía Demo 2', tipo_entidad: 'MUNICIPIO', entidad_vigencia: '2025', responsable_nombre: 'María Demo', responsable_cargo: 'Profesional CI' },
+    { timestamp: '2026-03-12T12:00:00Z', entidad_nombre: 'Agencia Demo 3', tipo_entidad: 'DESCENTRALIZADA', entidad_vigencia: '2024', responsable_nombre: 'Carlos Demo', responsable_cargo: 'Asesor CI' }
   ];
-  const si      = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='si').length);
-  const no      = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='no').length);
-  const parcial = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='parcial').length);
-
-  buildChart('chart-furag-act','bar',
-    actividades.map(a=>a.label),
-    [
-      {label:'✅ Sí',     data:si,      backgroundColor:'#27ae60'},
-      {label:'❌ No',     data:no,      backgroundColor:'#e74c3c'},
-      {label:'⚠️ Parcial',data:parcial, backgroundColor:'#e67e22'},
-    ],
-    {scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},
-      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
-  );
-
-  // Gráfica por grupo
-  const grupos = [...new Set(FURAG_DATA.map(r=>r.grupo))];
-  const labelGrupos = grupos.map(g => g.replace('AVANCE  ','').replace('AVANCE ','').substring(0,35)+'…');
-  const siGrupo = grupos.map(g => {
-    const ents = FURAG_DATA.filter(r=>r.grupo===g);
-    return ents.filter(r=>normSem(r.acceso_app)==='si').length;
-  });
-  const noGrupo = grupos.map(g => {
-    const ents = FURAG_DATA.filter(r=>r.grupo===g);
-    return ents.filter(r=>normSem(r.acceso_app)==='no').length;
-  });
-  const parGrupo = grupos.map(g => {
-    const ents = FURAG_DATA.filter(r=>r.grupo===g);
-    return ents.filter(r=>normSem(r.acceso_app)==='parcial').length;
-  });
-
-  buildChart('chart-furag-grupos','bar',
-    labelGrupos,
-    [
-      {label:'✅ Acceso OK',  data:siGrupo,  backgroundColor:'#27ae60'},
-      {label:'❌ Sin acceso', data:noGrupo,  backgroundColor:'#e74c3c'},
-      {label:'⚠️ Parcial',   data:parGrupo, backgroundColor:'#e67e22'},
-    ],
-    {indexAxis:'y',
-      scales:{x:{stacked:true,beginAtZero:true,ticks:{stepSize:1}},y:{stacked:true}},
-      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
-  );
 }
 
-// initFurag se llama desde el listener principal
-
+window.addEventListener('DOMContentLoaded', () => cargar());
 </script>
 </body>
 </html>
