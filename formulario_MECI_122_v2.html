@@ -3,1219 +3,1127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Formulario MECI 122</title>
+<title>Dashboard MECI 122</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root{--primary:#1a3a6b;--accent:#2d7dd2;--success:#27ae60;--bg:#f0f4fb;--card:#fff;--border:#dde3ef;--text:#222b3a;--muted:#6c7a93;--err:#e74c3c}
+:root{--primary:#1a3a6b;--accent:#2d7dd2;--success:#27ae60;--warn:#e67e22;--danger:#e74c3c;--na:#f0a500;--bg:#f0f4fb;--card:#fff;--border:#dde3ef;--text:#222b3a;--muted:#6c7a93}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-header{background:var(--primary);color:#fff;padding:20px 32px;display:flex;align-items:center;gap:14px}
-header .logo{width:44px;height:44px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-header h1{font-size:1.1rem;font-weight:800}
-header p{font-size:.78rem;opacity:.75;margin-top:2px}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--primary);color:#fff;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+header h1{font-size:1.1rem;font-weight:700}
+header p{font-size:.8rem;opacity:.8;margin-top:2px}
+.header-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:9px 20px;border:none;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-reload{background:#fff;color:var(--primary)}
+.btn-excel{background:var(--success);color:#fff}
+.btn-clear{background:var(--danger);color:#fff}
 
-.progress-bar{background:#dde3ef;height:6px}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--success));transition:width .4s}
-.progress-label{text-align:right;font-size:.75rem;color:var(--muted);padding:4px 20px 0}
+.filters{background:var(--card);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;position:sticky;top:0;z-index:100}
+.filter-group{display:flex;flex-direction:column;gap:4px;min-width:160px}
+.filter-group label{font-size:.75rem;font-weight:600;color:var(--muted)}
+.filter-group select,.filter-group input{border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.85rem;background:#f9fbff}
+.filter-group select:focus,.filter-group input:focus{outline:none;border-color:var(--accent)}
+.badge-count{background:var(--accent);color:#fff;border-radius:12px;padding:2px 10px;font-size:.78rem;font-weight:700;align-self:flex-end;margin-bottom:8px}
 
-.form-wrap{max-width:780px;margin:28px auto 60px;padding:0 16px}
+.container{max-width:1280px;margin:28px auto;padding:0 20px 60px}
 
-.seccion{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;overflow:hidden}
-.sec-header{background:var(--primary);color:#fff;padding:13px 22px;font-size:.92rem;font-weight:700;display:flex;align-items:center;gap:8px}
-.sec-body{padding:22px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;border-left:4px solid var(--accent)}
+.kpi.success{border-left-color:var(--success)}
+.kpi.warn{border-left-color:var(--warn)}
+.kpi.danger{border-left-color:var(--danger)}
+.kpi-label{font-size:.75rem;color:var(--muted);font-weight:600;margin-bottom:6px}
+.kpi-value{font-size:2rem;font-weight:800;color:var(--primary)}
+.kpi-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
 
-.campo{margin-bottom:20px}
-.campo:last-child{margin-bottom:0}
-.campo label{display:block;font-size:.88rem;font-weight:600;color:var(--primary);margin-bottom:6px}
-.campo label .req{color:var(--err);margin-left:2px}
-.campo .codigo{display:inline-block;background:#eaf1fb;color:var(--accent);font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:8px;margin-left:6px;vertical-align:middle}
-.campo .hint{font-size:.75rem;color:var(--muted);margin-bottom:6px;display:block}
+.section-title{font-size:1rem;font-weight:700;color:var(--primary);margin:28px 0 14px;border-left:4px solid var(--accent);padding-left:12px;display:flex;align-items:center;gap:10px}
 
-input[type=text],input[type=number],input[type=email],select,textarea{
-  width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-size:.88rem;
-  background:#f9fbff;font-family:inherit;transition:border-color .2s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:#fff}
-input.invalid,select.invalid{border-color:var(--err)}
-.err-msg{color:var(--err);font-size:.73rem;margin-top:3px;display:none}
-.campo.has-error .err-msg{display:block}
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;margin-bottom:28px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.chart-card h3{font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:14px}
+.chart-wrap{position:relative;height:220px}
 
-.radio-group,.check-group{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-.radio-group label,.check-group label{display:flex;align-items:flex-start;gap:9px;font-size:.86rem;font-weight:400;color:var(--text);cursor:pointer;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;transition:background .15s,border-color .15s}
-.radio-group label:hover,.check-group label:hover{background:#f0f6ff;border-color:var(--accent)}
-.radio-group input,.check-group input{margin-top:2px;flex-shrink:0;accent-color:var(--accent)}
-.radio-group label.selected,.check-group label.selected{background:#eaf1fb;border-color:var(--accent)}
+/* ── Seguimiento por pregunta ── */
+.preg-filter-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.preg-filter-bar label{font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
+.preg-filter-bar select,.preg-filter-bar input{border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.85rem;background:#f9fbff;min-width:200px}
+.preg-filter-bar select:focus,.preg-filter-bar input:focus{outline:none;border-color:var(--accent)}
 
-.num-grid{display:grid;grid-template-columns:1fr 140px;gap:6px 14px;align-items:center;margin-top:4px}
-.num-grid .row-label{font-size:.83rem;color:var(--text)}
-.num-grid input{text-align:center;max-width:140px}
+.preg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:28px}
+.preg-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.preg-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
+.preg-codigo{background:#eaf1fb;color:var(--accent);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:8px;white-space:nowrap}
+.preg-titulo{font-size:.8rem;font-weight:600;color:var(--primary);line-height:1.4}
+.sn-bar-wrap{display:flex;height:18px;border-radius:9px;overflow:hidden;margin-bottom:8px;gap:2px}
+.sn-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;transition:width .4s;min-width:0}
+.sn-seg.si{background:var(--success)}
+.sn-seg.no{background:var(--danger)}
+.sn-seg.na{background:var(--na)}
+.sn-seg.nr{background:#ccc;color:#666}
+.sn-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.sn-legend span{font-size:.72rem;display:flex;align-items:center;gap:4px}
+.sn-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.sn-dot.si{background:var(--success)}
+.sn-dot.no{background:var(--danger)}
+.sn-dot.na{background:var(--na)}
+.sn-dot.nr{background:#ccc}
+.sn-nums{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:4px}
+.sn-num{text-align:center;padding:6px 4px;border-radius:8px;font-size:.82rem}
+.sn-num .val{font-size:1.2rem;font-weight:800;display:block}
+.sn-num.si{background:#d4edda;color:#155724}
+.sn-num.no{background:#f8d7da;color:#721c24}
+.sn-num.na{background:#fff3cd;color:#856404}
+.sn-num.nr{background:#f1f3f6;color:var(--muted)}
 
-.entidad-block{display:none}
-.entidad-block.visible{display:block}
+/* opciones individuales */
+.opt-rows{margin-top:10px;border-top:1px solid var(--border);padding-top:8px}
+.opt-row{display:grid;grid-template-columns:1fr 52px 52px 52px 52px;gap:4px;align-items:center;padding:4px 0;border-bottom:1px dashed #eef;font-size:.75rem}
+.opt-row:last-child{border-bottom:none}
+.opt-row .opt-txt{color:var(--text);line-height:1.3}
+.opt-badge{text-align:center;font-weight:700;font-size:.72rem;border-radius:6px;padding:2px 4px}
+.opt-badge.si{background:#d4edda;color:#155724}
+.opt-badge.no{background:#f8d7da;color:#721c24}
+.opt-badge.na{background:#fff3cd;color:#856404}
+.opt-badge.nr{background:#f1f3f6;color:var(--muted)}
 
-.btn-submit{background:var(--success);color:#fff;border:none;border-radius:24px;padding:14px 48px;font-size:1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:10px;margin:24px auto 0;transition:transform .15s,box-shadow .15s}
-.btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(39,174,96,.35)}
+/* tabla entidades */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:.82rem}
+.table-wrap th{background:var(--primary);color:#fff;padding:10px 14px;text-align:left;font-weight:600;white-space:nowrap}
+.table-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.table-wrap tr:last-child td{border-bottom:none}
+.table-wrap tr:hover td{background:#f4f8ff}
+.progress-cell{display:flex;align-items:center;gap:8px}
+.prog-bar{flex:1;height:8px;background:#e8eef7;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--success));border-radius:4px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
+.badge-ok{background:#d4edda;color:#155724}
+.badge-warn{background:#fff3cd;color:#856404}
+.badge-bad{background:#f8d7da;color:#721c24}
 
-.success-screen{display:none;text-align:center;padding:60px 20px}
-.success-screen .icon{font-size:4rem;margin-bottom:16px}
-.success-screen h2{color:var(--success);font-size:1.5rem;margin-bottom:10px}
-.success-screen p{color:var(--muted);line-height:1.7}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:90%;max-width:760px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-header{background:var(--primary);color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:1rem}
+.modal-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
+.modal-body{overflow-y:auto;padding:22px}
+.modal-row{display:grid;grid-template-columns:220px 1fr;gap:8px;border-bottom:1px solid var(--border);padding:8px 0;font-size:.83rem}
+.modal-row:last-child{border-bottom:none}
+.modal-row .key{color:var(--muted);font-weight:600}
+.modal-section{font-size:.8rem;font-weight:700;color:var(--primary);background:#eaf1fb;padding:6px 10px;border-radius:6px;margin:10px 0 4px}
 
-@media(max-width:600px){
-  header{padding:14px 16px}
-  .sec-body{padding:14px}
-  .num-grid{grid-template-columns:1fr 110px}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .icon{font-size:3rem;margin-bottom:12px}
+.empty p{font-size:.95rem}
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-weight:700;font-size:.88rem;display:none;z-index:9999;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+#toast.ok{background:var(--success)}
+#toast.err{background:var(--danger)}
+#toast.info{background:var(--accent)}
+@media(max-width:700px){
+  .filters{padding:12px 16px}
+  .charts-grid,.preg-grid{grid-template-columns:1fr}
+  .table-wrap{overflow-x:auto}
 }
 
-  /* ---- Sub-bloque por opción ---- */
-  .opt-followup {
-    display: none;
-    margin-top: 6px;
-    margin-left: 28px;
-    background: #f0f6ff;
-    border-left: 3px solid var(--accent);
-    border-radius: 0 8px 8px 0;
-    padding: 8px 12px;
-    animation: fuFadeIn .2s ease;
-  }
-  .opt-followup.visible { display: block; }
-  @keyframes fuFadeIn { from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)} }
-  .opt-followup .fu-sn {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 6px;
-  }
-  .opt-followup .fu-sn label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: .78rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 4px 11px;
-    border: 1.5px solid var(--border);
-    border-radius: 20px;
-    transition: background .15s, border-color .15s;
-    color: var(--text);
-    margin-bottom: 0;
-  }
-  .opt-followup .fu-sn label:hover { background: #e0edff; border-color: var(--accent); }
-  .opt-followup .fu-sn label.sel-si  { background: #d4edda; border-color: #27ae60; color: #1a7a3c; }
-  .opt-followup .fu-sn label.sel-no  { background: #fde8e8; border-color: var(--err);  color: #c0392b; }
-  .opt-followup .fu-sn label.sel-na  { background: #fff3cd; border-color: #f0a500; color: #7a5000; }
-  .opt-followup .fu-sn input[type=radio] { accent-color: var(--accent); width:13px; height:13px; margin-top:0; flex-shrink:0; }
-  .opt-followup textarea {
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    padding: 5px 9px;
-    font-size: .78rem;
-    background: #fff;
-    font-family: inherit;
-    resize: vertical;
-    transition: border-color .2s;
-    box-sizing: border-box;
-  }
-  .opt-followup textarea:focus { outline: none; border-color: var(--accent); }
-  .opt-followup .fu-just-lbl {
-    font-size: .72rem;
-    color: var(--muted);
-    margin-bottom: 3px;
-    display: block;
-  }
+/* ══ Sección AT-FURAG ══ */
+.furag-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+.furag-kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:4px solid var(--accent);text-align:center}
+.furag-kpi.ok{border-left-color:var(--success)}
+.furag-kpi.warn{border-left-color:var(--warn)}
+.furag-kpi.danger{border-left-color:var(--danger)}
+.furag-kpi .fk-val{font-size:1.8rem;font-weight:800;color:var(--primary)}
+.furag-kpi .fk-lbl{font-size:.72rem;color:var(--muted);font-weight:600;margin-top:3px}
+
+.furag-filters{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.furag-filters label{font-size:.75rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px}
+.furag-filters select,.furag-filters input{border:1.5px solid var(--border);border-radius:8px;padding:6px 11px;font-size:.84rem;background:#f9fbff;min-width:180px}
+.furag-filters select:focus,.furag-filters input:focus{outline:none;border-color:var(--accent)}
+
+.furag-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:28px;overflow-x:auto}
+.furag-table-wrap table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:900px}
+.furag-table-wrap th{background:var(--primary);color:#fff;padding:9px 11px;text-align:left;font-weight:600;white-space:nowrap}
+.furag-table-wrap td{padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:top}
+.furag-table-wrap tr:last-child td{border-bottom:none}
+.furag-table-wrap tr:hover td{background:#f4f8ff}
+.furag-table-wrap .grupo-header td{background:#eaf1fb;color:var(--primary);font-weight:700;font-size:.8rem;padding:7px 11px}
+
+.sem{display:inline-block;width:20px;height:20px;border-radius:50%;font-size:.7rem;font-weight:800;color:#fff;text-align:center;line-height:20px}
+.sem.si{background:var(--success)}
+.sem.no{background:var(--danger)}
+.sem.parcial{background:var(--warn)}
+.sem.dash{background:#ccc;color:#888}
+
+.ent-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.68rem;font-weight:700}
+.ent-ese{background:#d4edda;color:#155724}
+.ent-desc{background:#cce5ff;color:#004085}
+.ent-muni{background:#fff3cd;color:#856404}
+
+.furag-obs{font-size:.72rem;color:var(--muted);max-width:200px;white-space:normal;line-height:1.3}
 
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">📋</div>
   <div>
-    <h1>Formulario MECI 122</h1>
+    <h1>📊 Dashboard MECI 122</h1>
     <p>Evaluación Independiente – Vigencia 2025</p>
+  </div>
+  <div class="header-btns">
+    <button class="btn btn-reload" onclick="cargarDatos(false)">🔄 Actualizar</button>
+    <button class="btn btn-reload" style="background:#f0a500;color:#fff" onclick="cargarDatos(true)">🔁 Forzar recarga</button>
+    <button class="btn btn-excel"  onclick="exportarExcel()">📥 Exportar Excel</button>
+    <button class="btn btn-clear"  onclick="confirmarLimpiar()">🗑️ Limpiar datos</button>
+    <button class="btn btn-reload" style="background:#9b59b6;color:#fff" onclick="diagnosticar()">🔬 Diagnóstico</button>
   </div>
 </header>
 
-<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-<div class="progress-label"><span id="progress-text">0 de 42 preguntas respondidas</span></div>
+<div class="filters">
+  <div class="filter-group">
+    <label>Entidad</label>
+    <select id="filtro-entidad" onchange="aplicarFiltros()"><option value="">— Todas las entidades —</option></select>
+  </div>
+  <div class="filter-group">
+    <label>Vigencia</label>
+    <select id="filtro-vigencia" onchange="aplicarFiltros()"><option value="">— Todas —</option></select>
+  </div>
+  <div class="filter-group">
+    <label>Tipo de entidad</label>
+    <select id="filtro-municipio" onchange="aplicarFiltros()"><option value="">— Todos —</option></select>
+  </div>
+  <div class="filter-group">
+    <label>Buscar</label>
+    <input type="text" id="filtro-texto" placeholder="Nombre, NIT..." oninput="aplicarFiltros()">
+  </div>
+  <span class="badge-count" id="conteo-badge">0 registros</span>
+</div>
 
-<div class="form-wrap">
-<form id="form-meci" novalidate>
+<div class="container">
 
-<!-- ====== DATOS BÁSICOS ====== -->
-<div class="seccion">
-  <div class="sec-header">👤 Datos Básicos del Responsable y la Entidad</div>
-  <div class="sec-body">
+  <!-- KPIs -->
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi"><div class="kpi-label">Total Entidades</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-sub">formularios recibidos</div></div>
+    <div class="kpi success"><div class="kpi-label">Completados ≥90%</div><div class="kpi-value" id="kpi-completos">0</div><div class="kpi-sub">formularios completos</div></div>
+    <div class="kpi warn"><div class="kpi-label">En progreso 50–89%</div><div class="kpi-value" id="kpi-parciales">0</div><div class="kpi-sub">parcialmente respondidos</div></div>
+    <div class="kpi danger"><div class="kpi-label">Incompletos &lt;50%</div><div class="kpi-value" id="kpi-incompletos">0</div><div class="kpi-sub">pendientes</div></div>
+    <div class="kpi"><div class="kpi-label">Promedio avance</div><div class="kpi-value" id="kpi-promedio">0</div><div class="kpi-sub">de los formularios</div></div>
+  </div>
 
-    <div class="campo" id="campo-nombre">
-      <label>Nombre completo del responsable <span class="req">*</span></label>
-      <input type="text" id="responsable_nombre" name="responsable_nombre" placeholder="Nombres y apellidos completos" required>
-      <div class="err-msg">Este campo es obligatorio.</div>
-    </div>
+  <!-- Gráficas generales -->
+  <div class="section-title">📈 Análisis General de Respuestas</div>
+  <div class="charts-grid">
+    <div class="chart-card"><h3>Avance por entidad (% completado)</h3><div class="chart-wrap"><canvas id="chart-avance"></canvas></div></div>
+    <div class="chart-card"><h3>PER201 – ¿El MECI generó valor agregado?</h3><div class="chart-wrap"><canvas id="chart-per201"></canvas></div></div>
+    <div class="chart-card"><h3>CIN243 – Ejecución del plan anual de auditorías</h3><div class="chart-wrap"><canvas id="chart-cin243"></canvas></div></div>
+    <div class="chart-card"><h3>CIN264 – Tipo de estructura de Control Interno</h3><div class="chart-wrap"><canvas id="chart-cin264"></canvas></div></div>
+    <div class="chart-card"><h3>CIN270 – Nivel formación jefe Control Interno</h3><div class="chart-wrap"><canvas id="chart-cin270"></canvas></div></div>
+    <div class="chart-card"><h3>CIN272 – Experiencia del jefe en CI</h3><div class="chart-wrap"><canvas id="chart-cin272"></canvas></div></div>
+  </div>
 
-    <div class="campo" id="campo-cedula">
-      <label>Número de cédula <span class="req">*</span></label>
-      <input type="text" id="responsable_cedula" name="responsable_cedula" placeholder="Sin puntos ni comas" required pattern="[0-9]{6,12}">
-      <div class="err-msg">Ingrese un número de cédula válido.</div>
-    </div>
+  <!-- ══ NUEVA SECCIÓN: Balance Sí/No/No aplica por pregunta ══ -->
+  <div class="section-title">
+    🔍 Seguimiento Sí / No / No aplica por Pregunta
+  </div>
 
-    <div class="campo" id="campo-cargo">
-      <label>Cargo del responsable <span class="req">*</span></label>
-      <input type="text" id="responsable_cargo" name="responsable_cargo" placeholder="Ej: Jefe de Control Interno" required>
-      <div class="err-msg">Este campo es obligatorio.</div>
-    </div>
-
-    <div class="campo" id="campo-correo">
-      <label>Correo electrónico institucional <span class="req">*</span></label>
-      <input type="email" id="responsable_correo" name="responsable_correo" placeholder="correo@entidad.gov.co" required>
-      <div class="err-msg">Ingrese un correo electrónico válido.</div>
-    </div>
-
-    <div class="campo" id="campo-tipo-entidad">
-      <label>Tipo de entidad <span class="req">*</span></label>
-      <select id="tipo_entidad" name="tipo_entidad" required onchange="ramificarEntidad()">
-        <option value="">— Seleccione el tipo de entidad —</option>
-        <option value="DESCENTRALIZADA">DESCENTRALIZADA DEPARTAMENTO</option>
-        <option value="ESES">EMPRESAS SOCIALES DEL ESTADO – ESES</option>
-        <option value="MUNICIPIO">MUNICIPIOS</option>
+  <div class="preg-filter-bar">
+    <div>
+      <label>Filtrar por tipo de pregunta</label>
+      <select id="filtro-tipo-preg" onchange="renderPreguntasBalance()">
+        <option value="">— Todas (PER + CIN) —</option>
+        <option value="PER">Solo PER</option>
+        <option value="CIN">Solo CIN</option>
       </select>
-      <div class="err-msg">Seleccione el tipo de entidad.</div>
     </div>
-
-    <!-- Ramificación DESCENTRALIZADA -->
-    <div class="campo entidad-block" id="bloque-desc">
-      <label>Entidad descentralizada <span class="req">*</span></label>
-      <select id="entidad_desc" name="entidad_nombre" required>
-        <option value="">— Seleccione la entidad —</option>
-        <option value="AGENCIA CATASTRAL DE CUNDINAMARCA">AGENCIA CATASTRAL DE CUNDINAMARCA</option>
-<option value="AGENCIA DE COMERCIALIZACION E INNOVACION PARA EL DESARROLLO DE CUNDINAMARCA">AGENCIA DE COMERCIALIZACION E INNOVACION PARA EL DESARROLLO DE CUNDINAMARCA</option>
-<option value="AGENCIA LOGISTICA DE GESTION INMOBILIARIA Y DE SERVICIOS">AGENCIA LOGISTICA DE GESTION INMOBILIARIA Y DE SERVICIOS</option>
-<option value="BENEFICENCIA DE CUNDINAMARCA">BENEFICENCIA DE CUNDINAMARCA</option>
-<option value="INSTITUTO DE ACCION COMUNAL Y CAPITAL SOCIAL DE CUNDINAMARCA">INSTITUTO DE ACCION COMUNAL Y CAPITAL SOCIAL DE CUNDINAMARCA</option>
-<option value="INSTITUTO DE INFRAESTRUCTURA Y CONCESIONES DE CUNDINAMARCA">INSTITUTO DE INFRAESTRUCTURA Y CONCESIONES DE CUNDINAMARCA</option>
-<option value="INSTITUTO DE PROTECCION Y BIENESTAR ANIMAL DE CUNDINAMARCA">INSTITUTO DE PROTECCION Y BIENESTAR ANIMAL DE CUNDINAMARCA</option>
-<option value="INSTITUTO DEPARTAMENTAL DE CULTURA Y TURISMO DE CUNDINAMARCA">INSTITUTO DEPARTAMENTAL DE CULTURA Y TURISMO DE CUNDINAMARCA</option>
-<option value="INSTITUTO DEPARTAMENTAL PARA LA RECREACION Y EL DEPORTE DE CUNDINAMARCA">INSTITUTO DEPARTAMENTAL PARA LA RECREACION Y EL DEPORTE DE CUNDINAMARCA</option>
-<option value="LOTERIA DE CUNDINAMARCA">LOTERIA DE CUNDINAMARCA</option>
-<option value="UNIDAD ADMINISTRATIVA ESPECIAL DE PENSIONES DEL DEPARTAMENTO DE CUNDINAMARCA">UNIDAD ADMINISTRATIVA ESPECIAL DE PENSIONES DEL DEPARTAMENTO DE CUNDINAMARCA</option>
-<option value="EMPRESAS PUBLICAS DE CUNDINAMARCA (EPC)">EMPRESAS PUBLICAS DE CUNDINAMARCA (EPC)</option>
-<option value="EMPRESA DE LICORES DE CUNDINAMARCA">EMPRESA DE LICORES DE CUNDINAMARCA</option>
-<option value="CORPORACIÓN SOCIAL DE CUNDINAMARCA - CSC">CORPORACIÓN SOCIAL DE CUNDINAMARCA - CSC</option>
-<option value="EMPRESA FÉRREA REGIONAL S.A.S.">EMPRESA FÉRREA REGIONAL S.A.S.</option>
+    <div>
+      <label>Buscar pregunta</label>
+      <input type="text" id="filtro-busca-preg" placeholder="Ej: CIN221, riesgo..." oninput="renderPreguntasBalance()">
+    </div>
+    <div>
+      <label>Mostrar opciones individuales</label>
+      <select id="filtro-detalle-opt" onchange="renderPreguntasBalance()">
+        <option value="0">Solo resumen total</option>
+        <option value="1">Con detalle por opción</option>
       </select>
-      <div class="err-msg">Seleccione la entidad.</div>
     </div>
+  </div>
 
-    <!-- Ramificación MUNICIPIO -->
-    <div class="campo entidad-block" id="bloque-muni">
-      <label>Municipio <span class="req">*</span></label>
-      <select id="entidad_muni" name="entidad_nombre" required>
-        <option value="">— Seleccione el municipio —</option>
-        <option value="AGUA DE DIOS">AGUA DE DIOS</option>
-<option value="ALBÁN">ALBÁN</option>
-<option value="ANAPOIMA">ANAPOIMA</option>
-<option value="ANOLAIMA">ANOLAIMA</option>
-<option value="APULO">APULO</option>
-<option value="ARBELÁEZ">ARBELÁEZ</option>
-<option value="BELTRÁN">BELTRÁN</option>
-<option value="BITUIMA">BITUIMA</option>
-<option value="BOJACÁ">BOJACÁ</option>
-<option value="CABRERA">CABRERA</option>
-<option value="CACHIPAY">CACHIPAY</option>
-<option value="CAJICÁ">CAJICÁ</option>
-<option value="CAPARRAPÍ">CAPARRAPÍ</option>
-<option value="CARMEN DE CARUPA">CARMEN DE CARUPA</option>
-<option value="CÁQUEZA">CÁQUEZA</option>
-<option value="CHAGUANÍ">CHAGUANÍ</option>
-<option value="CHÍA">CHÍA</option>
-<option value="CHIPAQUE">CHIPAQUE</option>
-<option value="CHOACHÍ">CHOACHÍ</option>
-<option value="CHOCONTÁ">CHOCONTÁ</option>
-<option value="COGUA">COGUA</option>
-<option value="COTA">COTA</option>
-<option value="CUCUNUBÁ">CUCUNUBÁ</option>
-<option value="EL COLEGIO">EL COLEGIO</option>
-<option value="EL PEÑÓN">EL PEÑÓN</option>
-<option value="EL ROSAL">EL ROSAL</option>
-<option value="FACATATIVÁ">FACATATIVÁ</option>
-<option value="FÓMEQUE">FÓMEQUE</option>
-<option value="FOSCA">FOSCA</option>
-<option value="FUNZA">FUNZA</option>
-<option value="FÚQUENE">FÚQUENE</option>
-<option value="FUSAGASUGÁ">FUSAGASUGÁ</option>
-<option value="GACHALÁ">GACHALÁ</option>
-<option value="GACHANCIPÁ">GACHANCIPÁ</option>
-<option value="GACHETÁ">GACHETÁ</option>
-<option value="GAMA">GAMA</option>
-<option value="GIRARDOT">GIRARDOT</option>
-<option value="GRANADA">GRANADA</option>
-<option value="GUACHETÁ">GUACHETÁ</option>
-<option value="GUADUAS">GUADUAS</option>
-<option value="GUASCA">GUASCA</option>
-<option value="GUATAQUÍ">GUATAQUÍ</option>
-<option value="GUATAVITA">GUATAVITA</option>
-<option value="GUAYABAL DE SÍQUIMA">GUAYABAL DE SÍQUIMA</option>
-<option value="GUAYABETAL">GUAYABETAL</option>
-<option value="GUTIÉRREZ">GUTIÉRREZ</option>
-<option value="JERUSALÉN">JERUSALÉN</option>
-<option value="JUNÍN">JUNÍN</option>
-<option value="LA CALERA">LA CALERA</option>
-<option value="LA MESA">LA MESA</option>
-<option value="LA PALMA">LA PALMA</option>
-<option value="LA PEÑA">LA PEÑA</option>
-<option value="LA VEGA">LA VEGA</option>
-<option value="LENGUAZAQUE">LENGUAZAQUE</option>
-<option value="MACHETÁ">MACHETÁ</option>
-<option value="MADRID">MADRID</option>
-<option value="MANTA">MANTA</option>
-<option value="MEDINA">MEDINA</option>
-<option value="MOSQUERA">MOSQUERA</option>
-<option value="NARIÑO">NARIÑO</option>
-<option value="NEMOCÓN">NEMOCÓN</option>
-<option value="NIMAIMA">NIMAIMA</option>
-<option value="NILO">NILO</option>
-<option value="NOCAIMA">NOCAIMA</option>
-<option value="PACHO">PACHO</option>
-<option value="PAIME">PAIME</option>
-<option value="PANDI">PANDI</option>
-<option value="PARATEBUENO">PARATEBUENO</option>
-<option value="PASCA">PASCA</option>
-<option value="PUERTO SALGAR">PUERTO SALGAR</option>
-<option value="PULÍ">PULÍ</option>
-<option value="QUEBRADANEGRA">QUEBRADANEGRA</option>
-<option value="QUETAME">QUETAME</option>
-<option value="QUIPILE">QUIPILE</option>
-<option value="RICAURTE">RICAURTE</option>
-<option value="SAN ANTONIO DEL TEQUENDAMA">SAN ANTONIO DEL TEQUENDAMA</option>
-<option value="SAN BERNARDO">SAN BERNARDO</option>
-<option value="SAN CAYETANO">SAN CAYETANO</option>
-<option value="SAN FRANCISCO">SAN FRANCISCO</option>
-<option value="SAN JUAN DE RIOSECO">SAN JUAN DE RIOSECO</option>
-<option value="SASAIMA">SASAIMA</option>
-<option value="SESQUILÉ">SESQUILÉ</option>
-<option value="SIBATÉ">SIBATÉ</option>
-<option value="SILVANIA">SILVANIA</option>
-<option value="SIMIJACA">SIMIJACA</option>
-<option value="SOACHA">SOACHA</option>
-<option value="SOPÓ">SOPÓ</option>
-<option value="SUBACHOQUE">SUBACHOQUE</option>
-<option value="SUESCA">SUESCA</option>
-<option value="SUPATÁ">SUPATÁ</option>
-<option value="SUSA">SUSA</option>
-<option value="SUTATAUSA">SUTATAUSA</option>
-<option value="TABIO">TABIO</option>
-<option value="TAUSA">TAUSA</option>
-<option value="TENA">TENA</option>
-<option value="TENJO">TENJO</option>
-<option value="TIBACUY">TIBACUY</option>
-<option value="TIBIRITA">TIBIRITA</option>
-<option value="TOCAIMA">TOCAIMA</option>
-<option value="TOCANCIPÁ">TOCANCIPÁ</option>
-<option value="TOPAIPÍ">TOPAIPÍ</option>
-<option value="UBALÁ">UBALÁ</option>
-<option value="UBAQUE">UBAQUE</option>
-<option value="UNE">UNE</option>
-<option value="ÚTICA">ÚTICA</option>
-<option value="VENECIA">VENECIA</option>
-<option value="VERGARA">VERGARA</option>
-<option value="VIANÍ">VIANÍ</option>
-<option value="VILLA DE SAN DIEGO DE UBATÉ">VILLA DE SAN DIEGO DE UBATÉ</option>
-<option value="VILLAGÓMEZ">VILLAGÓMEZ</option>
-<option value="VILLAPINZÓN">VILLAPINZÓN</option>
-<option value="VIOTÁ">VIOTÁ</option>
-<option value="VILLETA">VILLETA</option>
-<option value="YACOPÍ">YACOPÍ</option>
-<option value="ZIPACÓN">ZIPACÓN</option>
-<option value="ZIPAQUIRÁ">ZIPAQUIRÁ</option>
+  <!-- Gráfica resumen global Sí/No/No aplica -->
+  <div class="charts-grid" style="margin-bottom:20px">
+    <div class="chart-card"><h3>Balance Sí / No / No aplica por pregunta</h3><div class="chart-wrap" style="height:260px"><canvas id="chart-sn-global"></canvas></div></div>
+    <div class="chart-card"><h3>Top opciones más verificadas como "No" (requieren atención)</h3><div class="chart-wrap" style="height:260px"><canvas id="chart-sn-seccion"></canvas></div></div>
+  </div>
+
+  <div id="preg-cards-container" class="preg-grid"></div>
+
+  <!-- Tabla detalle entidades -->
+  <div class="section-title">📋 Detalle por Entidad</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Entidad</th><th>Municipio</th><th>Vigencia</th>
+          <th>Responsable</th><th>Avance</th><th>Fecha</th><th>Detalle</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-body">
+        <tr><td colspan="8"><div class="empty"><div class="icon">📭</div><p>No hay datos cargados aún.</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+
+  <!-- ══ SECCIÓN AT-FURAG ══ -->
+  <div class="section-title" style="margin-top:36px">
+    📋 Avances Asistencia Técnica FURAG – Fase 1
+  </div>
+
+  <!-- KPIs FURAG -->
+  <div class="furag-kpi-row" id="furag-kpi-row">
+    <div class="furag-kpi"><div class="fk-val" id="fk-total">0</div><div class="fk-lbl">Entidades convocadas</div></div>
+    <div class="furag-kpi ok"><div class="fk-val" id="fk-asistencia">0%</div><div class="fk-lbl">Con asistencia</div></div>
+    <div class="furag-kpi ok"><div class="fk-val" id="fk-circular">0%</div><div class="fk-lbl">Circular DAFP</div></div>
+    <div class="furag-kpi warn"><div class="fk-val" id="fk-circular003">0%</div><div class="fk-lbl">Circular 003 completa</div></div>
+    <div class="furag-kpi warn"><div class="fk-val" id="fk-acceso">0%</div><div class="fk-lbl">Acceso al aplicativo</div></div>
+    <div class="furag-kpi danger"><div class="fk-val" id="fk-pendientes">0</div><div class="fk-lbl">Pendientes de acceso</div></div>
+  </div>
+
+  <!-- Gráfica actividades Fase 1 + filtros -->
+  <div class="charts-grid" style="margin-bottom:18px">
+    <div class="chart-card">
+      <h3>Cumplimiento por actividad – Fase 1 (todas las entidades)</h3>
+      <div class="chart-wrap" style="height:240px"><canvas id="chart-furag-act"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>Estado de asistencia por grupo</h3>
+      <div class="chart-wrap" style="height:240px"><canvas id="chart-furag-grupos"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Filtros FURAG -->
+  <div class="furag-filters">
+    <div>
+      <label>Fecha de sesión</label>
+      <select id="furag-filtro-fecha" onchange="renderFuragTabla()">
+        <option value="">— Todas las fechas —</option>
+        <option value="04-Mar">04 Marzo</option>
+        <option value="05-Mar">05 Marzo</option>
+        <option value="06-Mar">06 Marzo</option>
+        <option value="09-Mar">09 Marzo</option>
       </select>
-      <div class="err-msg">Seleccione el municipio.</div>
     </div>
-
-    <!-- Ramificación ESES -->
-    <div class="campo entidad-block" id="bloque-eses">
-      <label>Empresa Social del Estado – ESE <span class="req">*</span></label>
-      <select id="entidad_ese" name="entidad_nombre" required>
-        <option value="">— Seleccione la ESE —</option>
-        <option value="HOSPITAL NUESTRA SEÑORA DE LAS MERCEDES">HOSPITAL NUESTRA SEÑORA DE LAS MERCEDES</option>
-<option value="CENTRO DE SALUD TIMOTEO RIVEROS CUBILLOS">CENTRO DE SALUD TIMOTEO RIVEROS CUBILLOS</option>
-<option value="CENTRO DE SALUD (CAYETANO MARIA DE ROJAS)">CENTRO DE SALUD (CAYETANO MARIA DE ROJAS)</option>
-<option value="CENTRO DE SALUD FOSCA">CENTRO DE SALUD FOSCA</option>
-<option value="EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN ANTONIO DE GUATAVITA">EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN ANTONIO DE GUATAVITA</option>
-<option value="HOSPITAL ABACU CALDERON">HOSPITAL ABACU CALDERON</option>
-<option value="HOSPITAL DIOGENES TRONCOSO">HOSPITAL DIOGENES TRONCOSO</option>
-<option value="HOSPITAL NUESTRA SEÑORA DEL CARMEN - TABIO">HOSPITAL NUESTRA SEÑORA DEL CARMEN - TABIO</option>
-<option value="HOSPITAL SAN JOSE DE GUACHETA">HOSPITAL SAN JOSE DE GUACHETA</option>
-<option value="HOSPITAL SAN VICENTE DE PAUL -- NEMOCON, CUNDINAMARCA">HOSPITAL SAN VICENTE DE PAUL -- NEMOCON, CUNDINAMARCA</option>
-<option value="HOSPITAL SANTA MATILDE">HOSPITAL SANTA MATILDE</option>
-<option value="MERCEDES TELLEZ DE PRADILLA HOSPITAL VIANI">MERCEDES TELLEZ DE PRADILLA HOSPITAL VIANI</option>
-<option value="CENTRO DE SALUD - CUCUNUBA">CENTRO DE SALUD - CUCUNUBA</option>
-<option value="CENTRO DE SALUD DE RICAURTE">CENTRO DE SALUD DE RICAURTE</option>
-<option value="EMPRESA SOCIAL DEL ESTADO HOSPITAL ISMAEL SILVA">EMPRESA SOCIAL DEL ESTADO HOSPITAL ISMAEL SILVA</option>
-<option value="EMPRESA SOCIAL DEL ESTADO CENTRO DE SALUD SUESCA">EMPRESA SOCIAL DEL ESTADO CENTRO DE SALUD SUESCA</option>
-<option value="CENTRO DE SALUD DE TAUSA">CENTRO DE SALUD DE TAUSA</option>
-<option value="CENTRO DE SALUD SAN FRANCISCO DE SALES">CENTRO DE SALUD SAN FRANCISCO DE SALES</option>
-<option value="CENTRO DE SALUD SAN JOSE -NIMAIMA">CENTRO DE SALUD SAN JOSE -NIMAIMA</option>
-<option value="EMPRESA SOCIAL DEL ESTADO DE LA PALMA">EMPRESA SOCIAL DEL ESTADO DE LA PALMA</option>
-<option value="EMPRESA SOCIAL DEL ESTADO E.S.E. MUNICIPAL DE SOACHA JULIO CESAR PEÑALOZA">EMPRESA SOCIAL DEL ESTADO E.S.E. MUNICIPAL DE SOACHA JULIO CESAR PEÑALOZA</option>
-<option value="HOSPITAL EL SALVADOR DE UBATE">HOSPITAL EL SALVADOR DE UBATE</option>
-<option value="HOSPITAL MARIO GAITAN YANGUAS - SOACHA">HOSPITAL MARIO GAITAN YANGUAS - SOACHA</option>
-<option value="HOSPITAL PEDRO LEON - LA MESA">HOSPITAL PEDRO LEON - LA MESA</option>
-<option value="HOSPITAL SAN FRANCISCO - GACHETA">HOSPITAL SAN FRANCISCO - GACHETA</option>
-<option value="EMPRESA SOCIAL DEL ESTADO REGIÓN DE SALUD CENTRO ORIENTE ALMEIDAS">EMPRESA SOCIAL DEL ESTADO REGIÓN DE SALUD CENTRO ORIENTE ALMEIDAS</option>
-<option value="HOSPITAL SAN RAFAEL - CAQUEZA">HOSPITAL SAN RAFAEL - CAQUEZA</option>
-<option value="HOSPITAL SAN RAFAEL - FACATATIVA">HOSPITAL SAN RAFAEL - FACATATIVA</option>
-<option value="HOSPITAL SAN RAFAEL - PACHO">HOSPITAL SAN RAFAEL - PACHO</option>
-<option value="HOSPITAL SAN RAFAEL - FUSAGASUGA">HOSPITAL SAN RAFAEL - FUSAGASUGA</option>
-<option value="HOSPITAL SAN VICENTE DE PAUL - SAN JUAN DE RIOSECO">HOSPITAL SAN VICENTE DE PAUL - SAN JUAN DE RIOSECO</option>
-<option value="ESE HOSPITAL SANTA BARBARA DE VERGARA">ESE HOSPITAL SANTA BARBARA DE VERGARA</option>
-<option value="HOSPITAL DE GIRARDOT">HOSPITAL DE GIRARDOT</option>
-<option value="HOSPITAL DIVINO SALVADOR DE SOPO">HOSPITAL DIVINO SALVADOR DE SOPO</option>
-<option value="HOSPITAL MARCO FELIPE AFANADOR DE TOCAIMA">HOSPITAL MARCO FELIPE AFANADOR DE TOCAIMA</option>
-<option value="EMPRESA SOCIAL DEL ESTADO REGIÓN DE SALUD MEDINA">EMPRESA SOCIAL DEL ESTADO REGIÓN DE SALUD MEDINA</option>
-<option value="HOSPITAL PROFESOR JORGE CAVELIER">HOSPITAL PROFESOR JORGE CAVELIER</option>
-<option value="HOSPITAL SALAZAR DE VILLETA">HOSPITAL SALAZAR DE VILLETA</option>
-<option value="HOSPITAL SAN ANTONIO DE ANOLAIMA">HOSPITAL SAN ANTONIO DE ANOLAIMA</option>
-<option value="HOSPITAL SAN ANTONIO DE CHIA">HOSPITAL SAN ANTONIO DE CHIA</option>
-<option value="HOSPITAL SAN ANTONIO DE SESQUILE">HOSPITAL SAN ANTONIO DE SESQUILE</option>
-<option value="HOSPITAL SAN ANTONIO DEL TEQUENDAMA I NIVEL">HOSPITAL SAN ANTONIO DEL TEQUENDAMA I NIVEL</option>
-<option value="HOSPITAL SAN JOSE DE GUADUAS">HOSPITAL SAN JOSE DE GUADUAS</option>
-<option value="HOSPITAL SAN VICENTE DE PAUL FOMEQUE">HOSPITAL SAN VICENTE DE PAUL FOMEQUE</option>
-<option value="HOSPITAL UNIVERSITARIO LA SAMARITANA">HOSPITAL UNIVERSITARIO LA SAMARITANA</option>
-<option value="MARIA AUXILIADORA DEL MUNICIPIO DE MOSQUERA - CUNDINAMARCA">MARIA AUXILIADORA DEL MUNICIPIO DE MOSQUERA - CUNDINAMARCA</option>
-<option value="EMPRESA SOCIAL DEL ESTADO POLICLINICO DE JUNIN">EMPRESA SOCIAL DEL ESTADO POLICLINICO DE JUNIN</option>
-<option value="HOSPITAL HILARIO LUGO DE SASAIMA">HOSPITAL HILARIO LUGO DE SASAIMA</option>
-<option value="HOSPITAL SAN ANTONIO DE ARBELAEZ">HOSPITAL SAN ANTONIO DE ARBELAEZ</option>
-<option value="HOSPITAL SAN FRANCISCO DE VIOTA">HOSPITAL SAN FRANCISCO DE VIOTA</option>
-<option value="HOSPITAL SANTA ROSA DE TENJO">HOSPITAL SANTA ROSA DE TENJO</option>
-<option value="HOSPITAL NUESTRA SEÑORA DEL CARMEN - EL COLEGIO">HOSPITAL NUESTRA SEÑORA DEL CARMEN - EL COLEGIO</option>
-<option value="EMPRESA DE SOCIAL DEL ESTADO HOSPITAL DE LA VEGA">EMPRESA DE SOCIAL DEL ESTADO HOSPITAL DE LA VEGA</option>
+    <div>
+      <label>Tipo de entidad</label>
+      <select id="furag-filtro-tipo" onchange="renderFuragTabla()">
+        <option value="">— Todos —</option>
+        <option value="ESE">ESES</option>
+        <option value="Descentralizada">Descentralizadas</option>
       </select>
-      <div class="err-msg">Seleccione la ESE.</div>
     </div>
-
-    <div class="campo" id="campo-vigencia">
-      <label>Vigencia evaluada <span class="req">*</span></label>
-      <select id="entidad_vigencia" name="entidad_vigencia" required>
-        <option value="">— Seleccione la vigencia —</option>
-        <option value="2024">2024</option>
-        <option value="2025">2025</option>
+    <div>
+      <label>Estado acceso aplicativo</label>
+      <select id="furag-filtro-acceso" onchange="renderFuragTabla()">
+        <option value="">— Todos —</option>
+        <option value="si">✅ Con acceso</option>
+        <option value="no">❌ Sin acceso</option>
+        <option value="parcial">⚠️ Parcial</option>
       </select>
-      <div class="err-msg">Seleccione la vigencia.</div>
     </div>
+    <div>
+      <label>Buscar entidad / jefe</label>
+      <input type="text" id="furag-buscar" placeholder="Nombre..." oninput="renderFuragTabla()">
+    </div>
+    <span class="badge-count" id="furag-badge">0 entidades</span>
+  </div>
 
+  <!-- Tabla FURAG -->
+  <div class="furag-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Entidad</th>
+          <th>Jefe OCI</th>
+          <th title="Asistencia a la sesión">Asist.</th>
+          <th title="Socialización Circular DAFP">Circ. DAFP</th>
+          <th title="Micrositio MECIC">Micrositio</th>
+          <th title="Sesión técnica Gerencia y JCI">Ses. Gerencia</th>
+          <th title="Circular 003 y Compromiso Gerencial">Circ. 003</th>
+          <th title="Usuario y clave activos en Función Pública">Acceso App</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody id="furag-tbody">
+        <tr><td colspan="10"><div class="empty"><div class="icon">📋</div><p>Cargando datos FURAG...</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Detalle de respuestas</h2>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
-
-<!-- ====== SECCIÓN GENERAL ====== -->
-<div class="seccion">
-  <div class="sec-header">📋 Sección General – Política MECI</div>
-  <div class="sec-body">
-
-    <div class="campo" id="campo-PER201">
-      <label>¿Considera que el MECI ha generado valor agregado a la gestión de la entidad? <span class="req">*</span> <span class="codigo">PER201</span></label>
-      <div class="radio-group" id="rg-PER201">
-        <label><input type="radio" name="PER201" value="si" required onchange="markSelected(this)"> Sí</label>
-        <label><input type="radio" name="PER201" value="no" onchange="markSelected(this)"> No</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-PER205">
-      <label>¿Cuál es su percepción sobre la utilidad de las guías y herramientas emitidas por el DAFP para la implementación del Control Interno? <span class="codigo">PER205</span></label>
-      <span class="hint">Justificación – campo opcional</span>
-      <textarea name="PER205" rows="3" placeholder="Escriba su percepción..."></textarea>
-    </div>
-
-  </div>
-</div>
-
-<!-- ====== CONTROL INTERNO ====== -->
-<div class="seccion">
-  <div class="sec-header">🔍 Control Interno – Evaluación del Jefe de Control Interno</div>
-  <div class="sec-body">
-
-    <div class="campo" id="campo-CIN203">
-      <label>El jefe de control interno, en cumplimiento de la política de integridad, verificó que la entidad: <span class="req">*</span> <span class="codigo">CIN203</span></label>
-      <div class="check-group" id="cg-CIN203">
-        <label><input type="checkbox" name="CIN203" value="a" onchange="markCheck(this)"> Implementa una estrategia para la apropiación del código de integridad</label>
-        <label><input type="checkbox" name="CIN203" value="b" onchange="markCheck(this)"> Cuenta con un protocolo para la identificación y declaración de conflictos de interés</label>
-        <label><input type="checkbox" name="CIN203" value="c" onchange="markCheck(this)"> Gestiona los conflictos de interés de acuerdo con el protocolo establecido</label>
-        <label><input type="checkbox" name="CIN203" value="d" onchange="markCheck(this)"> Mantiene actualizada la información institucional en el SIGEP</label>
-        <label><input type="checkbox" name="CIN203" value="e" onchange="markCheck(this)"> Garantiza que los sujetos obligados registren información en el aplicativo (Ley 2013/2019 – Decreto 830/2021)</label>
-        <label><input type="checkbox" name="CIN203" value="ninguna" onchange="markCheck(this)"> No cumple con ninguna de las anteriores condiciones</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN206">
-      <label>El jefe de control interno verificó que la entidad (Talento Humano): <span class="req">*</span> <span class="codigo">CIN206</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN206" value="a" onchange="markCheck(this)"> Elaboró y publicó el Plan Estratégico de Talento Humano</label>
-        <label><input type="checkbox" name="CIN206" value="b" onchange="markCheck(this)"> Articuló los planes del Decreto 612 de 2018 en el Plan Estratégico de Talento Humano</label>
-        <label><input type="checkbox" name="CIN206" value="c" onchange="markCheck(this)"> Desarrolló actividades de capacitación</label>
-        <label><input type="checkbox" name="CIN206" value="d" onchange="markCheck(this)"> Desarrolló actividades de bienestar e incentivos</label>
-        <label><input type="checkbox" name="CIN206" value="e" onchange="markCheck(this)"> Desarrolló actividades de clima, convivencia y relaciones laborales</label>
-        <label><input type="checkbox" name="CIN206" value="f" onchange="markCheck(this)"> Desarrolló actividades para la actualización y gestión en el SIGEP</label>
-        <label><input type="checkbox" name="CIN206" value="g" onchange="markCheck(this)"> Otros</label>
-        <label><input type="checkbox" name="CIN206" value="ninguna" onchange="markCheck(this)"> El jefe de control interno no hace seguimiento a la gestión del talento humano</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN207">
-      <label>El jefe de control interno verificó que la entidad (Planeación y Riesgos): <span class="req">*</span> <span class="codigo">CIN207</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN207" value="a" onchange="markCheck(this)"> Estableció objetivos claros, cumplibles y medibles en la planeación institucional</label>
-        <label><input type="checkbox" name="CIN207" value="b" onchange="markCheck(this)"> Estableció responsables, metas y tiempos para el seguimiento y aplicación de controles</label>
-        <label><input type="checkbox" name="CIN207" value="c" onchange="markCheck(this)"> Formuló su política para la gestión integral de riesgos</label>
-        <label><input type="checkbox" name="CIN207" value="d" onchange="markCheck(this)"> Aplica monitoreos a la gestión integral del riesgo</label>
-        <label><input type="checkbox" name="CIN207" value="e" onchange="markCheck(this)"> Monitorea el cumplimiento de metas y objetivos</label>
-        <label><input type="checkbox" name="CIN207" value="f" onchange="markCheck(this)"> Hace seguimiento a la ejecución presupuestal</label>
-        <label><input type="checkbox" name="CIN207" value="g" onchange="markCheck(this)"> Llevaron a cabo otras actividades de revisión, verificación o monitoreo</label>
-        <label><input type="checkbox" name="CIN207" value="ninguna" onchange="markCheck(this)"> El jefe de control interno no lleva a cabo actividades de revisión o monitoreo al SCI</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN221">
-      <label>En la evaluación independiente (tercera línea), el jefe de control interno: <span class="req">*</span> <span class="codigo">CIN221</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN221" value="a" required onchange="markSelected(this)"> Verificó que la entidad realiza una gestión integral de los riesgos y dispone de evidencias</label>
-        <label><input type="radio" name="CIN221" value="b" onchange="markSelected(this)"> Verificó que la entidad realiza una gestión parcial de los riesgos y dispone de evidencias</label>
-        <label><input type="radio" name="CIN221" value="c" onchange="markSelected(this)"> Verificó que la entidad no realiza gestión de los riesgos institucionales</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN222">
-      <label>En la evaluación de la gestión del riesgo y control (tercera línea): <span class="req">*</span> <span class="codigo">CIN222</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN222" value="a" onchange="markCheck(this)"> Se pronunció acerca del diseño de los controles</label>
-        <label><input type="checkbox" name="CIN222" value="b" onchange="markCheck(this)"> Emitió comentarios sobre la implementación de los controles</label>
-        <label><input type="checkbox" name="CIN222" value="c" onchange="markCheck(this)"> Contrastó la información sobre eventos de materialización en los procesos evaluados</label>
-        <label><input type="checkbox" name="CIN222" value="d" onchange="markCheck(this)"> Otra</label>
-        <label><input type="checkbox" name="CIN222" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN233">
-      <label>Frente a la evaluación de la gestión de la información (tercera línea): <span class="req">*</span> <span class="codigo">CIN233</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN233" value="a" required onchange="markSelected(this)"> Evaluó la gestión de la información y cuenta con las evidencias</label>
-        <label><input type="radio" name="CIN233" value="b" onchange="markSelected(this)"> Realizó una evaluación parcial de la gestión de la información y cuenta con evidencias</label>
-        <label><input type="radio" name="CIN233" value="c" onchange="markSelected(this)"> No evaluó la gestión de la información</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN234">
-      <label>En la evaluación de la gestión de la información realizada (tercera línea): <span class="req">*</span> <span class="codigo">CIN234</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN234" value="a" required onchange="markSelected(this)"> Se identificaron debilidades o hallazgos y se comunicaron al comité y/o representante legal</label>
-        <label><input type="radio" name="CIN234" value="b" onchange="markSelected(this)"> Se identificaron debilidades o hallazgos, pero no se comunicaron al comité ni al representante legal</label>
-        <label><input type="radio" name="CIN234" value="c" onchange="markSelected(this)"> Ni se identificaron ni se comunicaron debilidades o hallazgos</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN236">
-      <label>Se entregan oportunamente los informes y reportes contables a la Contaduría General de la Nación y organismos de control: <span class="req">*</span> <span class="codigo">CIN236</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN236" value="siempre" required onchange="markSelected(this)"> Siempre</label>
-        <label><input type="radio" name="CIN236" value="mayoria" onchange="markSelected(this)"> La mayoría de las veces</label>
-        <label><input type="radio" name="CIN236" value="pocas" onchange="markSelected(this)"> Pocas veces</label>
-        <label><input type="radio" name="CIN236" value="nunca" onchange="markSelected(this)"> Nunca</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ====== PROCESO AUDITOR ====== -->
-<div class="seccion">
-  <div class="sec-header">📝 Proceso Auditor – Plan Anual y Metodología</div>
-  <div class="sec-body">
-
-    <div class="campo" id="campo-CIN238">
-      <label>Para el desarrollo de los procesos de auditoría interna y/o seguimiento, la entidad: <span class="req">*</span> <span class="codigo">CIN238</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN238" value="a" required onchange="markSelected(this)"> Contó con una metodología o lineamientos definidos para el proceso auditor</label>
-        <label><input type="radio" name="CIN238" value="b" onchange="markSelected(this)"> Desarrolló el proceso auditor de acuerdo con un plan de trabajo definido (dada su capacidad administrativa)</label>
-        <label><input type="radio" name="CIN238" value="c" onchange="markSelected(this)"> Solo llevó a cabo ejercicios de seguimiento a aspectos puntuales (dada su capacidad administrativa)</label>
-        <label><input type="radio" name="CIN238" value="d" onchange="markSelected(this)"> No lleva a cabo ejercicios de auditoría interna ni seguimiento a la gestión</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN239">
-      <label>¿El líder de control interno elaboró el plan anual de auditorías o seguimiento a la gestión? <span class="req">*</span> <span class="codigo">CIN239</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN239" value="a" required onchange="markSelected(this)"> Sí y fue aprobado por el Comité Institucional de Coordinación de Control Interno</label>
-        <label><input type="radio" name="CIN239" value="b" onchange="markSelected(this)"> Sí lo definió, pero no fue aprobado</label>
-        <label><input type="radio" name="CIN239" value="c" onchange="markSelected(this)"> No fue definido</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN240">
-      <label>El plan anual de auditorías: <span class="req">*</span> <span class="codigo">CIN240</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN240" value="a" onchange="markCheck(this)"> Definió acciones vinculadas a los roles del jefe de control interno</label>
-        <label><input type="checkbox" name="CIN240" value="b" onchange="markCheck(this)"> Definió un objetivo y alcance alineado con la planeación estratégica</label>
-        <label><input type="checkbox" name="CIN240" value="c" onchange="markCheck(this)"> Tuvo en cuenta el universo de auditoría</label>
-        <label><input type="checkbox" name="CIN240" value="d" onchange="markCheck(this)"> Priorizó los procesos a auditar según riesgos</label>
-        <label><input type="checkbox" name="CIN240" value="e" onchange="markCheck(this)"> Incluyó la programación de los informes de ley</label>
-        <label><input type="checkbox" name="CIN240" value="f" onchange="markCheck(this)"> Contempló el enfoque de auditorías basadas en riesgos</label>
-        <label><input type="checkbox" name="CIN240" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN241">
-      <label>Para el desarrollo de las auditorías, el jefe de control interno aplicó las siguientes fases: <span class="req">*</span> <span class="codigo">CIN241</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN241" value="a" onchange="markCheck(this)"> Planeación de cada auditoría basada en riesgos</label>
-        <label><input type="checkbox" name="CIN241" value="b" onchange="markCheck(this)"> Ejecución o desempeño del trabajo de auditoría</label>
-        <label><input type="checkbox" name="CIN241" value="c" onchange="markCheck(this)"> Comunicación de resultados (informe de auditoría)</label>
-        <label><input type="checkbox" name="CIN241" value="d" onchange="markCheck(this)"> Seguimiento a los planes de mejoramiento derivados del ejercicio auditor</label>
-        <label><input type="checkbox" name="CIN241" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN242">
-      <label>En la determinación de las auditorías programadas, se consideraron los siguientes aspectos: <span class="req">*</span> <span class="codigo">CIN242</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN242" value="a" onchange="markCheck(this)"> Las unidades auditables del universo de auditoría</label>
-        <label><input type="checkbox" name="CIN242" value="b" onchange="markCheck(this)"> El nivel de riesgo inherente de las unidades auditables</label>
-        <label><input type="checkbox" name="CIN242" value="c" onchange="markCheck(this)"> La recurrencia de hallazgos en auditorías internas y externas</label>
-        <label><input type="checkbox" name="CIN242" value="d" onchange="markCheck(this)"> Las solicitudes o intereses de la alta dirección</label>
-        <label><input type="checkbox" name="CIN242" value="e" onchange="markCheck(this)"> La fecha de la última auditoría realizada</label>
-        <label><input type="checkbox" name="CIN242" value="f" onchange="markCheck(this)"> Los resultados de indicadores de gestión</label>
-        <label><input type="checkbox" name="CIN242" value="g" onchange="markCheck(this)"> El impacto en los objetivos estratégicos</label>
-        <label><input type="checkbox" name="CIN242" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN243">
-      <label>Registre el progreso alcanzado en la ejecución del programa anual de auditorías: <span class="req">*</span> <span class="codigo">CIN243</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN243" value="a" required onchange="markSelected(this)"> Se ejecutó entre el 90% y 100% de lo planeado</label>
-        <label><input type="radio" name="CIN243" value="b" onchange="markSelected(this)"> Se ejecutó entre el 60% y 89% de lo planeado</label>
-        <label><input type="radio" name="CIN243" value="c" onchange="markSelected(this)"> La ejecución fue inferior al 60% de lo planeado</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN244">
-      <label>¿Cuáles unidades auditables consideró el jefe de control interno para su universo de auditoría? <span class="req">*</span> <span class="codigo">CIN244</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN244" value="a" onchange="markCheck(this)"> Los procesos estratégicos</label>
-        <label><input type="checkbox" name="CIN244" value="b" onchange="markCheck(this)"> Los procesos misionales</label>
-        <label><input type="checkbox" name="CIN244" value="c" onchange="markCheck(this)"> Los procesos de apoyo</label>
-        <label><input type="checkbox" name="CIN244" value="d" onchange="markCheck(this)"> Otras</label>
-        <label><input type="checkbox" name="CIN244" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN246">
-      <label>¿Qué acciones emprendió el jefe de control interno para la evaluación del sistema de control interno? <span class="req">*</span> <span class="codigo">CIN246</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN246" value="a" onchange="markCheck(this)"> Presentó los informes de auditoría en las instancias de control interno</label>
-        <label><input type="checkbox" name="CIN246" value="b" onchange="markCheck(this)"> Analizó los resultados de autoevaluaciones y evaluaciones independientes</label>
-        <label><input type="checkbox" name="CIN246" value="c" onchange="markCheck(this)"> Examinó los progresos en los planes de mejoramiento</label>
-        <label><input type="checkbox" name="CIN246" value="d" onchange="markCheck(this)"> Desarrolló otras acciones</label>
-        <label><input type="checkbox" name="CIN246" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN247">
-      <label>El jefe de control interno, en el marco de su plan anual de auditorías: <span class="req">*</span> <span class="codigo">CIN247</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN247" value="a" onchange="markCheck(this)"> Llevó a cabo supervisión de la gestión y ejecución presupuestal</label>
-        <label><input type="checkbox" name="CIN247" value="b" onchange="markCheck(this)"> Realizó seguimiento a las políticas de gestión del talento humano</label>
-        <label><input type="checkbox" name="CIN247" value="c" onchange="markCheck(this)"> Verificó que la entidad definió una política de gestión integral de riesgos</label>
-        <label><input type="checkbox" name="CIN247" value="d" onchange="markCheck(this)"> Evaluó la efectividad de los controles de los riesgos asociados</label>
-        <label><input type="checkbox" name="CIN247" value="e" onchange="markCheck(this)"> Analizó la eficacia de las medidas en los planes de mejora</label>
-        <label><input type="checkbox" name="CIN247" value="f" onchange="markCheck(this)"> Desarrolló auditorías al modelo de seguridad y privacidad de la información (MSPI)</label>
-        <label><input type="checkbox" name="CIN247" value="g" onchange="markCheck(this)"> Desarrolló auditorías de accesibilidad web (NTC 5854)</label>
-        <label><input type="checkbox" name="CIN247" value="h" onchange="markCheck(this)"> Llevó a cabo auditorías de gestión (NTC 6047)</label>
-        <label><input type="checkbox" name="CIN247" value="i" onchange="markCheck(this)"> Desarrolló auditorías a otros sistemas de gestión (SST, salud, etc.)</label>
-        <label><input type="checkbox" name="CIN247" value="j" onchange="markCheck(this)"> Evaluó la oportunidad, integralidad y coherencia de la información suministrada a organismos de control</label>
-        <label><input type="checkbox" name="CIN247" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN252">
-      <label>En los procesos de auditoría planificados, se tomaron en cuenta los siguientes aspectos: <span class="req">*</span> <span class="codigo">CIN252</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN252" value="a" onchange="markCheck(this)"> Objetivo de la auditoría</label>
-        <label><input type="checkbox" name="CIN252" value="b" onchange="markCheck(this)"> Alcance de la auditoría</label>
-        <label><input type="checkbox" name="CIN252" value="c" onchange="markCheck(this)"> Consideraciones sobre recursos necesarios</label>
-        <label><input type="checkbox" name="CIN252" value="d" onchange="markCheck(this)"> Programa para el desarrollo de la auditoría</label>
-        <label><input type="checkbox" name="CIN252" value="ninguna" onchange="markCheck(this)"> No se adelantan acciones de planeación para cada auditoría</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN253">
-      <label>En la etapa de ejecución de cada auditoría, se implementaron las siguientes herramientas y actividades: <span class="req">*</span> <span class="codigo">CIN253</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN253" value="a" onchange="markCheck(this)"> Firmó la carta de representación</label>
-        <label><input type="checkbox" name="CIN253" value="b" onchange="markCheck(this)"> Proporcionó al auditado la carta de compromiso</label>
-        <label><input type="checkbox" name="CIN253" value="c" onchange="markCheck(this)"> Desarrolló la reunión inicial con el líder del proceso auditado</label>
-        <label><input type="checkbox" name="CIN253" value="d" onchange="markCheck(this)"> Implementó los procedimientos del programa de auditoría y documentó su aplicación</label>
-        <label><input type="checkbox" name="CIN253" value="e" onchange="markCheck(this)"> Realizó pruebas y verificaciones de información durante la ejecución</label>
-        <label><input type="checkbox" name="CIN253" value="f" onchange="markCheck(this)"> Documentó en los papeles de trabajo el progreso de la auditoría</label>
-        <label><input type="checkbox" name="CIN253" value="g" onchange="markCheck(this)"> Organizó mesas de trabajo anticipadas para compartir resultados preliminares</label>
-        <label><input type="checkbox" name="CIN253" value="h" onchange="markCheck(this)"> Llevó a cabo la reunión de cierre con el líder del proceso auditado</label>
-        <label><input type="checkbox" name="CIN253" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN254">
-      <label>¿Qué características tienen los informes resultado de los procesos de auditoría? <span class="req">*</span> <span class="codigo">CIN254</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN254" value="a" onchange="markCheck(this)"> Estructura de informe ejecutivo para facilitar comunicación y publicación web</label>
-        <label><input type="checkbox" name="CIN254" value="b" onchange="markCheck(this)"> Estructura detallada para conocimiento a fondo por parte de auditados</label>
-        <label><input type="checkbox" name="CIN254" value="c" onchange="markCheck(this)"> Estructura con análisis del cumplimiento del objetivo de la auditoría</label>
-        <label><input type="checkbox" name="CIN254" value="d" onchange="markCheck(this)"> Estructura con análisis del cumplimiento del alcance de la auditoría</label>
-        <label><input type="checkbox" name="CIN254" value="e" onchange="markCheck(this)"> Resumen con los aspectos más importantes (títulos de hallazgos)</label>
-        <label><input type="checkbox" name="CIN254" value="f" onchange="markCheck(this)"> Recomendaciones y conclusiones del proceso auditor</label>
-        <label><input type="checkbox" name="CIN254" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN255">
-      <label>¿El jefe de control interno contó con herramientas para el seguimiento a los planes de mejoramiento? <span class="req">*</span> <span class="codigo">CIN255</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN255" value="a" required onchange="markSelected(this)"> Sí, y cuenta con las evidencias</label>
-        <label><input type="radio" name="CIN255" value="b" onchange="markSelected(this)"> Se hace seguimiento, pero no se cuenta con una herramienta formalizada</label>
-        <label><input type="radio" name="CIN255" value="c" onchange="markSelected(this)"> No se adelanta seguimiento a los planes de mejoramiento</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ====== CAPACIDAD INSTITUCIONAL ====== -->
-<div class="seccion">
-  <div class="sec-header">🏛️ Capacidad Institucional del Área de Control Interno</div>
-  <div class="sec-body">
-
-    <div class="campo" id="campo-CIN264">
-      <label>Para el ejercicio de evaluación independiente en la vigencia evaluada, la entidad: <span class="req">*</span> <span class="codigo">CIN264</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN264" value="a" required onchange="markSelected(this)"> Contó con una oficina de control interno (dependencia, jefe y equipo de trabajo)</label>
-        <label><input type="radio" name="CIN264" value="b" onchange="markSelected(this)"> Contó con un grupo interno de trabajo coordinado por un servidor del nivel asesor o profesional</label>
-        <label><input type="radio" name="CIN264" value="c" onchange="markSelected(this)"> No contó con un área responsable, pero el Representante Legal asignó la función a un servidor (sin equipo)</label>
-        <label><input type="radio" name="CIN264" value="d" onchange="markSelected(this)"> Se cuenta con un contrato de apoyo</label>
-        <label><input type="radio" name="CIN264" value="e" onchange="markSelected(this)"> No se contaba con un responsable</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN268">
-      <label>El jefe de control interno o quien haga sus veces: <span class="req">*</span> <span class="codigo">CIN268</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN268" value="periodo" required onchange="markSelected(this)"> Es de periodo fijo</label>
-        <label><input type="radio" name="CIN268" value="libre" onchange="markSelected(this)"> Es de libre nombramiento y remoción</label>
-        <label><input type="radio" name="CIN268" value="carrera" onchange="markSelected(this)"> Está inscrito en la Carrera Administrativa</label>
-        <label><input type="radio" name="CIN268" value="provisional" onchange="markSelected(this)"> Es de nombramiento provisional</label>
-        <label><input type="radio" name="CIN268" value="temporal" onchange="markSelected(this)"> Pertenece a la planta temporal</label>
-        <label><input type="radio" name="CIN268" value="otro" onchange="markSelected(this)"> Otro</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN269">
-      <label>El jefe de control interno pertenece al siguiente nivel jerárquico: <span class="req">*</span> <span class="codigo">CIN269</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN269" value="directivo" required onchange="markSelected(this)"> Directivo</label>
-        <label><input type="radio" name="CIN269" value="asesor" onchange="markSelected(this)"> Asesor</label>
-        <label><input type="radio" name="CIN269" value="profesional" onchange="markSelected(this)"> Profesional</label>
-        <label><input type="radio" name="CIN269" value="tecnico" onchange="markSelected(this)"> Técnico</label>
-        <label><input type="radio" name="CIN269" value="asistencial" onchange="markSelected(this)"> Asistencial</label>
-        <label><input type="radio" name="CIN269" value="otro" onchange="markSelected(this)"> Otro</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN270">
-      <label>El máximo nivel de formación académica del jefe de control interno es: <span class="req">*</span> <span class="codigo">CIN270</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN270" value="doctorado" required onchange="markSelected(this)"> Doctorado</label>
-        <label><input type="radio" name="CIN270" value="maestria" onchange="markSelected(this)"> Maestría</label>
-        <label><input type="radio" name="CIN270" value="especializacion" onchange="markSelected(this)"> Especialización</label>
-        <label><input type="radio" name="CIN270" value="pregrado" onchange="markSelected(this)"> Pregrado</label>
-        <label><input type="radio" name="CIN270" value="tecnica" onchange="markSelected(this)"> Formación técnica o tecnológica</label>
-        <label><input type="radio" name="CIN270" value="media" onchange="markSelected(this)"> Formación media (bachiller)</label>
-        <label><input type="radio" name="CIN270" value="basica" onchange="markSelected(this)"> Formación básica (noveno grado)</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN271">
-      <label>¿Con cuál disciplina académica está relacionada la formación del jefe de control interno? <span class="req">*</span> <span class="codigo">CIN271</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN271" value="derecho" onchange="markCheck(this)"> Derecho</label>
-        <label><input type="checkbox" name="CIN271" value="economia" onchange="markCheck(this)"> Economía</label>
-        <label><input type="checkbox" name="CIN271" value="estadistica" onchange="markCheck(this)"> Estadística</label>
-        <label><input type="checkbox" name="CIN271" value="contaduria" onchange="markCheck(this)"> Contaduría</label>
-        <label><input type="checkbox" name="CIN271" value="adm-empresas" onchange="markCheck(this)"> Administración de Empresas</label>
-        <label><input type="checkbox" name="CIN271" value="adm-publica" onchange="markCheck(this)"> Administración Pública</label>
-        <label><input type="checkbox" name="CIN271" value="adm-financiera" onchange="markCheck(this)"> Administración Financiera</label>
-        <label><input type="checkbox" name="CIN271" value="ing-industrial" onchange="markCheck(this)"> Ingeniería Industrial</label>
-        <label><input type="checkbox" name="CIN271" value="ing-sistemas" onchange="markCheck(this)"> Ingeniería de Sistemas</label>
-        <label><input type="checkbox" name="CIN271" value="otro" onchange="markCheck(this)"> Otro</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN272">
-      <label>La experiencia específica en temas de control interno del jefe de control interno es: <span class="req">*</span> <span class="codigo">CIN272</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN272" value="1" required onchange="markSelected(this)"> Menor a 1 año</label>
-        <label><input type="radio" name="CIN272" value="1-3" onchange="markSelected(this)"> Entre 1 – 3 años</label>
-        <label><input type="radio" name="CIN272" value="4-6" onchange="markSelected(this)"> Entre 4 – 6 años</label>
-        <label><input type="radio" name="CIN272" value="7-10" onchange="markSelected(this)"> Entre 7 – 10 años</label>
-        <label><input type="radio" name="CIN272" value="11-20" onchange="markSelected(this)"> Entre 11 – 20 años</label>
-        <label><input type="radio" name="CIN272" value="21" onchange="markSelected(this)"> Mayor de 21 años</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-    <!-- CIN273 -->
-    <div class="campo" id="campo-CIN273">
-      <label>Número total de trabajadores del área de Control Interno por tipo de empleo (corte 31 dic): <span class="req">*</span> <span class="codigo">CIN273</span></label>
-      <span class="hint">Ingrese 0 si no aplica para alguna categoría.</span>
-      <div class="num-grid">
-        <span class="row-label">Empleados públicos</span> <input type="number" name="CIN273_a" min="0" value="0" required>
-        <span class="row-label">Trabajadores Oficiales</span> <input type="number" name="CIN273_b" min="0" value="0" required>
-        <span class="row-label">Servidores derecho privado</span> <input type="number" name="CIN273_c" min="0" value="0" required>
-        <span class="row-label">Contratistas</span> <input type="number" name="CIN273_d" min="0" value="0" required>
-        <span class="row-label">Otros</span> <input type="number" name="CIN273_e" min="0" value="0" required>
-      </div>
-      <div class="err-msg">Complete todos los campos numéricos.</div>
-    </div>
-
-    <!-- CIN274 -->
-    <div class="campo" id="campo-CIN274">
-      <label>De los empleados públicos de Control Interno, desagréguelos por tipo de vinculación (corte 31 dic): <span class="req">*</span> <span class="codigo">CIN274</span></label>
-      <span class="hint">Ingrese 0 si no aplica.</span>
-      <div class="num-grid">
-        <span class="row-label">Libre nombramiento y remoción</span> <input type="number" name="CIN274_a" min="0" value="0" required>
-        <span class="row-label">Carrera administrativa</span> <input type="number" name="CIN274_b" min="0" value="0" required>
-        <span class="row-label">Nombramiento provisional</span> <input type="number" name="CIN274_c" min="0" value="0" required>
-        <span class="row-label">Nombramiento en planta temporal</span> <input type="number" name="CIN274_d" min="0" value="0" required>
-        <span class="row-label">Otros</span> <input type="number" name="CIN274_e" min="0" value="0" required>
-      </div>
-      <div class="err-msg">Complete todos los campos numéricos.</div>
-    </div>
-
-    <!-- CIN275 -->
-    <div class="campo" id="campo-CIN275">
-      <label>Trabajadores de Control Interno por máximo nivel de formación académica (corte 31 dic): <span class="req">*</span> <span class="codigo">CIN275</span></label>
-      <span class="hint">Ingrese 0 si no aplica.</span>
-      <div class="num-grid">
-        <span class="row-label">Doctorado</span> <input type="number" name="CIN275_a" min="0" value="0" required>
-        <span class="row-label">Maestría</span> <input type="number" name="CIN275_b" min="0" value="0" required>
-        <span class="row-label">Especialización</span> <input type="number" name="CIN275_c" min="0" value="0" required>
-        <span class="row-label">Pregrado</span> <input type="number" name="CIN275_d" min="0" value="0" required>
-        <span class="row-label">Técnica o tecnológica</span> <input type="number" name="CIN275_e" min="0" value="0" required>
-        <span class="row-label">Bachiller</span> <input type="number" name="CIN275_f" min="0" value="0" required>
-        <span class="row-label">Básica</span> <input type="number" name="CIN275_g" min="0" value="0" required>
-      </div>
-      <div class="err-msg">Complete todos los campos numéricos.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN276">
-      <label>¿Cuáles son las disciplinas académicas más comunes en la formación de los servidores de control interno? <span class="req">*</span> <span class="codigo">CIN276</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN276" value="derecho" onchange="markCheck(this)"> Derecho</label>
-        <label><input type="checkbox" name="CIN276" value="economia" onchange="markCheck(this)"> Economía</label>
-        <label><input type="checkbox" name="CIN276" value="estadistica" onchange="markCheck(this)"> Estadística</label>
-        <label><input type="checkbox" name="CIN276" value="contaduria" onchange="markCheck(this)"> Contaduría</label>
-        <label><input type="checkbox" name="CIN276" value="adm-empresas" onchange="markCheck(this)"> Administración de Empresas</label>
-        <label><input type="checkbox" name="CIN276" value="adm-publica" onchange="markCheck(this)"> Administración Pública</label>
-        <label><input type="checkbox" name="CIN276" value="adm-financiera" onchange="markCheck(this)"> Administración Financiera</label>
-        <label><input type="checkbox" name="CIN276" value="ing-industrial" onchange="markCheck(this)"> Ingeniería Industrial</label>
-        <label><input type="checkbox" name="CIN276" value="ing-sistemas" onchange="markCheck(this)"> Ingeniería de Sistemas</label>
-        <label><input type="checkbox" name="CIN276" value="otro" onchange="markCheck(this)"> Otro</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN287">
-      <label>¿Cuántos trabajadores de Control Interno tienen certificación del Instituto Internacional de Auditores (IIA)? <span class="req">*</span> <span class="codigo">CIN287</span></label>
-      <input type="number" name="CIN287" min="0" placeholder="Ingrese 0 si ninguno" required>
-      <div class="err-msg">Este campo es obligatorio.</div>
-    </div>
-
-    <!-- CIN288 -->
-    <div class="campo" id="campo-CIN288">
-      <label>Número de trabajadores de Control Interno por rango de edades: <span class="req">*</span> <span class="codigo">CIN288</span></label>
-      <span class="hint">Ingrese 0 si no aplica.</span>
-      <div class="num-grid">
-        <span class="row-label">Entre 18 y 25 años</span> <input type="number" name="CIN288_a" min="0" value="0" required>
-        <span class="row-label">Entre 26 y 35 años</span> <input type="number" name="CIN288_b" min="0" value="0" required>
-        <span class="row-label">Entre 36 y 45 años</span> <input type="number" name="CIN288_c" min="0" value="0" required>
-        <span class="row-label">Entre 46 y 55 años</span> <input type="number" name="CIN288_d" min="0" value="0" required>
-        <span class="row-label">Entre 56 y 65 años</span> <input type="number" name="CIN288_e" min="0" value="0" required>
-        <span class="row-label">Más de 66 años</span> <input type="number" name="CIN288_f" min="0" value="0" required>
-      </div>
-      <div class="err-msg">Complete todos los campos numéricos.</div>
-    </div>
-
-    <!-- CIN289 -->
-    <div class="campo" id="campo-CIN289">
-      <label>Número de trabajadores de Control Interno por rangos de experiencia laboral: <span class="req">*</span> <span class="codigo">CIN289</span></label>
-      <span class="hint">Ingrese 0 si no aplica.</span>
-      <div class="num-grid">
-        <span class="row-label">Menor a 1 año</span> <input type="number" name="CIN289_a" min="0" value="0" required>
-        <span class="row-label">Entre 1 – 3 años</span> <input type="number" name="CIN289_b" min="0" value="0" required>
-        <span class="row-label">Entre 4 – 6 años</span> <input type="number" name="CIN289_c" min="0" value="0" required>
-        <span class="row-label">Entre 7 – 10 años</span> <input type="number" name="CIN289_d" min="0" value="0" required>
-        <span class="row-label">Entre 11 – 20 años</span> <input type="number" name="CIN289_e" min="0" value="0" required>
-        <span class="row-label">Mayor de 21 años</span> <input type="number" name="CIN289_f" min="0" value="0" required>
-      </div>
-      <div class="err-msg">Complete todos los campos numéricos.</div>
-    </div>
-
-    <!-- CIN290 -->
-    <div class="campo" id="campo-CIN290">
-      <label>Número de trabajadores de Control Interno por rangos de experiencia específica en control interno: <span class="req">*</span> <span class="codigo">CIN290</span></label>
-      <span class="hint">Ingrese 0 si no aplica.</span>
-      <div class="num-grid">
-        <span class="row-label">Menor a 1 año</span> <input type="number" name="CIN290_a" min="0" value="0" required>
-        <span class="row-label">Entre 1 – 3 años</span> <input type="number" name="CIN290_b" min="0" value="0" required>
-        <span class="row-label">Entre 4 – 6 años</span> <input type="number" name="CIN290_c" min="0" value="0" required>
-        <span class="row-label">Entre 7 – 10 años</span> <input type="number" name="CIN290_d" min="0" value="0" required>
-        <span class="row-label">Entre 11 – 20 años</span> <input type="number" name="CIN290_e" min="0" value="0" required>
-        <span class="row-label">Mayor de 21 años</span> <input type="number" name="CIN290_f" min="0" value="0" required>
-      </div>
-      <div class="err-msg">Complete todos los campos numéricos.</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ====== GESTIÓN INFORMACIÓN ====== -->
-<div class="seccion">
-  <div class="sec-header">📊 Gestión de la Información, Riesgos y Alertas</div>
-  <div class="sec-body">
-
-    <div class="campo" id="campo-CIN300">
-      <label>Para el control sobre la gestión de la información en la entidad: <span class="req">*</span> <span class="codigo">CIN300</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN300" value="a" onchange="markCheck(this)"> Se estableció un sistema o procedimiento para el manejo y control de la información</label>
-        <label><input type="checkbox" name="CIN300" value="b" onchange="markCheck(this)"> Se realizó un respaldo de la información de manera periódica y segura</label>
-        <label><input type="checkbox" name="CIN300" value="c" onchange="markCheck(this)"> Se estableció un criterio para la clasificación y acceso a la información sensible</label>
-        <label><input type="checkbox" name="CIN300" value="d" onchange="markCheck(this)"> Se establecieron controles sobre los cambios realizados en la información</label>
-        <label><input type="checkbox" name="CIN300" value="e" onchange="markCheck(this)"> Se asignaron roles y responsabilidades en relación con el acceso y manejo de la información</label>
-        <label><input type="checkbox" name="CIN300" value="f" onchange="markCheck(this)"> Se realizaron revisiones periódicas de la integridad y precisión de la información</label>
-        <label><input type="checkbox" name="CIN300" value="g" onchange="markCheck(this)"> Se mantuvo actualizada la documentación (manuales, políticas, normativas)</label>
-        <label><input type="checkbox" name="CIN300" value="ninguna" onchange="markCheck(this)"> Ninguna de las anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN301">
-      <label>¿Cuáles fueron las principales razones que afectaron el cumplimiento total del plan anual de auditoría? <span class="req">*</span> <span class="codigo">CIN301</span></label>
-      <div class="check-group">
-        <label><input type="checkbox" name="CIN301" value="a" onchange="markCheck(this)"> Disponibilidad de recursos (técnicos, humanos, entre otros)</label>
-        <label><input type="checkbox" name="CIN301" value="b" onchange="markCheck(this)"> Cambios organizacionales o normativos</label>
-        <label><input type="checkbox" name="CIN301" value="c" onchange="markCheck(this)"> Comunicación deficiente entre el auditor y los auditados</label>
-        <label><input type="checkbox" name="CIN301" value="d" onchange="markCheck(this)"> Fallas en la elaboración del plan anual de auditoría</label>
-        <label><input type="checkbox" name="CIN301" value="e" onchange="markCheck(this)"> Falta de acceso a la información clave para el desarrollo de la auditoría</label>
-        <label><input type="checkbox" name="CIN301" value="f" onchange="markCheck(this)"> Conflictos de intereses entre el auditor y los auditados</label>
-        <label><input type="checkbox" name="CIN301" value="g" onchange="markCheck(this)"> Otro</label>
-        <label><input type="checkbox" name="CIN301" value="ninguno" onchange="markCheck(this)"> Ninguno de los anteriores</label>
-      </div>
-      <div class="err-msg">Seleccione al menos una opción.</div>
-    </div>
-
-    <!-- CIN304 -->
-    <div class="campo" id="campo-CIN304">
-      <label>De acuerdo con los resultados del seguimiento a la gestión del riesgo, indique: <span class="req">*</span> <span class="codigo">CIN304</span></label>
-      <span class="hint">Ingrese 0 si no aplica para alguna categoría.</span>
-      <div class="num-grid">
-        <span class="row-label">Total riesgos identificados</span> <input type="number" name="CIN304_a" min="0" value="0" required>
-        <span class="row-label">Riesgos materializados</span> <input type="number" name="CIN304_b" min="0" value="0" required>
-        <span class="row-label">Materializados no identificados</span> <input type="number" name="CIN304_c" min="0" value="0" required>
-        <span class="row-label">Riesgos de corrupción identificados</span> <input type="number" name="CIN304_d" min="0" value="0" required>
-        <span class="row-label">Riesgos de corrupción materializados</span> <input type="number" name="CIN304_e" min="0" value="0" required>
-        <span class="row-label">Riesgos corrupción no identificados previamente</span> <input type="number" name="CIN304_f" min="0" value="0" required>
-      </div>
-      <div class="err-msg">Complete todos los campos numéricos.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN305">
-      <label>Indique el número total de trabajadores del área de Control Interno: <span class="req">*</span> <span class="codigo">CIN305</span></label>
-      <input type="number" name="CIN305" min="0" placeholder="Número total" required>
-      <div class="err-msg">Este campo es obligatorio.</div>
-    </div>
-
-    <div class="campo" id="campo-CIN306">
-      <label>¿El jefe de control interno generó alertas o recomendaciones preventivas respecto a eventuales incumplimientos en la implementación de la política de integridad? <span class="req">*</span> <span class="codigo">CIN306</span></label>
-      <div class="radio-group">
-        <label><input type="radio" name="CIN306" value="si" required onchange="markSelected(this)"> Sí, y cuenta con las evidencias</label>
-        <label><input type="radio" name="CIN306" value="no" onchange="markSelected(this)"> No generó las respectivas alertas</label>
-        <label><input type="radio" name="CIN306" value="na" onchange="markSelected(this)"> La entidad no presentó incumplimientos en la implementación de la política de integridad</label>
-      </div>
-      <div class="err-msg">Seleccione una opción.</div>
-    </div>
-
-  </div>
-</div>
-
-<button type="submit" class="btn-submit">✅ Enviar Formulario</button>
-
-</form>
-
-<div class="success-screen" id="success-screen">
-  <div class="icon">✅</div>
-  <h2>¡Formulario enviado correctamente!</h2>
-  <p>Gracias por diligenciar el formulario MECI 122.<br>Sus respuestas han sido registradas exitosamente.</p>
-</div>
-
-</div>
+<div id="toast"></div>
 
 <script>
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
+const STORAGE_KEY = "meci_respuestas";
 
-// ---- RAMIFICACIÓN TIPO ENTIDAD ----
-function ramificarEntidad() {
-  const tipo = document.getElementById('tipo_entidad').value;
-  document.querySelectorAll('.entidad-block').forEach(b => {
-    b.classList.remove('visible');
-    b.querySelector('select').required = false;
-  });
-  if (tipo === 'DESCENTRALIZADA') {
-    document.getElementById('bloque-desc').classList.add('visible');
-    document.getElementById('entidad_desc').required = true;
-  } else if (tipo === 'MUNICIPIO') {
-    document.getElementById('bloque-muni').classList.add('visible');
-    document.getElementById('entidad_muni').required = true;
-  } else if (tipo === 'ESES') {
-    document.getElementById('bloque-eses').classList.add('visible');
-    document.getElementById('entidad_ese').required = true;
-  }
-  actualizarProgreso();
+let todosLosDatos = [];
+let datosFiltrados = [];
+let chartInstances = {};
+
+// ── Definición completa de preguntas y sus opciones ──
+const PREGUNTAS = [
+  { codigo:'PER201', titulo:'¿El MECI ha generado valor agregado a la gestión?', tipo:'radio',
+    opciones:[{v:'si',l:'Sí'},{v:'no',l:'No'}] },
+  { codigo:'CIN203', titulo:'Política de integridad – cumplimiento verificado', tipo:'check',
+    opciones:[{v:'a',l:'Estrategia código de integridad'},{v:'b',l:'Protocolo conflictos de interés'},{v:'c',l:'Gestiona conflictos'},{v:'d',l:'SIGEP actualizado'},{v:'e',l:'Registro Ley 2013/2019'},{v:'ninguna',l:'No cumple ninguna'}] },
+  { codigo:'CIN206', titulo:'Talento Humano – verificado por jefe CI', tipo:'check',
+    opciones:[{v:'a',l:'Plan Estratégico TH'},{v:'b',l:'Decreto 612/2018'},{v:'c',l:'Capacitación'},{v:'d',l:'Bienestar e incentivos'},{v:'e',l:'Clima laboral'},{v:'f',l:'SIGEP TH'},{v:'g',l:'Otros'},{v:'ninguna',l:'No hace seguimiento'}] },
+  { codigo:'CIN207', titulo:'Planeación y Riesgos – verificado por jefe CI', tipo:'check',
+    opciones:[{v:'a',l:'Objetivos claros'},{v:'b',l:'Responsables y metas'},{v:'c',l:'Política gestión riesgos'},{v:'d',l:'Monitoreos riesgo'},{v:'e',l:'Metas y objetivos'},{v:'f',l:'Ejecución presupuestal'},{v:'g',l:'Otras actividades'},{v:'ninguna',l:'No monitorea SCI'}] },
+  { codigo:'CIN221', titulo:'Evaluación independiente – gestión integral riesgos', tipo:'radio',
+    opciones:[{v:'a',l:'Gestión integral con evidencias'},{v:'b',l:'Gestión parcial con evidencias'},{v:'c',l:'No realiza gestión'}] },
+  { codigo:'CIN222', titulo:'Evaluación gestión riesgo y control (3ª línea)', tipo:'check',
+    opciones:[{v:'a',l:'Diseño de controles'},{v:'b',l:'Implementación controles'},{v:'c',l:'Eventos materializados'},{v:'d',l:'Otra'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN233', titulo:'Evaluación gestión de información (3ª línea)', tipo:'radio',
+    opciones:[{v:'a',l:'Evaluación completa'},{v:'b',l:'Evaluación parcial'},{v:'c',l:'No evaluó'}] },
+  { codigo:'CIN234', titulo:'Hallazgos de gestión de información comunicados', tipo:'radio',
+    opciones:[{v:'a',l:'Identificados y comunicados'},{v:'b',l:'Identificados, no comunicados'},{v:'c',l:'Ni identificados ni comunicados'}] },
+  { codigo:'CIN236', titulo:'Informes contables entregados oportunamente', tipo:'radio',
+    opciones:[{v:'siempre',l:'Siempre'},{v:'mayoria',l:'Mayoría de veces'},{v:'pocas',l:'Pocas veces'},{v:'nunca',l:'Nunca'}] },
+  { codigo:'CIN238', titulo:'Proceso auditor – metodología y plan', tipo:'radio',
+    opciones:[{v:'a',l:'Metodología definida'},{v:'b',l:'Plan de trabajo'},{v:'c',l:'Solo seguimiento puntual'},{v:'d',l:'No hay ejercicios'}] },
+  { codigo:'CIN239', titulo:'Plan anual de auditorías elaborado', tipo:'radio',
+    opciones:[{v:'a',l:'Sí, aprobado por Comité'},{v:'b',l:'Sí, sin aprobación'},{v:'c',l:'No fue definido'}] },
+  { codigo:'CIN240', titulo:'Características del plan anual de auditorías', tipo:'check',
+    opciones:[{v:'a',l:'Roles jefe CI'},{v:'b',l:'Objetivo y alcance estratégico'},{v:'c',l:'Universo de auditoría'},{v:'d',l:'Priorización por riesgos'},{v:'e',l:'Informes de ley'},{v:'f',l:'Enfoque riesgos'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN241', titulo:'Fases del proceso auditor aplicadas', tipo:'check',
+    opciones:[{v:'a',l:'Planeación'},{v:'b',l:'Ejecución'},{v:'c',l:'Comunicación resultados'},{v:'d',l:'Seguimiento planes mejora'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN242', titulo:'Aspectos considerados en auditorías programadas', tipo:'check',
+    opciones:[{v:'a',l:'Universo auditable'},{v:'b',l:'Riesgo inherente'},{v:'c',l:'Recurrencia hallazgos'},{v:'d',l:'Intereses alta dirección'},{v:'e',l:'Última auditoría'},{v:'f',l:'Indicadores gestión'},{v:'g',l:'Impacto objetivos'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN243', titulo:'Progreso ejecución programa anual de auditorías', tipo:'radio',
+    opciones:[{v:'a',l:'90–100% ejecutado'},{v:'b',l:'60–89% ejecutado'},{v:'c',l:'Menos del 60%'}] },
+  { codigo:'CIN244', titulo:'Unidades auditables en universo de auditoría', tipo:'check',
+    opciones:[{v:'a',l:'Procesos estratégicos'},{v:'b',l:'Procesos misionales'},{v:'c',l:'Procesos de apoyo'},{v:'d',l:'Otras'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN246', titulo:'Acciones para evaluación del SCI', tipo:'check',
+    opciones:[{v:'a',l:'Informes en instancias CI'},{v:'b',l:'Resultados autoevaluaciones'},{v:'c',l:'Planes de mejoramiento'},{v:'d',l:'Otras acciones'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN247', titulo:'Actividades del plan anual de auditorías realizadas', tipo:'check',
+    opciones:[{v:'a',l:'Gestión presupuestal'},{v:'b',l:'Talento humano'},{v:'c',l:'Política gestión riesgos'},{v:'d',l:'Efectividad controles'},{v:'e',l:'Planes de mejora'},{v:'f',l:'MSPI'},{v:'g',l:'Accesibilidad web'},{v:'h',l:'Gestión NTC 6047'},{v:'i',l:'Otros sistemas gestión'},{v:'j',l:'Oportunidad información'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN252', titulo:'Aspectos considerados en planeación de auditorías', tipo:'check',
+    opciones:[{v:'a',l:'Objetivo'},{v:'b',l:'Alcance'},{v:'c',l:'Recursos'},{v:'d',l:'Programa auditoría'},{v:'ninguna',l:'No se planea'}] },
+  { codigo:'CIN253', titulo:'Herramientas en ejecución de auditorías', tipo:'check',
+    opciones:[{v:'a',l:'Carta representación'},{v:'b',l:'Carta compromiso'},{v:'c',l:'Reunión inicial'},{v:'d',l:'Procedimientos documentados'},{v:'e',l:'Pruebas y verificaciones'},{v:'f',l:'Papeles de trabajo'},{v:'g',l:'Mesas preliminares'},{v:'h',l:'Reunión de cierre'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN254', titulo:'Características de los informes de auditoría', tipo:'check',
+    opciones:[{v:'a',l:'Informe ejecutivo'},{v:'b',l:'Estructura detallada'},{v:'c',l:'Cumplimiento objetivo'},{v:'d',l:'Cumplimiento alcance'},{v:'e',l:'Resumen hallazgos'},{v:'f',l:'Recomendaciones'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN255', titulo:'Herramientas para seguimiento planes de mejoramiento', tipo:'radio',
+    opciones:[{v:'a',l:'Sí, con evidencias'},{v:'b',l:'Seguimiento sin herramienta'},{v:'c',l:'No hay seguimiento'}] },
+  { codigo:'CIN264', titulo:'Estructura de Control Interno en la entidad', tipo:'radio',
+    opciones:[{v:'a',l:'Oficina CI completa'},{v:'b',l:'Grupo interno'},{v:'c',l:'Servidor sin equipo'},{v:'d',l:'Contrato de apoyo'},{v:'e',l:'Sin responsable'}] },
+  { codigo:'CIN268', titulo:'Tipo de vinculación jefe de Control Interno', tipo:'radio',
+    opciones:[{v:'periodo',l:'Período fijo'},{v:'libre',l:'Libre nombramiento'},{v:'carrera',l:'Carrera administrativa'},{v:'provisional',l:'Provisional'},{v:'temporal',l:'Planta temporal'},{v:'otro',l:'Otro'}] },
+  { codigo:'CIN269', titulo:'Nivel jerárquico jefe de Control Interno', tipo:'radio',
+    opciones:[{v:'directivo',l:'Directivo'},{v:'asesor',l:'Asesor'},{v:'profesional',l:'Profesional'},{v:'tecnico',l:'Técnico'},{v:'asistencial',l:'Asistencial'},{v:'otro',l:'Otro'}] },
+  { codigo:'CIN270', titulo:'Máximo nivel de formación jefe CI', tipo:'radio',
+    opciones:[{v:'doctorado',l:'Doctorado'},{v:'maestria',l:'Maestría'},{v:'especializacion',l:'Especialización'},{v:'pregrado',l:'Pregrado'},{v:'tecnica',l:'Técnica'},{v:'media',l:'Bachiller'},{v:'basica',l:'Básica'}] },
+  { codigo:'CIN272', titulo:'Experiencia específica en CI del jefe', tipo:'radio',
+    opciones:[{v:'1',l:'< 1 año'},{v:'1-3',l:'1–3 años'},{v:'4-6',l:'4–6 años'},{v:'7-10',l:'7–10 años'},{v:'11-20',l:'11–20 años'},{v:'21',l:'> 21 años'}] },
+  { codigo:'CIN300', titulo:'Control sobre gestión de la información', tipo:'check',
+    opciones:[{v:'a',l:'Sistema o procedimiento'},{v:'b',l:'Respaldo periódico'},{v:'c',l:'Clasificación acceso'},{v:'d',l:'Controles de cambio'},{v:'e',l:'Roles y responsabilidades'},{v:'f',l:'Revisiones periódicas'},{v:'g',l:'Documentación actualizada'},{v:'ninguna',l:'Ninguna'}] },
+  { codigo:'CIN301', titulo:'Razones de incumplimiento plan anual auditoría', tipo:'check',
+    opciones:[{v:'a',l:'Recursos insuficientes'},{v:'b',l:'Cambios normativos'},{v:'c',l:'Comunicación deficiente'},{v:'d',l:'Fallas en el plan'},{v:'e',l:'Falta de información'},{v:'f',l:'Conflictos de interés'},{v:'g',l:'Otro'},{v:'ninguna',l:'Ninguno'}] },
+  { codigo:'CIN306', titulo:'Alertas preventivas política de integridad generadas', tipo:'radio',
+    opciones:[{v:'si',l:'Sí, con evidencias'},{v:'no',l:'No generó alertas'},{v:'na',l:'Sin incumplimientos'}] },
+];
+
+// Clave de las columnas fu_sn_ que vienen del formulario
+// Formato: fu_sn_<campo>_<valor_opcion>  => si | no | na
+function getFuSN(row, campo, optVal) {
+  const key = `fu_sn_${campo}_${optVal}`;
+  return row[key] || null; // 'si','no','na' o null
+}
+function getFuJust(row, campo, optVal) {
+  return row[`fu_just_${campo}_${optVal}`] || '';
 }
 
-// ---- HIGHLIGHT SELECCIÓN ----
+async function cargarDatos(forzarLimpio = false) {
+  showToast('⏳ Cargando datos desde Google Sheets...', 'info');
+  if (forzarLimpio) localStorage.removeItem(STORAGE_KEY);
 
-
-
-// ---- PROGRESO ----
-const TOTAL_PREGUNTAS = 42;
-function actualizarProgreso() {
-  let respondidas = 0;
-  // radios
-  document.querySelectorAll('.radio-group').forEach(rg => {
-    if (rg.querySelector('input[type=radio]:checked')) respondidas++;
-  });
-  // checkboxes
-  document.querySelectorAll('.check-group').forEach(cg => {
-    if (cg.querySelector('input[type=checkbox]:checked')) respondidas++;
-  });
-  // text/number/select inputs (excluye entidad_nombre ramificados)
-  ['responsable_nombre','responsable_cedula','responsable_cargo','responsable_correo',
-   'tipo_entidad','entidad_vigencia'].forEach(id => {
-    const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
-    if (el && el.value.trim()) respondidas++;
-  });
-  const pct = Math.min(100, Math.round(respondidas / TOTAL_PREGUNTAS * 100));
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-text').textContent = respondidas + ' de ' + TOTAL_PREGUNTAS + ' preguntas respondidas';
-}
-
-// ---- VALIDACIÓN Y ENVÍO ----
-document.getElementById('form-meci').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  if (!validarFormulario()) return;
-
-  const btn = document.querySelector('.btn-submit');
-  btn.textContent = '⏳ Enviando...';
-  btn.disabled = true;
-
-  const data = recopilarDatos();
-
+  // Intentar cargar desde Sheets
+  let cargadoDesdeSheets = false;
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(data)
-    });
-    document.getElementById('form-meci').style.display = 'none';
-    document.getElementById('success-screen').style.display = 'block';
-    window.scrollTo(0,0);
-  } catch(err) {
-    alert('Error al enviar. Intente de nuevo.');
-    btn.textContent = '✅ Enviar Formulario';
-    btn.disabled = false;
-  }
-});
-
-function validarFormulario() {
-  let ok = true;
-  document.querySelectorAll('.campo.has-error').forEach(c => c.classList.remove('has-error'));
-
-  // Campos de texto/select required
-  document.querySelectorAll('input[required], select[required]').forEach(el => {
-    if (!el.offsetParent) return; // elemento oculto
-    const v = el.value.trim();
-    if (!v || (el.type==='number' && el.value==='')) {
-      marcarError(el.closest('.campo'));
-      ok = false;
-    }
-  });
-
-  // Radio groups requeridos
-  document.querySelectorAll('.campo').forEach(campo => {
-    const radios = campo.querySelectorAll('input[type=radio][required]');
-    if (radios.length > 0) {
-      const checked = campo.querySelector('input[type=radio]:checked');
-      if (!checked) { marcarError(campo); ok = false; }
-    }
-  });
-
-  // Checkboxes requeridos
-  const checkCampos = ['CIN203','CIN206','CIN207','CIN222','CIN240','CIN241','CIN242','CIN244',
-    'CIN246','CIN247','CIN252','CIN253','CIN254','CIN271','CIN276','CIN300','CIN301'];
-  checkCampos.forEach(nombre => {
-    const campo = document.getElementById('campo-' + nombre);
-    if (!campo) return;
-    const checked = campo.querySelector('input[type=checkbox]:checked');
-    if (!checked) { marcarError(campo); ok = false; }
-  });
-
-  if (!ok) {
-    const firstErr = document.querySelector('.campo.has-error');
-    if (firstErr) firstErr.scrollIntoView({behavior:'smooth',block:'center'});
-  }
-  return ok;
-}
-
-function marcarError(campo) {
-  if (campo) campo.classList.add('has-error');
-}
-
-function recopilarDatos() {
-  const data = { timestamp: new Date().toISOString() };
-  const fd = new FormData(document.getElementById('form-meci'));
-
-  // Nombre de entidad según tipo
-  const tipo = document.getElementById('tipo_entidad').value;
-  if (tipo === 'DESCENTRALIZADA') data.entidad_nombre = document.getElementById('entidad_desc').value;
-  else if (tipo === 'MUNICIPIO')   data.entidad_nombre = document.getElementById('entidad_muni').value;
-  else if (tipo === 'ESES')        data.entidad_nombre = document.getElementById('entidad_ese').value;
-  data.tipo_entidad = tipo;
-
-  const checkNames = {};
-  for (let [k,v] of fd.entries()) {
-    if (['entidad_nombre'].includes(k)) continue;
-    if (data[k]) {
-      if (!checkNames[k]) checkNames[k] = [];
-      checkNames[k].push(v);
-    } else {
-      data[k] = v;
-      checkNames[k] = [v];
-    }
-  }
-  // Para checkboxes múltiples, unir con coma
-  Object.entries(checkNames).forEach(([k,vals]) => {
-    if (vals.length > 1) data[k] = vals.join(',');
-  });
-
-  return data;
-}
-
-// Escuchar cambios en inputs numéricos y texto
-document.querySelectorAll('input, select, textarea').forEach(el => {
-  el.addEventListener('input', actualizarProgreso);
-  el.addEventListener('change', actualizarProgreso);
-});
-
-  /* ---- Sub-bloque Sí/No/No aplica + Justificación por opción ---- */
-  function markSelected(inp) {
-    var grp = inp.closest('.radio-group');
-    if (grp) {
-      grp.querySelectorAll('label').forEach(function(l){ l.classList.remove('selected'); });
-      inp.closest('label').classList.add('selected');
-      // ocultar todos los followups del grupo, mostrar solo el del seleccionado
-      grp.querySelectorAll('.opt-followup').forEach(function(f){ f.classList.remove('visible'); });
-      var fu = inp.closest('label').querySelector('.opt-followup');
-      if (fu) fu.classList.add('visible');
-    }
-  }
-  function markCheck(inp) {
-    var lbl = inp.closest('label');
-    if (inp.checked) {
-      lbl.classList.add('selected');
-      var fu = lbl.querySelector('.opt-followup');
-      if (fu) fu.classList.add('visible');
-    } else {
-      lbl.classList.remove('selected');
-      var fu = lbl.querySelector('.opt-followup');
-      if (fu) fu.classList.remove('visible');
-    }
-  }
-  function markFuBtn(radio, si, no, na) {
-    var wrap = radio.closest('.fu-sn');
-    wrap.querySelectorAll('label').forEach(function(l){
-      l.classList.remove('sel-si','sel-no','sel-na');
-    });
-    var lbl = radio.closest('label');
-    if (radio.value==='si') lbl.classList.add('sel-si');
-    else if (radio.value==='no') lbl.classList.add('sel-no');
-    else lbl.classList.add('sel-na');
-  }
-
-  function buildFollowup(uid) {
-    return '<div class="opt-followup" id="fu_' + uid + '">' +
-      '<div class="fu-sn">' +
-        '<label><input type="radio" name="fu_sn_' + uid + '" value="si" onchange="markFuBtn(this)"> ✅ Sí</label>' +
-        '<label><input type="radio" name="fu_sn_' + uid + '" value="no" onchange="markFuBtn(this)"> ❌ No</label>' +
-        '<label><input type="radio" name="fu_sn_' + uid + '" value="na" onchange="markFuBtn(this)"> ➖ No aplica</label>' +
-      '</div>' +
-      '<span class="fu-just-lbl">Justificación (opcional)</span>' +
-      '<textarea name="fu_just_' + uid + '" rows="2" placeholder="Escriba una justificación..."></textarea>' +
-    '</div>';
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    var counter = 0;
-    document.querySelectorAll('.radio-group, .check-group').forEach(function(group) {
-      var fieldName = group.querySelector('input') ? group.querySelector('input').name : 'q' + counter;
-      group.querySelectorAll('label').forEach(function(lbl) {
-        var inp = lbl.querySelector('input');
-        if (!inp) return;
-        var optVal = inp.value || ('opt' + counter);
-        var uid = fieldName + '_' + optVal;
-        counter++;
-        // reemplazar onchange existente y agregar el followup
-        inp.removeAttribute('onchange');
-        if (inp.type === 'radio') {
-          inp.addEventListener('change', function(){ markSelected(this); });
-        } else {
-          inp.addEventListener('change', function(){ markCheck(this); });
-        }
-        // insertar followup dentro del label
-        lbl.insertAdjacentHTML('beforeend', buildFollowup(uid));
+    const url = APPS_SCRIPT_URL + '?t=' + Date.now();
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (!text || text.trim() === '') throw new Error('Respuesta vacía del servidor');
+    const data = JSON.parse(text);
+    if (Array.isArray(data) && data.length > 0) {
+      todosLosDatos = data.map(r => {
+        const clean = Object.assign({}, r);
+        delete clean.viewport;
+        return clean;
       });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todosLosDatos));
+      showToast('✅ ' + todosLosDatos.length + ' registros cargados desde Google Sheets', 'ok');
+      cargadoDesdeSheets = true;
+    } else if (Array.isArray(data) && data.length === 0) {
+      showToast('⚠️ Sheets respondió: hoja vacía. Mostrando demostración.', 'info');
+    } else {
+      throw new Error('Formato inesperado: ' + typeof data);
+    }
+  } catch(err) {
+    console.warn('[MECI Dashboard] Error Sheets:', err.message);
+    const local = localStorage.getItem(STORAGE_KEY);
+    if (local) {
+      try {
+        todosLosDatos = JSON.parse(local);
+        showToast('📦 ' + todosLosDatos.length + ' registros desde caché local. Error Sheets: ' + err.message, 'info');
+        cargadoDesdeSheets = true;
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+    if (!cargadoDesdeSheets) {
+      todosLosDatos = cargarDatosDemostracion();
+      showToast('🔴 Sin datos reales. Error: ' + err.message + ' | Mostrando demo.', 'err');
+    }
+  }
+
+  poblarFiltros();
+  aplicarFiltros();
+}
+
+function cargarDatosDemostracion() {
+  // Datos demo con campos fu_sn_ incluidos para mostrar el nuevo seguimiento
+  return [
+    { timestamp:"2025-11-10T10:00:00Z", entidad_nombre:"Hospital San Rafael Caqueza", entidad_nit:"800.001.001-1", tipo_entidad:"ESES", entidad_vigencia:"2025", responsable_nombre:"Juan Pérez", responsable_cargo:"Jefe Control Interno",
+      PER201:"si", fu_sn_PER201_si:"si",
+      CIN203:"a,b,c", fu_sn_CIN203_a:"si", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"no",
+      CIN221:"a", fu_sn_CIN221_a:"si",
+      CIN236:"siempre", fu_sn_CIN236_siempre:"si",
+      CIN238:"a", fu_sn_CIN238_a:"si",
+      CIN239:"a", fu_sn_CIN239_a:"si",
+      CIN243:"a", fu_sn_CIN243_a:"si",
+      CIN264:"a", fu_sn_CIN264_a:"si",
+      CIN270:"especializacion", fu_sn_CIN270_especializacion:"na",
+      CIN272:"4-6", fu_sn_CIN272_4-6:"si",
+      CIN306:"si", fu_sn_CIN306_si:"si" },
+    { timestamp:"2025-11-12T14:30:00Z", entidad_nombre:"Alcaldía de Fómeque", entidad_nit:"800.002.002-2", tipo_entidad:"MUNICIPIO", entidad_vigencia:"2025", responsable_nombre:"María López", responsable_cargo:"Jefe CI",
+      PER201:"si", fu_sn_PER201_si:"si",
+      CIN203:"a,d", fu_sn_CIN203_a:"si", fu_sn_CIN203_d:"no",
+      CIN221:"b", fu_sn_CIN221_b:"no",
+      CIN236:"mayoria", fu_sn_CIN236_mayoria:"si",
+      CIN238:"b", fu_sn_CIN238_b:"si",
+      CIN239:"b", fu_sn_CIN239_b:"no",
+      CIN243:"b", fu_sn_CIN243_b:"si",
+      CIN264:"b", fu_sn_CIN264_b:"si",
+      CIN270:"pregrado", fu_sn_CIN270_pregrado:"si",
+      CIN272:"1-3", fu_sn_CIN272_1-3:"na",
+      CIN306:"si", fu_sn_CIN306_si:"si" },
+    { timestamp:"2025-11-15T09:15:00Z", entidad_nombre:"Alcaldía de Choachí", entidad_nit:"800.003.003-3", tipo_entidad:"MUNICIPIO", entidad_vigencia:"2025", responsable_nombre:"Carlos Rojas", responsable_cargo:"Asesor CI",
+      PER201:"no", fu_sn_PER201_no:"no",
+      CIN203:"ninguna", fu_sn_CIN203_ninguna:"no",
+      CIN221:"c", fu_sn_CIN221_c:"no",
+      CIN236:"pocas", fu_sn_CIN236_pocas:"no",
+      CIN238:"c", fu_sn_CIN238_c:"no",
+      CIN239:"c", fu_sn_CIN239_c:"no",
+      CIN243:"c", fu_sn_CIN243_c:"no",
+      CIN264:"c", fu_sn_CIN264_c:"na",
+      CIN270:"pregrado", fu_sn_CIN270_pregrado:"si",
+      CIN272:"1-3", fu_sn_CIN272_1-3:"si",
+      CIN306:"no", fu_sn_CIN306_no:"no" },
+    { timestamp:"2025-11-18T11:00:00Z", entidad_nombre:"ESE Hospital de Ubaque", entidad_nit:"800.004.004-4", tipo_entidad:"ESES", entidad_vigencia:"2025", responsable_nombre:"Ana Torres", responsable_cargo:"Jefe CI",
+      PER201:"si", fu_sn_PER201_si:"si",
+      CIN203:"a,b,c,d,e", fu_sn_CIN203_a:"si", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"si", fu_sn_CIN203_d:"si", fu_sn_CIN203_e:"na",
+      CIN221:"a", fu_sn_CIN221_a:"si",
+      CIN236:"siempre", fu_sn_CIN236_siempre:"si",
+      CIN238:"a", fu_sn_CIN238_a:"si",
+      CIN239:"a", fu_sn_CIN239_a:"si",
+      CIN243:"b", fu_sn_CIN243_b:"si",
+      CIN264:"a", fu_sn_CIN264_a:"si",
+      CIN270:"maestria", fu_sn_CIN270_maestria:"si",
+      CIN272:"7-10", fu_sn_CIN272_7-10:"si",
+      CIN306:"si", fu_sn_CIN306_si:"si" },
+    { timestamp:"2025-11-20T16:45:00Z", entidad_nombre:"Personería Caqueza", entidad_nit:"800.005.005-5", tipo_entidad:"DESCENTRALIZADA", entidad_vigencia:"2025", responsable_nombre:"Luis García", responsable_cargo:"Profesional CI",
+      PER201:"si", fu_sn_PER201_si:"si",
+      CIN203:"b,c", fu_sn_CIN203_b:"si", fu_sn_CIN203_c:"na",
+      CIN221:"b", fu_sn_CIN221_b:"na",
+      CIN236:"mayoria", fu_sn_CIN236_mayoria:"si",
+      CIN238:"b", fu_sn_CIN238_b:"si",
+      CIN239:"a", fu_sn_CIN239_a:"si",
+      CIN243:"a", fu_sn_CIN243_a:"si",
+      CIN264:"b", fu_sn_CIN264_b:"na",
+      CIN270:"especializacion", fu_sn_CIN270_especializacion:"si",
+      CIN272:"4-6", fu_sn_CIN272_4-6:"si",
+      CIN306:"na", fu_sn_CIN306_na:"na" },
+  ];
+}
+
+const CAMPOS_IMPORTANTES = ['entidad_nombre','entidad_vigencia','tipo_entidad','responsable_nombre','responsable_cargo',
+  'PER201','PER205','CIN203','CIN206','CIN207','CIN221','CIN222','CIN233','CIN234','CIN236',
+  'CIN238','CIN239','CIN240','CIN241','CIN242','CIN243','CIN244','CIN246','CIN247','CIN252','CIN253','CIN254','CIN255',
+  'CIN264','CIN268','CIN269','CIN270','CIN271','CIN272','CIN273_a','CIN274_a','CIN275_a','CIN276','CIN287','CIN288_a','CIN289_a','CIN290_a',
+  'CIN300','CIN301','CIN304_a','CIN305','CIN306'];
+
+function calcularAvance(row) {
+  let ok = 0;
+  CAMPOS_IMPORTANTES.forEach(k => { if (row[k] && String(row[k]).trim() !== '' && String(row[k]) !== '0') ok++; });
+  return Math.round(ok / CAMPOS_IMPORTANTES.length * 100);
+}
+
+function poblarFiltros() {
+  // Soporta tanto keys del Apps Script como keys de demo
+  const getVal = (r, ...keys) => { for(const k of keys){ if(r[k]) return r[k]; } return null; };
+  const entidades  = [...new Set(todosLosDatos.map(r => getVal(r,'entidad_nombre')).filter(Boolean))].sort();
+  const vigencias  = [...new Set(todosLosDatos.map(r => getVal(r,'entidad_vigencia')).filter(Boolean))].sort();
+  const tipos      = [...new Set(todosLosDatos.map(r => getVal(r,'tipo_entidad')).filter(Boolean))].sort();
+  poblarSelect('filtro-entidad',  entidades);
+  poblarSelect('filtro-vigencia', vigencias);
+  poblarSelect('filtro-municipio', tipos);
+}
+function poblarSelect(id, valores) {
+  const sel = document.getElementById(id);
+  const current = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  valores.forEach(v => { const o = document.createElement('option'); o.value = o.textContent = v; sel.appendChild(o); });
+  sel.value = current;
+}
+
+function aplicarFiltros() {
+  const fE = document.getElementById('filtro-entidad').value;
+  const fV = document.getElementById('filtro-vigencia').value;
+  const fM = document.getElementById('filtro-municipio').value;
+  const fT = document.getElementById('filtro-texto').value.toLowerCase();
+  const getVal = (r, ...keys) => { for(const k of keys){ if(r[k] && r[k]!=='—') return r[k]; } return null; };
+  datosFiltrados = todosLosDatos.filter(r => {
+    if (fE && getVal(r,'entidad_nombre')           !== fE) return false;
+    if (fV && getVal(r,'entidad_vigencia')          !== fV) return false;
+    if (fM && getVal(r,'tipo_entidad','tipoentidad')!== fM) return false;
+    if (fT && !JSON.stringify(r).toLowerCase().includes(fT)) return false;
+    return true;
+  });
+  document.getElementById('conteo-badge').textContent = `${datosFiltrados.length} registros`;
+  actualizarKPIs();
+  actualizarTabla();
+  actualizarGraficas();
+  renderPreguntasBalance();
+}
+
+function actualizarKPIs() {
+  const n = datosFiltrados.length;
+  const avances = datosFiltrados.map(calcularAvance);
+  document.getElementById('kpi-total').textContent       = n;
+  document.getElementById('kpi-completos').textContent   = avances.filter(a=>a>=90).length;
+  document.getElementById('kpi-parciales').textContent   = avances.filter(a=>a>=50&&a<90).length;
+  document.getElementById('kpi-incompletos').textContent = avances.filter(a=>a<50).length;
+  document.getElementById('kpi-promedio').textContent    = (n ? Math.round(avances.reduce((s,v)=>s+v,0)/n) : 0) + '%';
+}
+
+function actualizarTabla() {
+  const tbody = document.getElementById('tabla-body');
+  if (!datosFiltrados.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="icon">🔍</div><p>Ningún registro coincide.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = datosFiltrados.map((row,i) => {
+    const av = calcularAvance(row);
+    const bc = av>=90?'badge-ok':av>=50?'badge-warn':'badge-bad';
+    const fecha = row.timestamp ? new Date(row.timestamp).toLocaleDateString('es-CO') : '—';
+    const gv = (r,...keys) => { for(const k of keys){ if(r[k] && r[k]!=='—') return r[k]; } return '—'; };
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${gv(row,'entidad_nombre')||'—'}</strong><br><small style="color:var(--muted)">${gv(row,'entidad_nit')||''}</small></td>
+      <td>${gv(row,'tipo_entidad','entidad_municipio')}</td>
+      <td>${gv(row,'entidad_vigencia')}</td>
+      <td>${gv(row,'responsable_nombre','responsablenombre','entidad_responsable')}<br><small style="color:var(--muted)">${gv(row,'responsable_cargo','responsablecargo','entidad_cargo')}</small></td>
+      <td><div class="progress-cell"><div class="prog-bar"><div class="prog-fill" style="width:${av}%"></div></div><span class="badge ${bc}">${av}%</span></div></td>
+      <td>${fecha}</td>
+      <td><button class="btn btn-reload" style="padding:5px 14px;font-size:.78rem" onclick="verDetalle(${i})">👁️ Ver</button></td>
+    </tr>`;
+  }).join('');
+}
+
+const PALETTE = ['#2d7dd2','#27ae60','#e67e22','#e74c3c','#9b59b6','#1abc9c','#f39c12','#3498db'];
+
+function buildChart(id, type, labels, datasets, opts={}) {
+  if (chartInstances[id]) chartInstances[id].destroy();
+  const el = document.getElementById(id);
+  if (!el) return;
+  const defaultScales = (type==='bar' && !opts.scales) ? { y:{beginAtZero:true} } : undefined;
+  const legendPos = opts.plugins?.legend?.position || (type==='bar'?'top':'right');
+  chartInstances[id] = new Chart(el.getContext('2d'), {
+    type,
+    data: { labels, datasets },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:legendPos, labels:{boxWidth:12,font:{size:11}} } },
+      scales: opts.scales || defaultScales,
+      ...(({scales, plugins, ...rest})=>rest)(opts)
+    }
+  });
+}
+
+function contarPorValor(campo) {
+  const c={};
+  datosFiltrados.forEach(r=>{ const v=r[campo]||'Sin respuesta'; c[v]=(c[v]||0)+1; });
+  return c;
+}
+
+function actualizarGraficas() {
+  const n = datosFiltrados.length;
+  if (!n) return;
+  const nombres = datosFiltrados.map(r=>(r.entidad_nombre||'?').substring(0,20)+'…');
+  const avances = datosFiltrados.map(calcularAvance);
+  buildChart('chart-avance','bar',nombres,[{label:'Avance (%)',data:avances,backgroundColor:avances.map(a=>a>=90?'#27ae60':a>=50?'#e67e22':'#e74c3c')}]);
+
+  const p201=contarPorValor('PER201');
+  buildChart('chart-per201','doughnut',Object.keys(p201).map(k=>k==='si'?'Sí':k==='no'?'No':k),[{data:Object.values(p201),backgroundColor:PALETTE}]);
+
+  const c243=contarPorValor('CIN243');
+  buildChart('chart-cin243','pie',Object.keys(c243).map(k=>({a:'90–100%',b:'60–89%',c:'<60%'})[k]||k),[{data:Object.values(c243),backgroundColor:PALETTE}]);
+
+  const c264=contarPorValor('CIN264');
+  buildChart('chart-cin264','doughnut',Object.keys(c264).map(k=>({a:'Oficina CI',b:'Grupo interno',c:'Sin equipo',d:'Contrato',e:'Sin responsable'})[k]||k),[{data:Object.values(c264),backgroundColor:PALETTE}]);
+
+  const c270=contarPorValor('CIN270');
+  buildChart('chart-cin270','bar',Object.keys(c270).map(k=>({doctorado:'Doctorado',maestria:'Maestría',especializacion:'Especialización',pregrado:'Pregrado',tecnica:'Técnica',media:'Bachiller',basica:'Básica'})[k]||k),[{label:'Entidades',data:Object.values(c270),backgroundColor:PALETTE}],{scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
+
+  const c272=contarPorValor('CIN272');
+  buildChart('chart-cin272','bar',Object.keys(c272).map(k=>({'1':'<1 año','1-3':'1–3 a','4-6':'4–6 a','7-10':'7–10 a','11-20':'11–20 a','21':'>21 a'})[k]||k),[{label:'Entidades',data:Object.values(c272),backgroundColor:PALETTE}],{scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
+
+  // ── Gráfica: Sí/No/NA por cada pregunta ──
+  const snPorPreg = {};
+  PREGUNTAS.forEach(p => { snPorPreg[p.codigo] = {si:0,no:0,na:0}; });
+  datosFiltrados.forEach(row => {
+    Object.keys(row).forEach(k => {
+      if (!k.startsWith('fu_sn_')) return;
+      const partes = k.replace('fu_sn_','').split('_');
+      const campo  = partes.slice(0,-1).join('_');
+      if (!snPorPreg[campo]) snPorPreg[campo] = {si:0,no:0,na:0};
+      const v = row[k];
+      if (v==='si') snPorPreg[campo].si++;
+      else if (v==='no') snPorPreg[campo].no++;
+      else if (v==='na') snPorPreg[campo].na++;
     });
   });
+  // Solo mostrar preguntas que tengan al menos 1 respuesta
+  const pregConDatos = Object.entries(snPorPreg).filter(([,v])=>v.si+v.no+v.na>0);
+  if (pregConDatos.length) {
+    buildChart('chart-sn-global','bar',
+      pregConDatos.map(([k])=>k),
+      [
+        {label:'✅ Sí',       data:pregConDatos.map(([,v])=>v.si),  backgroundColor:'#27ae60'},
+        {label:'❌ No',       data:pregConDatos.map(([,v])=>v.no),  backgroundColor:'#e74c3c'},
+        {label:'➖ No aplica',data:pregConDatos.map(([,v])=>v.na),  backgroundColor:'#f0a500'},
+      ],
+      {scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},
+       plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
+    );
+  }
+
+  // Top opciones con más "No" — requieren atención
+  const noConteo = {};
+  datosFiltrados.forEach(row => {
+    Object.keys(row).forEach(k => {
+      if (!k.startsWith('fu_sn_')) return;
+      if (row[k] !== 'no') return;
+      // k = fu_sn_CIN203_a  => extraer campo+opt
+      const partes = k.replace('fu_sn_','').split('_');
+      const optV   = partes[partes.length - 1];
+      const campo  = partes.slice(0, -1).join('_');
+      // buscar label de la opción
+      const pregDef = PREGUNTAS.find(p => p.codigo === campo);
+      const optDef  = pregDef ? pregDef.opciones.find(o => o.v === optV) : null;
+      const etiqueta = `${campo}: ${optDef ? optDef.l : optV}`;
+      noConteo[etiqueta] = (noConteo[etiqueta] || 0) + 1;
+    });
+  });
+  const topNo = Object.entries(noConteo).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if (topNo.length) {
+    buildChart('chart-sn-seccion','bar',
+      topNo.map(([k])=>k.length>40?k.slice(0,38)+'…':k),
+      [{label:'Cantidad de "No"', data:topNo.map(([,v])=>v), backgroundColor:'#e74c3c'}],
+      {indexAxis:'y', scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}, plugins:{legend:{display:false}}}
+    );
+  }
+}
+
+// ── Render de tarjetas de balance Sí/No/NA por pregunta ──
+function calcSNBalancePregunta(preg) {
+  const result = { total:0, si:0, no:0, na:0, nr:0, opciones:{} };
+  preg.opciones.forEach(opt => {
+    result.opciones[opt.v] = { label:opt.l, si:0, no:0, na:0, nr:0 };
+  });
+
+  datosFiltrados.forEach(row => {
+    // Detectar qué opciones seleccionó el usuario en esta pregunta
+    let seleccionadas = [];
+    const valRaw = row[preg.codigo];
+    if (valRaw) {
+      seleccionadas = String(valRaw).split(',').map(s=>s.trim());
+    }
+    seleccionadas.forEach(optV => {
+      if (!result.opciones[optV]) result.opciones[optV] = { label:optV, si:0, no:0, na:0, nr:0 };
+      const snKey = `fu_sn_${preg.codigo}_${optV}`;
+      const snVal = row[snKey];
+      result.total++;
+      if (snVal==='si')      { result.si++; result.opciones[optV].si++; }
+      else if (snVal==='no') { result.no++; result.opciones[optV].no++; }
+      else if (snVal==='na') { result.na++; result.opciones[optV].na++; }
+      else                   { result.nr++; result.opciones[optV].nr++; }
+    });
+  });
+  return result;
+}
+
+function pct(val, total) {
+  return total===0 ? 0 : Math.round(val/total*100);
+}
+
+function renderPreguntasBalance() {
+  const filtroTipo = document.getElementById('filtro-tipo-preg').value;
+  const filtroBusca = document.getElementById('filtro-busca-preg').value.toLowerCase();
+  const mostrarDetalle = document.getElementById('filtro-detalle-opt').value === '1';
+
+  const container = document.getElementById('preg-cards-container');
+  if (!datosFiltrados.length) {
+    container.innerHTML = `<div style="grid-column:1/-1"><div class="empty"><div class="icon">📊</div><p>Sin datos para mostrar balance.</p></div></div>`;
+    return;
+  }
+
+  const pregsFiltradas = PREGUNTAS.filter(p => {
+    if (filtroTipo && !p.codigo.startsWith(filtroTipo)) return false;
+    if (filtroBusca && !p.codigo.toLowerCase().includes(filtroBusca) && !p.titulo.toLowerCase().includes(filtroBusca)) return false;
+    return true;
+  });
+
+  container.innerHTML = pregsFiltradas.map(preg => {
+    const b = calcSNBalancePregunta(preg);
+    const t = b.total;
+    const pSi = pct(b.si,t), pNo = pct(b.no,t), pNa = pct(b.na,t), pNr = pct(b.nr,t);
+
+    let optsHTML = '';
+    if (mostrarDetalle) {
+      optsHTML = `<div class="opt-rows">
+        <div class="opt-row" style="font-weight:700;color:var(--muted);font-size:.7rem">
+          <div>Opción</div><div class="opt-badge">✅ Sí</div><div class="opt-badge">❌ No</div><div class="opt-badge">➖ N/A</div><div class="opt-badge">—</div>
+        </div>` +
+        Object.entries(b.opciones).map(([v,o]) => {
+          if (o.si+o.no+o.na+o.nr === 0) return '';
+          return `<div class="opt-row">
+            <div class="opt-txt">${o.label}</div>
+            <div class="opt-badge si">${o.si}</div>
+            <div class="opt-badge no">${o.no}</div>
+            <div class="opt-badge na">${o.na}</div>
+            <div class="opt-badge nr">${o.nr}</div>
+          </div>`;
+        }).join('') + `</div>`;
+    }
+
+    return `<div class="preg-card">
+      <div class="preg-card-header">
+        <div class="preg-titulo">${preg.titulo}</div>
+        <span class="preg-codigo">${preg.codigo}</span>
+      </div>
+      <div class="sn-bar-wrap">
+        ${pSi>0?`<div class="sn-seg si" style="width:${pSi}%">${pSi>8?pSi+'%':''}</div>`:''}
+        ${pNo>0?`<div class="sn-seg no" style="width:${pNo}%">${pNo>8?pNo+'%':''}</div>`:''}
+        ${pNa>0?`<div class="sn-seg na" style="width:${pNa}%">${pNa>8?pNa+'%':''}</div>`:''}
+        ${pNr>0?`<div class="sn-seg nr" style="width:${pNr}%">${pNr>8?pNr+'%':''}</div>`:''}
+      </div>
+      <div class="sn-legend">
+        <span><i class="sn-dot si"></i> Sí</span>
+        <span><i class="sn-dot no"></i> No</span>
+        <span><i class="sn-dot na"></i> No aplica</span>
+        <span><i class="sn-dot nr"></i> Sin verificar</span>
+      </div>
+      <div class="sn-nums">
+        <div class="sn-num si"><span class="val">${b.si}</span>✅ Sí</div>
+        <div class="sn-num no"><span class="val">${b.no}</span>❌ No</div>
+        <div class="sn-num na"><span class="val">${b.na}</span>➖ N/A</div>
+        <div class="sn-num nr"><span class="val">${b.nr}</span>Sin verif.</div>
+      </div>
+      ${optsHTML}
+    </div>`;
+  }).join('');
+}
+
+// ── Modal detalle entidad ──
+const LABELS = {
+  entidad_nombre:"Entidad", entidad_nit:"NIT (no aplica)", tipo_entidad:"Tipo de entidad",
+  entidad_vigencia:"Vigencia", responsable_nombre:"Responsable", responsable_cargo:"Cargo",
+  responsable_cedula:"Cédula", responsable_correo:"Correo", timestamp:"Fecha envío",
+  PER201:"PER201 – MECI genera valor", PER205:"PER205 – Percepción guías DAFP",
+  CIN221:"CIN221 – Gestión integral riesgos", CIN236:"CIN236 – Informes oportunos",
+  CIN238:"CIN238 – Metodología auditora", CIN239:"CIN239 – Plan anual elaborado",
+  CIN243:"CIN243 – Ejecución plan anual", CIN255:"CIN255 – Seguimiento planes mejora",
+  CIN264:"CIN264 – Estructura CI", CIN268:"CIN268 – Vinculación jefe CI",
+  CIN269:"CIN269 – Nivel jerárquico jefe CI", CIN270:"CIN270 – Formación jefe CI",
+  CIN272:"CIN272 – Experiencia CI", CIN305:"CIN305 – Total trabajadores CI", CIN306:"CIN306 – Alertas integridad"
+};
+
+function verDetalle(idx) {
+  const row = datosFiltrados[idx];
+  document.getElementById('modal-title').textContent = row.entidad_nombre || 'Detalle';
+  const body = document.getElementById('modal-body');
+  // Separar campos normales de campos fu_
+  const normales = Object.entries(row).filter(([k]) => !k.startsWith('fu_'));
+  const fuEntries = Object.entries(row).filter(([k]) => k.startsWith('fu_sn_'));
+
+  let html = normales.map(([k,v]) => {
+    const label = LABELS[k] || k;
+    const val = v || '<em style="color:var(--muted)">Sin respuesta</em>';
+    return `<div class="modal-row"><div class="key">${label}</div><div>${val}</div></div>`;
+  }).join('');
+
+  if (fuEntries.length) {
+    html += `<div class="modal-section">📝 Verificaciones Sí / No / No aplica</div>`;
+    html += fuEntries.map(([k,v]) => {
+      const partes = k.replace('fu_sn_','').split('_');
+      const campo = partes.slice(0,-1).join('_');
+      const optV  = partes[partes.length-1];
+      const justKey = `fu_just_${campo}_${optV}`;
+      const just = row[justKey] ? `<br><small style="color:var(--muted)">💬 ${row[justKey]}</small>` : '';
+      const color = v==='si'?'#27ae60':v==='no'?'#e74c3c':v==='na'?'#f0a500':'#999';
+      const label = v==='si'?'✅ Sí':v==='no'?'❌ No':v==='na'?'➖ No aplica':'—';
+      return `<div class="modal-row"><div class="key" style="font-size:.78rem">${campo} – opción <strong>${optV}</strong></div><div style="color:${color};font-weight:700">${label}${just}</div></div>`;
+    }).join('');
+  }
+
+  body.innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function cerrarModal(e) {
+  if (e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function exportarExcel() {
+  if (!datosFiltrados.length) { showToast('No hay datos para exportar', 'err'); return; }
+  const ws = XLSX.utils.json_to_sheet(datosFiltrados);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Respuestas MECI');
+  XLSX.writeFile(wb, `Dashboard_MECI_122_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('📥 Excel exportado correctamente', 'ok');
+}
+function confirmarLimpiar() {
+  if (confirm('¿Eliminar caché local? Los datos en Google Sheets NO se borrarán.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    todosLosDatos = []; datosFiltrados = [];
+    aplicarFiltros();
+    showToast('🗑️ Caché eliminada', 'info');
+  }
+}
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className=type; t.style.display='block';
+  setTimeout(()=>t.style.display='none', 4000);
+}
+
+function diagnosticar() {
+  const url = APPS_SCRIPT_URL + '?t=' + Date.now();
+  const win = window.open('', '_blank', 'width=700,height=500');
+  win.document.write('<pre style="font-family:monospace;padding:20px;font-size:13px">🔬 DIAGNÓSTICO MECI Dashboard\n\n');
+  win.document.write('URL Apps Script:\n' + url + '\n\n');
+  win.document.write('Cache local: ' + (localStorage.getItem(STORAGE_KEY) ? 
+    JSON.parse(localStorage.getItem(STORAGE_KEY)).length + ' registros guardados' : 
+    'Vacío') + '\n\n');
+  win.document.write('Datos en memoria: ' + todosLosDatos.length + ' registros\n');
+  win.document.write('Datos filtrados: ' + datosFiltrados.length + ' registros\n\n');
+  win.document.write('Probando conexión a Sheets...\n');
+  fetch(url, { cache: 'no-store' })
+    .then(r => {
+      win.document.write('HTTP Status: ' + r.status + ' ' + r.statusText + '\n');
+      return r.text();
+    })
+    .then(t => {
+      win.document.write('Respuesta (primeros 500 chars):\n' + t.substring(0,500) + '\n\n');
+      try {
+        const d = JSON.parse(t);
+        win.document.write('✅ JSON válido: ' + (Array.isArray(d) ? d.length + ' registros' : typeof d) + '\n');
+        if(d.length > 0) win.document.write('Primer registro keys: ' + Object.keys(d[0]).join(', '));
+      } catch(e) {
+        win.document.write('❌ JSON inválido: ' + e.message);
+      }
+      win.document.write('</pre>');
+    })
+    .catch(e => {
+      win.document.write('❌ Error de red: ' + e.message + '\n');
+      win.document.write('Posible causa: CORS bloqueado o archivo abierto como file://\n</pre>');
+    });
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await cargarDatos();
+  initFurag();
+});
+
+// ══ DATOS AT-FURAG EMBEBIDOS ══
+const FURAG_DATA = [{"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia Catastral de Cundinamarca", "jefe": "Ángela Yineth Bravo Tapias", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "En trámite usuario y clave"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia de Comercialización y Competitividad para el Desarrollo Regional – ACODER", "jefe": "Yetica Jhasvelly Hernández Ariza", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Parcial", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 ENTIDADES DESCENTRALIZADAS", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Agencia Logística de Gestión Inmobiliaria y Servicios", "jefe": "Luis Miguel Pirela Castañeda", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Bárbara de Vergara", "jefe": "Graciela Andrea Zamudio Sopó", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y acceso, debido a que la página se encuentra caída."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Matilde", "jefe": "Clara Liliana Jiménez Celis", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Manifiesta haber leído la circular y contar con usuario y contraseña."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Santa Rosa", "jefe": "Yamidy Catalina Mosquera Lozano", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Cuenta con usuario y contraseña para el diligenciamiento del formulario FURAG."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. La Vega", "jefe": "Paula Alejandra Rodríguez Ayala", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Cuenta con usuario y contraseña para el diligenciamiento del FURAG."}, {"grupo": "AVANCE  4 DE MARZO DE 2026 – FASE 1 - GRUPO 1 EMPRESAS SOCIALES DEL ESTADO", "fecha": "04-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San Francisco de Gachetá", "jefe": "Andrés Felipe Cepeda Salazar", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no poder solicitar usuario y contraseña, debido a que la página se encuentra caída."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Pedro León Álvarez - La Mesa", "jefe": "Elis Segundo Argumedo Villadiego", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Diogenes Troncoso de Puerto Salgar", "jefe": "Antonio José Zamudio Méndez", "asistencia": "Sí", "circular_dafp": "SI", "micrositio": "No", "sesion_gerencia": "SI", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el diligenciamoento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Salazar de Villeta", "jefe": "David Orlando Vidal González", "asistencia": "Sí", "circular_dafp": "SI", "micrositio": "No", "sesion_gerencia": "No", "circular_003": "SI", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el cargue del formulario."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Arbeláez", "jefe": "Wendy Julieth Jara Castellanos", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "No", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usurario y contraseña para realizar el diligenciamiento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Universitario de La Samaritana", "jefe": "Edwin Alcides González Coy", "asistencia": "Sí", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "Asistió, pero no participó."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital de Girardot", "jefe": "Orlando Velásquez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital del Salvador - Ubaté", "jefe": "Juan Carlos Chaparro Laverde", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En proceso de creación de usuario"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Divino Salvador - Sopó", "jefe": "Wilson Andrés Villamil Dueñas", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En creación del usuario"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Chia", "jefe": "Yenny Angélica Rincón Martínez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio - Guatativa", "jefe": "Lourdes Sierra Uparella", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "No", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "No", "obs": "Manifiesta no contar con usuario y contraseña para el diligenciamiento del FURAG."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio de Anolaima", "jefe": "Ana Ximena Gómez Ramos", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Antonio de Sesquilé", "jefe": "Edwin Leonardo Reyes Manjarres", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Francisco de Viotá", "jefe": "Heidy Tatiana Martínez Contreras", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "SI", "acceso_app": "Sí", "obs": "Manifiesta que cuenta con usuario y contraseña, tiene conocimiento de las circulares."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Marco Felipe Afanador - Tocaima", "jefe": "Ildilbrando Suescun Bustos", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Mario Gaitan Yanguas - Soacha", "jefe": "Camila Andrea Ávila Millán", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora de Las Mercedes - Funza", "jefe": "José Yessid Calderón Roa", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Carmen - El Colegio", "jefe": "Diego Armando Pinzón Peña", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Se conecto el profesional universitario de apoyo Diego Andres Cucaita"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 y 3 (Mañana) Y 4 y 5 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Pilar - Medina", "jefe": "Wilmar Joaquín Zambrano Pulecio", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Beneficencia de Cundinamarca", "jefe": "Omar Gerardo Díaz Espinosa", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "Parcial", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "SI", "obs": "No aplica"}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Corporación Social de Cundinamarca - CSC", "jefe": "Carlos Eduardo Hernández", "asistencia": "Sí", "circular_dafp": "No", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "En la consecución de clave y usuario."}, {"grupo": "AVANCE  5 DE MARZO DE 2026 – FASE 1 - GRUPO 2 - ENTIDADES DESCENTRALIZADAS", "fecha": "05-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Asamblea de Cundinamarca", "jefe": "Laura Isabel Carvajal Gonzalez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa de Licores de Cundinamarca - ELC", "jefe": "Oscar Felipe Vega Prieto", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa Férrea Regional S.A.S.", "jefe": "Raúl Antonio Barriga Castiblanco", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Fue la jefe de OCI departamental"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresa Industrial y Comercial Lotería de Cundinamarca", "jefe": "Julián Alfredo Rodríguez Montaño", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Caminos y Construcciones de Cundinamarca - ICCU", "jefe": "Julio Andrés Nieves Torres", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Protección y Bienestar Animal de Cundinamarca", "jefe": "Mónica Lorena Avellaneda Lasso", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "No", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto Departamental de Cultura y Turismo - IDECUT", "jefe": "Vilma Durley Castro Herrera", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Empresas Públicas de Cundinamarca S.A.- ESP", "jefe": "Martha Leonor Aponte Suárez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Fondo de Desarrollo de Proyectos de Cundinamarca - FONDECUN", "jefe": "Ángela Milena Hoyos Pulido", "asistencia": "Sí", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto de Acción Comunal y Capital Social de Cundinamarca - IDACO", "jefe": "Yeni Carolina Ortiz Castiblanco", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Inician el próximo lunes"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Instituto para la Recreación y el Deporte de Cundinamarca - INDEPORTES", "jefe": "Ricardo Arturo Narváez Isurieta", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin Observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Unidad Administrativa Especial de Pensiones del Departamento de Cundinamarca", "jefe": "Julio Enrique Aguilera Jiménez", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "No", "acceso_app": "Sí", "obs": "Sin Observaciones"}, {"grupo": "AVANCE  6 DE MARZO DE 2026 – FASE 1 - GRUPO 3 y 4 (Mañana) - GRUPO 5 y 6 (Tarde )- ENTIDADES DESCENTRALIZADAS", "fecha": "06-Mar", "fase": "Fase 1", "tipo_entidad": "Descentralizada", "entidad": "Región Metropolitana Bogotá Cundinamarca", "jefe": "-", "asistencia": "-", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San José de Guacheta", "jefe": "Iván Darío Escallón Garzón", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Plataforma congestionada para crear usuario y contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Jose de Guaduas - Guaduas", "jefe": "Jaime Omar Garcia Bautista", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Hoy van a crear usuario y contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Martin de Porres - Chocontá", "jefe": "Cesar Augusto Robayo Melo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "No", "obs": "Hoy crean el usuario y la contraseña"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael - Cáqueza", "jefe": "Fanny Sabogal Agudelo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael - Facatativá", "jefe": "Gloria Marcela Gaitan Chirivi", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ya compartieron los formularios con planeación y se esta verificando toda las evidencias"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Rafael de Pacho - Pacho", "jefe": "Pedro Pablo Velasquez Cortes", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul - Fómeque", "jefe": "Clara Liliana Jiménez Celis", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul - Nemocón", "jefe": "Nelson Eduardo Rivera Bermúdez", "asistencia": "No", "circular_dafp": "-", "micrositio": "-", "sesion_gerencia": "-", "circular_003": "-", "acceso_app": "-", "obs": "-"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital San Vicente de Paul de San Juan de Ríoseco", "jefe": "Ángela Maritza López Barrero", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San José de La Palma", "jefe": "Eduardo López Cuervo", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna."}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. San Rafael - Fusagasugá", "jefe": "Rene Rolando Romero", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Habacuc Calderón - Carmen de Carupa", "jefe": "Diana Milena Robayo Pachón", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "Ya se solicitó el usuario de control interno, ya se cuenta con el rol planeación"}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Hilario Lugo - Sasaima", "jefe": "Paula Alejandra Rodríguez Ayala", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Parcial", "obs": "Esta en proceso de solicitud."}, {"grupo": "AVANCE  9 DE MARZO DE 2026 – FASE 1 - GRUPO 6 (Mañana) y 7 y 8 (Tarde) EMPRESAS SOCIALES DEL ESTADO", "fecha": "09-Mar", "fase": "Fase 1", "tipo_entidad": "ESE", "entidad": "E.S.E. Hospital Nuestra Señora del Carmen - Tabio", "jefe": "Zaira Alejandra Mena Ovalle", "asistencia": "Sí", "circular_dafp": "Sí", "micrositio": "Sí", "sesion_gerencia": "Sí", "circular_003": "Sí", "acceso_app": "Sí", "obs": "Ninguna."}];
+
+function normSem(v) {
+  if (!v) return 'dash';
+  const s = v.toString().trim().toLowerCase();
+  if (['sí','si','yes','s','✓'].includes(s)) return 'si';
+  if (['no','n','✗'].includes(s)) return 'no';
+  if (['parcial','partial'].includes(s)) return 'parcial';
+  return 'dash';
+}
+function semHtml(v) {
+  const t = normSem(v);
+  const icon = t==='si'?'✓':t==='no'?'✗':t==='parcial'?'~':'–';
+  return `<span class="sem ${t}" title="${v}">${icon}</span>`;
+}
+function tipoClase(grupo) {
+  const g = grupo.toUpperCase();
+  if (g.includes('ESE') || g.includes('SOCIAL')) return 'ent-ese';
+  if (g.includes('DESCENT') || g.includes('DESCENTRALI')) return 'ent-desc';
+  return 'ent-muni';
+}
+function tipoLabel(grupo) {
+  const g = grupo.toUpperCase();
+  if (g.includes('ESE') || g.includes('SOCIAL')) return 'ESE';
+  if (g.includes('DESCENT') || g.includes('DESCENTRALI')) return 'Descentralizada';
+  return 'Municipio';
+}
+
+function initFurag() {
+  renderFuragTabla();
+  renderFuragCharts();
+}
+
+function getFuragFiltrado() {
+  const fFecha  = document.getElementById('furag-filtro-fecha').value;
+  const fTipo   = document.getElementById('furag-filtro-tipo').value;
+  const fAcceso = document.getElementById('furag-filtro-acceso').value;
+  const fBuscar = document.getElementById('furag-buscar').value.toLowerCase();
+
+  return FURAG_DATA.filter(r => {
+    if (fFecha  && r.fecha         !== fFecha)  return false;
+    if (fTipo   && r.tipo_entidad  !== fTipo)   return false;
+    if (fAcceso && normSem(r.acceso_app) !== fAcceso) return false;
+    if (fBuscar && !r.entidad.toLowerCase().includes(fBuscar) && !r.jefe.toLowerCase().includes(fBuscar)) return false;
+    return true;
+  });
+}
+
+function renderFuragTabla() {
+  const datos = getFuragFiltrado();
+  document.getElementById('furag-badge').textContent = datos.length + ' entidades';
+
+  // KPIs
+  const n = datos.length;
+  const pct = (campo, val) => n ? Math.round(datos.filter(r=>normSem(r[campo])===val).length/n*100) : 0;
+  document.getElementById('fk-total').textContent      = n;
+  document.getElementById('fk-asistencia').textContent = pct('asistencia','si') + '%';
+  document.getElementById('fk-circular').textContent   = pct('circular_dafp','si') + '%';
+  document.getElementById('fk-circular003').textContent= pct('circular_003','si') + '%';
+  document.getElementById('fk-acceso').textContent     = pct('acceso_app','si') + '%';
+  document.getElementById('fk-pendientes').textContent = datos.filter(r=>normSem(r.acceso_app)==='no').length;
+
+  if (!datos.length) {
+    document.getElementById('furag-tbody').innerHTML =
+      `<tr><td colspan="10"><div class="empty"><div class="icon">🔍</div><p>Sin resultados con los filtros actuales.</p></div></td></tr>`;
+    return;
+  }
+
+  // Agrupar por grupo para mostrar separadores
+  let html = '';
+  let grupoActual = null;
+  let idx = 0;
+  datos.forEach(r => {
+    if (r.grupo !== grupoActual) {
+      grupoActual = r.grupo;
+      const label = r.grupo.replace('AVANCE  ','').replace('AVANCE ','');
+      html += `<tr class="grupo-header"><td colspan="10">📅 ${label}</td></tr>`;
+    }
+    idx++;
+    const tipo = r.tipo_entidad;
+    const cls  = r.tipo_entidad === 'ESE' ? 'ent-ese' : r.tipo_entidad === 'Descentralizada' ? 'ent-desc' : 'ent-muni';
+    const obsText = r.obs !== '-' && r.obs ? r.obs : '';
+    html += `<tr>
+      <td>${idx}</td>
+      <td><strong>${r.entidad}</strong><br><span class="ent-badge ${cls}">${tipo}</span></td>
+      <td style="font-size:.75rem;color:var(--muted)">${r.jefe}</td>
+      <td style="text-align:center">${semHtml(r.asistencia)}</td>
+      <td style="text-align:center">${semHtml(r.circular_dafp)}</td>
+      <td style="text-align:center">${semHtml(r.micrositio)}</td>
+      <td style="text-align:center">${semHtml(r.sesion_gerencia)}</td>
+      <td style="text-align:center">${semHtml(r.circular_003)}</td>
+      <td style="text-align:center">${semHtml(r.acceso_app)}</td>
+      <td class="furag-obs">${obsText}</td>
+    </tr>`;
+  });
+  document.getElementById('furag-tbody').innerHTML = html;
+}
+
+function renderFuragCharts() {
+  const actividades = [
+    { key:'asistencia',     label:'Asistencia' },
+    { key:'circular_dafp',  label:'Circ. DAFP' },
+    { key:'micrositio',     label:'Micrositio' },
+    { key:'sesion_gerencia',label:'Ses. Gerencia' },
+    { key:'circular_003',   label:'Circ. 003' },
+    { key:'acceso_app',     label:'Acceso App' },
+  ];
+  const si      = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='si').length);
+  const no      = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='no').length);
+  const parcial = actividades.map(a => FURAG_DATA.filter(r=>normSem(r[a.key])==='parcial').length);
+
+  buildChart('chart-furag-act','bar',
+    actividades.map(a=>a.label),
+    [
+      {label:'✅ Sí',     data:si,      backgroundColor:'#27ae60'},
+      {label:'❌ No',     data:no,      backgroundColor:'#e74c3c'},
+      {label:'⚠️ Parcial',data:parcial, backgroundColor:'#e67e22'},
+    ],
+    {scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},
+      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
+  );
+
+  // Gráfica por grupo
+  const grupos = [...new Set(FURAG_DATA.map(r=>r.grupo))];
+  const labelGrupos = grupos.map(g => g.replace('AVANCE  ','').replace('AVANCE ','').substring(0,35)+'…');
+  const siGrupo = grupos.map(g => {
+    const ents = FURAG_DATA.filter(r=>r.grupo===g);
+    return ents.filter(r=>normSem(r.acceso_app)==='si').length;
+  });
+  const noGrupo = grupos.map(g => {
+    const ents = FURAG_DATA.filter(r=>r.grupo===g);
+    return ents.filter(r=>normSem(r.acceso_app)==='no').length;
+  });
+  const parGrupo = grupos.map(g => {
+    const ents = FURAG_DATA.filter(r=>r.grupo===g);
+    return ents.filter(r=>normSem(r.acceso_app)==='parcial').length;
+  });
+
+  buildChart('chart-furag-grupos','bar',
+    labelGrupos,
+    [
+      {label:'✅ Acceso OK',  data:siGrupo,  backgroundColor:'#27ae60'},
+      {label:'❌ Sin acceso', data:noGrupo,  backgroundColor:'#e74c3c'},
+      {label:'⚠️ Parcial',   data:parGrupo, backgroundColor:'#e67e22'},
+    ],
+    {indexAxis:'y',
+      scales:{x:{stacked:true,beginAtZero:true,ticks:{stepSize:1}},y:{stacked:true}},
+      plugins:{legend:{position:'top',labels:{boxWidth:12,font:{size:11}}}}}
+  );
+}
+
+// initFurag se llama desde el listener principal
 
 </script>
 </body>
