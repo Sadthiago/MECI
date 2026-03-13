@@ -6,504 +6,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Dashboard MECI 122</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="DashBoard.css">
   <style>
-    :root {
-      --p: #1a3a6b;
-      --a: #2d7dd2;
-      --ok: #27ae60;
-      --warn: #e67e22;
-      --err: #e74c3c;
-      --na: #8e44ad;
-      --bg: #f0f4fb;
-      --card: #fff;
-      --border: #dde3ef;
-      --muted: #6c7a93;
-      --text: #222b3a
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0
-    }
-
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text)
-    }
-
-    header {
-      background: linear-gradient(135deg, var(--p), #2d5a9e);
-      color: #fff;
-      padding: 18px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px
-    }
-
-    header h1 {
-      font-size: 1.15rem;
-      font-weight: 800
-    }
-
-    header p {
-      font-size: .78rem;
-      opacity: .8;
-      margin-top: 2px
-    }
-
-    .header-btns {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap
-    }
-
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 20px;
-      font-size: .82rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform .15s, opacity .15s
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      opacity: .9
-    }
-
-    .btn-w {
-      background: #fff;
-      color: var(--p)
-    }
-
-    .btn-o {
-      background: var(--warn);
-      color: #fff
-    }
-
-    .btn-g {
-      background: var(--ok);
-      color: #fff
-    }
-
-    .btn-p {
-      background: #9b59b6;
-      color: #fff
-    }
-
-    .wrap {
-      max-width: 1500px;
-      margin: 0 auto;
-      padding: 20px 24px
-    }
-
-    /* Filtros */
-    .filtros {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: flex-end
-    }
-
-    .fg {
-      display: flex;
-      flex-direction: column;
-      gap: 4px
-    }
-
-    .fg label {
-      font-size: .73rem;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .3px
-    }
-
-    .fg select,
-    .fg input {
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 11px;
-      font-size: .85rem;
-      background: #f9fbff;
-      min-width: 160px;
-      color: var(--text)
-    }
-
-    .fg select:focus,
-    .fg input:focus {
-      outline: none;
-      border-color: var(--a)
-    }
-
-    .badge {
-      background: var(--a);
-      color: #fff;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: .78rem;
-      font-weight: 700;
-      align-self: flex-end;
-      margin-bottom: 1px
-    }
-
-    /* KPIs */
-    .kpis {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
-      margin-bottom: 22px
-    }
-
-    .kpi {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px 18px;
-      border-left: 4px solid var(--a);
-      text-align: center
-    }
-
-    .kpi.ok {
-      border-left-color: var(--ok)
-    }
-
-    .kpi.warn {
-      border-left-color: var(--warn)
-    }
-
-    .kpi.err {
-      border-left-color: var(--err)
-    }
-
-    .kpi-v {
-      font-size: 2.2rem;
-      font-weight: 800;
-      color: var(--p);
-      line-height: 1
-    }
-
-    .kpi-l {
-      font-size: .7rem;
-      color: var(--muted);
-      font-weight: 700;
-      margin-top: 6px;
-      text-transform: uppercase;
-      letter-spacing: .3px
-    }
-
-    /* Tabla principal */
-    .tabla-wrap {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 22px;
-      overflow-x: auto
-    }
-
-    .tabla-wrap table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 900px
-    }
-
-    .tabla-wrap th {
-      background: var(--p);
-      color: #fff;
-      padding: 10px 12px;
-      text-align: left;
-      font-size: .78rem;
-      font-weight: 700;
-      white-space: nowrap
-    }
-
-    .tabla-wrap td {
-      padding: 9px 12px;
-      border-bottom: 1px solid var(--border);
-      font-size: .82rem;
-      vertical-align: middle
-    }
-
-    .tabla-wrap tr:hover td {
-      background: #f4f8ff
-    }
-
-    .tabla-wrap tr:last-child td {
-      border-bottom: none
-    }
-
-    /* Barra de avance */
-    .bar-wrap {
-      width: 140px;
-      background: #eee;
-      border-radius: 10px;
-      height: 10px;
-      overflow: hidden;
-      display: inline-block;
-      vertical-align: middle
-    }
-
-    .bar-fill {
-      height: 100%;
-      border-radius: 10px;
-      transition: width .3s
-    }
-
-    .bar-ok {
-      background: var(--ok)
-    }
-
-    .bar-warn {
-      background: var(--warn)
-    }
-
-    .bar-err {
-      background: var(--err)
-    }
-
-    .bar-zero {
-      background: #ccc
-    }
-
-    /* Score badge */
-    .score {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: .75rem;
-      font-weight: 800;
-      color: #fff;
-      margin-left: 6px
-    }
-
-    .s-ok {
-      background: var(--ok)
-    }
-
-    .s-warn {
-      background: var(--warn)
-    }
-
-    .s-err {
-      background: var(--err)
-    }
-
-    .s-zero {
-      background: #999
-    }
-
-    /* Gráficas */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-      gap: 18px;
-      margin-bottom: 22px
-    }
-
-    .chart-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px
-    }
-
-    .chart-card h3 {
-      font-size: .9rem;
-      font-weight: 700;
-      color: var(--p);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px
-    }
-
-    .chart-wrap {
-      height: 280px
-    }
-
-    /* Categorías */
-    .cats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-      margin-bottom: 22px
-    }
-
-    .cat-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px
-    }
-
-    .cat-card h4 {
-      font-size: .82rem;
-      font-weight: 700;
-      color: var(--p);
-      margin-bottom: 10px
-    }
-
-    .cat-bar-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 6px;
-      font-size: .78rem
-    }
-
-    .cat-bar-bg {
-      flex: 1;
-      background: #eee;
-      border-radius: 10px;
-      height: 8px;
-      overflow: hidden
-    }
-
-    .cat-bar-f {
-      height: 100%;
-      border-radius: 10px;
-      background: var(--a);
-      transition: width .4s
-    }
-
-    .cat-val {
-      width: 36px;
-      text-align: right;
-      font-weight: 700;
-      font-size: .78rem;
-      color: var(--muted)
-    }
-
-    .cat-ent {
-      flex: 0 0 130px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap
-    }
-
-    /* Modal detalle */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center
-    }
-
-    .modal-overlay.visible {
-      display: flex
-    }
-
-    .modal {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 28px;
-      max-width: 700px;
-      width: 95%;
-      max-height: 85vh;
-      overflow-y: auto
-    }
-
-    .modal h2 {
-      color: var(--p);
-      font-size: 1rem;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center
-    }
-
-    .modal .close {
-      cursor: pointer;
-      font-size: 1.4rem;
-      color: var(--muted)
-    }
-
-    .detalle-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px
-    }
-
-    .detalle-item {
-      background: #f9fbff;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px
-    }
-
-    .detalle-item .d-label {
-      font-size: .72rem;
-      color: var(--muted);
-      font-weight: 700;
-      margin-bottom: 3px;
-      text-transform: uppercase
-    }
-
-    .detalle-item .d-val {
-      font-size: .88rem;
-      font-weight: 600;
-      color: var(--text)
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      padding: 12px 20px;
-      border-radius: 10px;
-      color: #fff;
-      font-size: .85rem;
-      font-weight: 600;
-      z-index: 9999;
-      animation: slideUp .3s;
-      max-width: 380px
-    }
-
-    .toast.ok {
-      background: var(--ok)
-    }
-
-    .toast.err {
-      background: var(--err)
-    }
-
-    .toast.info {
-      background: var(--a)
-    }
-
-    .toast.warn {
-      background: var(--warn)
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(60px);
-        opacity: 0
-      }
-
-      to {
-        transform: translateY(0);
-        opacity: 1
-      }
-    }
-
-
-    /* Metodología */
+    /* ── Metodología ── */
     .metodo-wrap {
       background: var(--card);
       border: 1px solid var(--border);
@@ -522,7 +27,12 @@
       align-items: center;
       font-weight: 700;
       color: var(--p);
-      font-size: .92rem
+      font-size: .9rem;
+      user-select: none
+    }
+
+    .metodo-header:hover {
+      background: #e8f0fb
     }
 
     .metodo-body {
@@ -538,19 +48,21 @@
       width: 100%;
       border-collapse: collapse;
       font-size: .82rem;
-      margin-bottom: 16px
+      margin-bottom: 8px
     }
 
     .metodo-table th {
       background: var(--p);
       color: #fff;
       padding: 8px 12px;
-      text-align: left
+      text-align: left;
+      font-size: .78rem
     }
 
     .metodo-table td {
       padding: 8px 12px;
-      border-bottom: 1px solid var(--border)
+      border-bottom: 1px solid var(--border);
+      vertical-align: top
     }
 
     .metodo-table tr:last-child td {
@@ -567,7 +79,8 @@
       border-radius: 8px;
       font-size: .72rem;
       font-weight: 700;
-      color: #fff
+      color: #fff;
+      white-space: nowrap
     }
 
     .tag-3 {
@@ -582,7 +95,7 @@
       background: #3498db
     }
 
-    /* Respuestas por entidad */
+    /* ── Respuestas por entidad ── */
     .resp-select-wrap {
       background: var(--card);
       border: 1px solid var(--border);
@@ -604,7 +117,8 @@
       border-radius: 8px;
       padding: 8px 12px;
       font-size: .88rem;
-      min-width: 320px
+      min-width: 300px;
+      max-width: 100%
     }
 
     .preguntas-list {
@@ -620,98 +134,81 @@
       padding: 14px 16px
     }
 
-    .preg-item .preg-codigo {
+    .preg-item .preg-meta {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 7px;
+      flex-wrap: wrap
+    }
+
+    .preg-codigo {
       display: inline-block;
       background: var(--p);
       color: #fff;
       font-size: .7rem;
       font-weight: 700;
       padding: 2px 8px;
-      border-radius: 6px;
-      margin-bottom: 6px
+      border-radius: 6px
     }
 
-    .preg-item .preg-label {
+    .preg-peso-tag {
+      display: inline-block;
+      font-size: .7rem;
+      background: #f0f0f0;
+      color: var(--muted);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 600
+    }
+
+    .preg-label {
       font-size: .85rem;
       font-weight: 600;
       color: var(--text);
-      margin-bottom: 8px
+      margin-bottom: 8px;
+      line-height: 1.4
     }
 
-    .preg-item .preg-resp {
+    .preg-resp {
       font-size: .83rem;
-      padding: 8px 12px;
+      padding: 10px 13px;
       border-radius: 8px;
-      border-left: 4px solid var(--a)
+      border-left: 4px solid var(--a);
+      line-height: 1.6
     }
 
-    .preg-item .preg-resp.r-ok {
+    .preg-resp.r-ok {
       background: #d4edda;
       border-color: var(--ok);
       color: #155724
     }
 
-    .preg-item .preg-resp.r-warn {
+    .preg-resp.r-warn {
       background: #fff3cd;
       border-color: var(--warn);
       color: #856404
     }
 
-    .preg-item .preg-resp.r-err {
+    .preg-resp.r-err {
       background: #fde8e8;
       border-color: var(--err);
       color: #721c24
     }
 
-    .preg-item .preg-resp.r-empty {
+    .preg-resp.r-empty {
       background: #f0f0f0;
       border-color: #ccc;
-      color: #888
+      color: #888;
+      font-style: italic
     }
 
-    .preg-item .preg-score {
+    .preg-score-badge {
       float: right;
       font-weight: 800;
-      font-size: .82rem
-    }
-
-    /* Sección headers */
-    .sec-header {
-      font-size: .85rem;
-      font-weight: 800;
-      color: var(--p);
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px
-    }
-
-    .empty {
-      text-align: center;
-      padding: 48px 20px;
-      color: var(--muted)
-    }
-
-    .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 12px
-    }
-
-    @media(max-width:700px) {
-
-      .charts-grid,
-      .cats-grid,
-      .detalle-grid {
-        grid-template-columns: 1fr
-      }
-
-      header {
-        padding: 14px 16px
-      }
+      font-size: .8rem;
+      margin-left: 10px;
+      white-space: nowrap
     }
   </style>
 </head>
@@ -720,7 +217,7 @@
 
   <header>
     <div>
-      <h1>📊 Dashboard MECI 122 — Seguimiento Formularios</h1>
+      <h1>📊 Dashboard MECI 122</h1>
       <p>Análisis de avance y estado por entidad · Evaluación Independiente 2025</p>
     </div>
     <div class="header-btns">
@@ -799,7 +296,7 @@
       </div>
     </div>
 
-    <!-- Gráficas de avance -->
+    <!-- Gráficas -->
     <div class="sec-header">📈 Visualización de avance</div>
     <div class="charts-grid">
       <div class="chart-card">
@@ -820,7 +317,7 @@
       </div>
     </div>
 
-    <!-- Análisis por categoría (top/bottom entidades) -->
+    <!-- Categorías -->
     <div class="sec-header">🔎 Categorías con menor cumplimiento por entidad</div>
     <div class="cats-grid" id="cats-grid">
       <div class="empty">
@@ -829,7 +326,7 @@
       </div>
     </div>
 
-    <!-- Tabla de entidades -->
+    <!-- Tabla -->
     <div class="sec-header">📋 Tabla de estado por entidad</div>
     <div class="tabla-wrap">
       <table>
@@ -861,128 +358,125 @@
       </table>
     </div>
 
-  </div>
 
-
-  <!-- ══════ METODOLOGÍA ══════ -->
-  <div class="sec-header">📐 Metodología de calificación</div>
-  <div class="metodo-wrap">
-    <div class="metodo-header" onclick="toggleMetodo()">
-      ℹ️ ¿Cómo se calcula el avance de cada entidad? &nbsp;<span id="metodo-arrow">▼ Ver explicación</span>
-    </div>
-    <div class="metodo-body" id="metodo-body">
-      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">
-        Cada pregunta del formulario tiene un <strong>peso</strong> (importancia) y una <strong>forma de
-          puntuar</strong> según su tipo.
-        El avance final es la suma ponderada de todos los puntajes dividida entre el puntaje máximo posible, expresado
-        en porcentaje.
-      </p>
-
-      <strong style="font-size:.85rem;color:var(--p)">Tipos de pregunta y cómo se puntúan:</strong>
-      <table class="metodo-table" style="margin-top:10px">
-        <tr>
-          <th>Tipo</th>
-          <th>Lógica de calificación</th>
-          <th>Ejemplo</th>
-        </tr>
-        <tr>
-          <td><strong>Opción única (radio)</strong></td>
-          <td>Cada opción tiene un valor fijo entre 0.0 y 1.0 según qué tan buena es la respuesta</td>
-          <td>CIN221: Gestión integral=1.0 · Parcial=0.5 · No realiza=0.0</td>
-        </tr>
-        <tr>
-          <td><strong>Múltiple opción (checkbox)</strong></td>
-          <td>Se divide la cantidad de opciones marcadas entre el total posible. "Ninguna de las anteriores" = 0.0
-            (salvo CIN301 donde significa cumplimiento total = 1.0)</td>
-          <td>CIN253: marcó 6 de 8 herramientas = 75%</td>
-        </tr>
-        <tr>
-          <td><strong>Número</strong></td>
-          <td>Si es mayor a 0 = 1.0 · Si es 0 o vacío = 0.0</td>
-          <td>CIN305: tiene 3 trabajadores = 1.0</td>
-        </tr>
-      </table>
-
-      <strong style="font-size:.85rem;color:var(--p)">Semáforo de avance:</strong>
-      <table class="metodo-table" style="margin-top:10px">
-        <tr>
-          <th>Resultado</th>
-          <th>Estado</th>
-          <th>Interpretación</th>
-        </tr>
-        <tr>
-          <td>≥ 75%</td>
-          <td>🟢 <strong>Alto</strong></td>
-          <td>Buen nivel de control interno implementado</td>
-        </tr>
-        <tr>
-          <td>50 – 74%</td>
-          <td>🟡 <strong>Medio</strong></td>
-          <td>Avance aceptable, con áreas a fortalecer</td>
-        </tr>
-        <tr>
-          <td>25 – 49%</td>
-          <td>🔴 <strong>Bajo</strong></td>
-          <td>Requiere atención y acompañamiento prioritario</td>
-        </tr>
-        <tr>
-          <td>&lt; 25%</td>
-          <td>⚫ <strong>Crítico</strong></td>
-          <td>Control interno muy débil — intervención urgente</td>
-        </tr>
-      </table>
-
-      <strong style="font-size:.85rem;color:var(--p)">Pesos por pregunta:</strong>
-      <table class="metodo-table" style="margin-top:10px">
-        <tr>
-          <th>Peso</th>
-          <th>Preguntas</th>
-          <th>Razón</th>
-        </tr>
-        <tr>
-          <td><span class="tag-peso tag-3">Peso 3</span></td>
-          <td>CIN238, CIN239, CIN243, CIN253, CIN255, CIN264</td>
-          <td>Preguntas estructurales: metodología, plan anual, ejecución, herramientas y capacidad del área</td>
-        </tr>
-        <tr>
-          <td><span class="tag-peso tag-2">Peso 2</span></td>
-          <td>CIN203, CIN206, CIN207, CIN221, CIN222, CIN233, CIN234, CIN236, CIN240, CIN241, CIN242, CIN244, CIN246,
-            CIN247, CIN252, CIN254, CIN300, CIN306</td>
-          <td>Preguntas de seguimiento y verificación de componentes MECI</td>
-        </tr>
-        <tr>
-          <td><span class="tag-peso tag-1">Peso 1</span></td>
-          <td>PER201, CIN268, CIN305, CIN301</td>
-          <td>Preguntas de contexto o percepción</td>
-        </tr>
-      </table>
-
-      <div
-        style="background:#eaf1fb;border-radius:10px;padding:12px 16px;font-size:.82rem;color:var(--p);margin-top:4px">
-        <strong>Fórmula:</strong> Avance % = (Σ puntaje_pregunta × peso) ÷ (Σ peso_máximo) × 100
+    <!-- ══════ METODOLOGÍA ══════ -->
+    <div class="sec-header">📐 Metodología de calificación</div>
+    <div class="metodo-wrap">
+      <div class="metodo-header" onclick="toggleMetodo()">
+        ℹ️ ¿Cómo se calcula el avance de cada entidad? &nbsp;<span id="metodo-arrow">▼ Ver explicación completa</span>
+      </div>
+      <div class="metodo-body" id="metodo-body">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">
+          Cada pregunta del formulario tiene un <strong>peso</strong> (importancia) y una <strong>forma de
+            puntuar</strong> según su tipo.
+          El avance final es la suma ponderada de todos los puntajes dividida entre el puntaje máximo posible, expresado
+          en porcentaje.
+        </p>
+        <strong style="font-size:.85rem;color:var(--p)">Tipos de pregunta y cómo se puntúan:</strong>
+        <table class="metodo-table" style="margin-top:10px">
+          <tr>
+            <th>Tipo</th>
+            <th>Lógica de calificación</th>
+            <th>Ejemplo</th>
+          </tr>
+          <tr>
+            <td><strong>Opción única (radio)</strong></td>
+            <td>Cada opción tiene un valor fijo entre 0.0 y 1.0 según qué tan buena es la respuesta</td>
+            <td>CIN221: Gestión integral=1.0 · Parcial=0.5 · No realiza=0.0</td>
+          </tr>
+          <tr>
+            <td><strong>Múltiple opción (checkbox)</strong></td>
+            <td>Se divide la cantidad de opciones marcadas entre el total posible. "Ninguna de las anteriores" = 0.0
+              (excepto CIN301 donde significa plan cumplido al 100% = 1.0)</td>
+            <td>CIN253: marcó 6 de 8 herramientas = 75%</td>
+          </tr>
+          <tr>
+            <td><strong>Número</strong></td>
+            <td>Mayor a 0 = 1.0 · Igual a 0 o vacío = 0.0</td>
+            <td>CIN305: tiene 3 trabajadores = 1.0</td>
+          </tr>
+        </table>
+        <strong style="font-size:.85rem;color:var(--p);display:block;margin-top:14px">Semáforo de avance:</strong>
+        <table class="metodo-table" style="margin-top:10px">
+          <tr>
+            <th>Resultado</th>
+            <th>Estado</th>
+            <th>Interpretación</th>
+          </tr>
+          <tr>
+            <td>≥ 75%</td>
+            <td>🟢 <strong>Alto</strong></td>
+            <td>Buen nivel de control interno implementado</td>
+          </tr>
+          <tr>
+            <td>50 – 74%</td>
+            <td>🟡 <strong>Medio</strong></td>
+            <td>Avance aceptable, con áreas a fortalecer</td>
+          </tr>
+          <tr>
+            <td>25 – 49%</td>
+            <td>🔴 <strong>Bajo</strong></td>
+            <td>Requiere atención y acompañamiento prioritario</td>
+          </tr>
+          <tr>
+            <td>&lt; 25%</td>
+            <td>⚫ <strong>Crítico</strong></td>
+            <td>Control interno muy débil — intervención urgente</td>
+          </tr>
+        </table>
+        <strong style="font-size:.85rem;color:var(--p);display:block;margin-top:14px">Pesos asignados por
+          pregunta:</strong>
+        <table class="metodo-table" style="margin-top:10px">
+          <tr>
+            <th>Peso</th>
+            <th>Preguntas</th>
+            <th>Razón</th>
+          </tr>
+          <tr>
+            <td><span class="tag-peso tag-3">Peso 3</span></td>
+            <td>CIN238, CIN239, CIN243, CIN253, CIN255, CIN264</td>
+            <td>Preguntas estructurales: metodología, plan anual, ejecución, herramientas y capacidad del área</td>
+          </tr>
+          <tr>
+            <td><span class="tag-peso tag-2">Peso 2</span></td>
+            <td>CIN203, CIN206, CIN207, CIN221, CIN222, CIN233, CIN234, CIN236, CIN240, CIN241, CIN242, CIN244, CIN246,
+              CIN247, CIN252, CIN254, CIN300, CIN306</td>
+            <td>Preguntas de seguimiento y verificación de componentes MECI</td>
+          </tr>
+          <tr>
+            <td><span class="tag-peso tag-1">Peso 1</span></td>
+            <td>PER201, CIN268, CIN305, CIN301</td>
+            <td>Preguntas de contexto o percepción</td>
+          </tr>
+        </table>
+        <div
+          style="background:#eaf1fb;border-radius:10px;padding:12px 16px;font-size:.82rem;color:var(--p);margin-top:14px">
+          <strong>Fórmula:</strong> Avance % = (Σ puntaje_pregunta × peso) ÷ (Σ peso_máximo_posible) × 100
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ══════ RESPUESTAS POR ENTIDAD ══════ -->
-  <div class="sec-header">🔍 Respuestas por entidad</div>
-  <div class="resp-select-wrap">
-    <div class="resp-selector">
-      <div class="fg">
-        <label>Selecciona una entidad</label>
-        <select id="sel-entidad" onchange="verRespuestas()">
-          <option value="">— Selecciona una entidad —</option>
-        </select>
+    <!-- ══════ RESPUESTAS POR ENTIDAD ══════ -->
+    <div class="sec-header">🔍 Respuestas por entidad</div>
+    <div class="resp-select-wrap">
+      <div class="resp-selector">
+        <div class="fg">
+          <label>Selecciona una entidad para ver sus respuestas</label>
+          <select id="sel-entidad" onchange="verRespuestas()">
+            <option value="">— Selecciona una entidad —</option>
+          </select>
+        </div>
+        <span id="resp-avance-badge"
+          style="display:none;padding:6px 16px;border-radius:20px;font-weight:800;font-size:.9rem;color:#fff;background:var(--a);align-self:flex-end"></span>
       </div>
-      <span id="resp-avance-badge"
-        style="display:none;padding:6px 16px;border-radius:20px;font-weight:800;font-size:.9rem;color:#fff;background:var(--a)"></span>
-    </div>
-    <div class="preguntas-list" id="preguntas-list">
-      <div class="empty" style="padding:24px">
-        <div class="empty-icon" style="font-size:2rem">👆</div>
-        <p>Selecciona una entidad para ver sus respuestas pregunta por pregunta.</p>
+      <div class="preguntas-list" id="preguntas-list">
+        <div class="empty" style="padding:24px">
+          <div class="empty-icon" style="font-size:2rem">👆</div>
+          <p>Selecciona una entidad para ver sus respuestas pregunta por pregunta.</p>
+        </div>
       </div>
     </div>
+
   </div>
 
   <!-- Modal detalle -->
@@ -998,46 +492,36 @@
     const APPS_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
     const CACHE_KEY = "meci122_v9";
 
-
     const PREGUNTAS = { "PER201": { "label": "MECI genera valor agregado", "tipo": "radio", "opciones": { "si": 1, "no": 0 }, "peso": 1 }, "CIN203": { "label": "Política de integridad", "tipo": "check", "max_opts": 5, "peso": 2 }, "CIN206": { "label": "Talento Humano", "tipo": "check", "max_opts": 7, "peso": 2 }, "CIN207": { "label": "Planeación y Riesgos", "tipo": "check", "max_opts": 8, "peso": 2 }, "CIN221": { "label": "Gestión integral de riesgos", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 }, "CIN222": { "label": "Evaluación riesgo/control", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN233": { "label": "Evaluación gestión info", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 }, "CIN234": { "label": "Hallazgos comunicados", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 2 }, "CIN236": { "label": "Informes contables oportunos", "tipo": "radio", "opciones": { "siempre": 1, "mayoria": 0.75, "pocas": 0.25, "nunca": 0 }, "peso": 2 }, "CIN238": { "label": "Metodología auditoría", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25, "d": 0 }, "peso": 3 }, "CIN239": { "label": "Plan anual auditoras", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 3 }, "CIN240": { "label": "Componentes plan anual", "tipo": "check", "max_opts": 6, "peso": 2 }, "CIN241": { "label": "Fases de auditoría", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN242": { "label": "Aspectos auditoras programadas", "tipo": "check", "max_opts": 7, "peso": 2 }, "CIN243": { "label": "Ejecución plan anual", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25 }, "peso": 3 }, "CIN244": { "label": "Universo de auditoría", "tipo": "check", "max_opts": 3, "peso": 2 }, "CIN246": { "label": "Acciones eval. SCI", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN247": { "label": "Alcance plan auditoras", "tipo": "check", "max_opts": 9, "peso": 2 }, "CIN252": { "label": "Planeación auditoras", "tipo": "check", "max_opts": 4, "peso": 2 }, "CIN253": { "label": "Herramientas ejecución", "tipo": "check", "max_opts": 8, "peso": 3 }, "CIN254": { "label": "Características informes", "tipo": "check", "max_opts": 6, "peso": 2 }, "CIN255": { "label": "Seguimiento planes mejoramiento", "tipo": "radio", "opciones": { "a": 1, "b": 0.5, "c": 0 }, "peso": 3 }, "CIN264": { "label": "Estructura área CI", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25, "d": 0.5, "e": 0 }, "peso": 3 }, "CIN268": { "label": "Tipo vinculación JCI", "tipo": "radio", "opciones": { "periodo": 1, "libre": 1, "carrera": 1, "provisional": 0.5, "temporal": 0.25, "otro": 0.25 }, "peso": 1 }, "CIN305": { "label": "Total trabajadores CI", "tipo": "numero", "peso": 1 }, "CIN306": { "label": "Alertas política integridad", "tipo": "radio", "opciones": { "si": 1, "no": 0, "na": 1 }, "peso": 2 }, "CIN300": { "label": "Control gestión información", "tipo": "check", "max_opts": 7, "peso": 2 }, "CIN301": { "label": "Razones incumplimiento plan", "tipo": "check", "max_opts": 7, "peso": 1, "ninguna_ok": true } };
     const CATEGORIAS = { "Política de Integridad": ["CIN203", "CIN306"], "Evaluación Riesgos": ["CIN207", "CIN221", "CIN222"], "Proceso Auditor": ["CIN238", "CIN239", "CIN240", "CIN241", "CIN242", "CIN243", "CIN247", "CIN252", "CIN253", "CIN254"], "Comunicación y Hallazgos": ["CIN233", "CIN234", "CIN236"], "Seguimiento y Mejora": ["CIN246", "CIN255", "CIN301"], "Gestión Información": ["CIN300"], "Capacidad Institucional": ["CIN264", "CIN268", "CIN305"] };
 
     function calcAvance(r) {
       let score = 0, maxScore = 0;
       const detalle = {};
-
       for (const [campo, cfg] of Object.entries(PREGUNTAS)) {
         const val = (r[campo] || '').toString().trim().toLowerCase();
         maxScore += cfg.peso;
-
         if (!val) { detalle[campo] = 0; continue; }
-
         if (cfg.tipo === 'radio') {
           const pts = cfg.opciones[val] ?? 0;
-          score += pts * cfg.peso;
-          detalle[campo] = pts;
+          score += pts * cfg.peso; detalle[campo] = pts;
         } else if (cfg.tipo === 'check') {
           const partes = val.split(',').map(o => o.trim()).filter(Boolean);
           const tieneNinguna = partes.includes('ninguna');
           const opts = partes.filter(o => o !== 'ninguna');
           let pts;
           if (tieneNinguna && opts.length === 0) {
-            // Solo marcó "ninguna" — positivo o negativo según configuración
             pts = cfg.ninguna_ok ? 1.0 : 0.0;
           } else {
-            // Marcó opciones reales (ignorar ninguna si viene junto)
             pts = Math.min(1, opts.length / (cfg.max_opts || 5));
           }
-          score += pts * cfg.peso;
-          detalle[campo] = Math.round(pts * 100) / 100;
+          score += pts * cfg.peso; detalle[campo] = Math.round(pts * 100) / 100;
         } else if (cfg.tipo === 'numero') {
           const n = parseInt(val) || 0;
           const pts = n > 0 ? 1 : 0;
-          score += pts * cfg.peso;
-          detalle[campo] = pts;
+          score += pts * cfg.peso; detalle[campo] = pts;
         }
       }
-
       const pct = maxScore > 0 ? Math.round(score / maxScore * 1000) / 10 : 0;
       return { pct, detalle };
     }
@@ -1052,54 +536,216 @@
     function calcCategoria(r, campos) {
       let s = 0, m = 0;
       campos.forEach(c => {
-        const cfg = PREGUNTAS[c];
-        if (!cfg) return;
+        const cfg = PREGUNTAS[c]; if (!cfg) return;
         m += cfg.peso;
         const val = (r[c] || '').toString().trim().toLowerCase();
         if (!val) return;
-        if (cfg.tipo === 'radio') {
-          s += (cfg.opciones[val] ?? 0) * cfg.peso;
-        } else if (cfg.tipo === 'check') {
-          const opts = val.split(',').filter(o => o.trim() && o.trim() !== 'ninguna');
-          s += Math.min(1, opts.length / (cfg.max_opts || 5)) * cfg.peso;
-        } else if (cfg.tipo === 'numero') {
-          s += ((parseInt(val) || 0) > 0 ? 1 : 0) * cfg.peso;
+        if (cfg.tipo === 'radio') { s += (cfg.opciones[val] ?? 0) * cfg.peso; }
+        else if (cfg.tipo === 'check') {
+          const partes = val.split(',').map(o => o.trim()).filter(Boolean);
+          const tieneNinguna = partes.includes('ninguna');
+          const opts = partes.filter(o => o !== 'ninguna');
+          const pts = (tieneNinguna && opts.length === 0) ? (cfg.ninguna_ok ? 1 : 0) : Math.min(1, opts.length / (cfg.max_opts || 5));
+          s += pts * cfg.peso;
         }
+        else if (cfg.tipo === 'numero') { s += ((parseInt(val) || 0) > 0 ? 1 : 0) * cfg.peso; }
       });
       return m > 0 ? Math.round(s / m * 100) : 0;
     }
 
+    let allData = [], filtData = [], chartInst = {};
 
-    let allData = [];
-    let filtData = [];
-    let chartInst = {};
+    function toast(msg, type = 'info') {
+      const t = document.createElement('div');
+      t.className = 'toast ' + type; t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 4500);
+    }
 
+    async function cargar(limpiar = false) {
+      toast('⏳ Cargando desde Google Sheets...', 'info');
+      if (limpiar) localStorage.removeItem(CACHE_KEY);
+      try {
+        const res = await fetch(APPS_URL + '?t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = JSON.parse(await res.text());
+        if (!Array.isArray(data)) throw new Error('No es array');
+        if (data.length === 0) { toast('⚠️ Sheets vacío — mostrando demo', 'warn'); allData = datosDemo(); }
+        else {
+          allData = data.map(r => { delete r.viewport; return r; });
+          localStorage.setItem(CACHE_KEY, JSON.stringify(allData));
+          toast('✅ ' + allData.length + ' registros cargados', 'ok');
+        }
+      } catch (err) {
+        const cache = localStorage.getItem(CACHE_KEY);
+        if (cache) { allData = JSON.parse(cache); toast('📦 ' + allData.length + ' desde caché · ' + err.message, 'warn'); }
+        else { allData = datosDemo(); toast('❌ ' + err.message + ' · Mostrando demo', 'err'); }
+      }
+      poblarFiltros(); aplicar();
+    }
 
-    // ══ METODOLOGÍA TOGGLE ══
+    function poblarFiltros() {
+      const vigs = [...new Set(allData.map(r => r.entidad_vigencia).filter(Boolean))].sort();
+      const tipos = [...new Set(allData.map(r => r.tipo_entidad).filter(Boolean))].sort();
+      document.getElementById('f-vig').innerHTML = '<option value="">— Todas —</option>' + vigs.map(v => `<option>${v}</option>`).join('');
+      document.getElementById('f-tipo').innerHTML = '<option value="">— Todos —</option>' + tipos.map(v => `<option>${v}</option>`).join('');
+      ['f-vig', 'f-tipo', 'f-estado'].forEach(id => document.getElementById(id).onchange = aplicar);
+      // Selector respuestas
+      const ents = [...new Set(allData.map(r => r.entidad_nombre).filter(Boolean))].sort();
+      document.getElementById('sel-entidad').innerHTML = '<option value="">— Selecciona una entidad —</option>' + ents.map(e => `<option value="${e}">${e}</option>`).join('');
+    }
+
+    function aplicar() {
+      const fV = document.getElementById('f-vig').value, fT = document.getElementById('f-tipo').value,
+        fE = document.getElementById('f-estado').value, fB = document.getElementById('f-buscar').value.toLowerCase();
+      filtData = allData
+        .map(r => { const { pct, detalle } = calcAvance(r); return { ...r, _pct: pct, _det: detalle }; })
+        .filter(r => {
+          if (fV && r.entidad_vigencia !== fV) return false;
+          if (fT && r.tipo_entidad !== fT) return false;
+          if (fB && !(r.entidad_nombre || '').toLowerCase().includes(fB)) return false;
+          if (fE === 'alto' && r._pct < 75) return false;
+          if (fE === 'medio' && (r._pct < 50 || r._pct >= 75)) return false;
+          if (fE === 'bajo' && (r._pct < 25 || r._pct >= 50)) return false;
+          if (fE === 'critico' && r._pct >= 25) return false;
+          return true;
+        }).sort((a, b) => b._pct - a._pct);
+      document.getElementById('badge').textContent = filtData.length + ' registros';
+      renderKPIs(); renderTabla(); renderCharts(); renderCats();
+    }
+
+    function renderKPIs() {
+      const n = filtData.length, prom = n ? Math.round(filtData.reduce((a, r) => a + r._pct, 0) / n * 10) / 10 : 0;
+      document.getElementById('k-total').textContent = n;
+      document.getElementById('k-alto').textContent = filtData.filter(r => r._pct >= 75).length;
+      document.getElementById('k-medio').textContent = filtData.filter(r => r._pct >= 50 && r._pct < 75).length;
+      document.getElementById('k-bajo').textContent = filtData.filter(r => r._pct < 50).length;
+      document.getElementById('k-prom').textContent = prom + '%';
+      document.getElementById('k-eses').textContent = filtData.filter(r => r.tipo_entidad === 'ESES').length;
+      document.getElementById('k-desc').textContent = filtData.filter(r => r.tipo_entidad === 'DESCENTRALIZADA').length;
+      document.getElementById('k-muni').textContent = filtData.filter(r => r.tipo_entidad === 'MUNICIPIO').length;
+    }
+
+    function barHtml(pct) {
+      const c = pct >= 75 ? 'bar-ok' : pct >= 50 ? 'bar-warn' : pct > 0 ? 'bar-err' : 'bar-zero';
+      const s = pct >= 75 ? 's-ok' : pct >= 50 ? 's-warn' : pct > 0 ? 's-err' : 's-zero';
+      return `<div style="display:flex;align-items:center;gap:8px"><div class="bar-wrap"><div class="bar-fill ${c}" style="width:${pct}%"></div></div><span class="score ${s}">${pct}%</span></div>`;
+    }
+
+    function renderTabla() {
+      const tbody = document.getElementById('tbody');
+      if (!filtData.length) { tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados.</p></div></td></tr>'; return; }
+      tbody.innerHTML = filtData.map((r, i) => {
+        const fecha = r.timestamp ? new Date(r.timestamp).toLocaleDateString('es-CO') : '—';
+        return `<tr>
+          <td>${i + 1}</td>
+          <td><strong>${r.entidad_nombre || '—'}</strong><br><small style="color:var(--muted)">${fecha}</small></td>
+          <td><span style="font-size:.72rem;background:#eaf1fb;color:var(--p);padding:2px 8px;border-radius:8px;font-weight:700">${r.tipo_entidad || '—'}</span></td>
+          <td>${r.entidad_vigencia || '—'}</td>
+          <td style="font-size:.78rem">${r.responsable_nombre || '—'}<br><span style="color:var(--muted)">${r.responsable_cargo || ''}</span></td>
+          <td>${semaforo(r._pct)} ${barHtml(r._pct)}</td>
+          <td>${barHtml(calcCategoria(r, CATEGORIAS['Política de Integridad']))}</td>
+          <td>${barHtml(calcCategoria(r, CATEGORIAS['Evaluación Riesgos']))}</td>
+          <td>${barHtml(calcCategoria(r, CATEGORIAS['Proceso Auditor']))}</td>
+          <td>${barHtml(calcCategoria(r, CATEGORIAS['Capacidad Institucional']))}</td>
+          <td><button class="btn btn-w" style="padding:5px 12px;font-size:.75rem" onclick="verDetalle(${i})">🔍 Ver</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    function mkChart(id, type, labels, datasets, opts = {}) {
+      if (chartInst[id]) chartInst[id].destroy();
+      const el = document.getElementById(id); if (!el) return;
+      chartInst[id] = new Chart(el, { type, data: { labels, datasets }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: type === 'pie' || type === 'doughnut', position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } }, ...opts } });
+    }
+
+    function renderCharts() {
+      if (!filtData.length) return;
+      const top8 = [...filtData].sort((a, b) => b._pct - a._pct).slice(0, 8);
+      mkChart('ch-top', 'bar', top8.map(r => (r.entidad_nombre || '').substring(0, 22) + '…'), [{ data: top8.map(r => r._pct), backgroundColor: top8.map(r => r._pct >= 75 ? '#27ae60' : r._pct >= 50 ? '#e67e22' : '#e74c3c'), borderRadius: 6 }], { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, y: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } });
+      const bot8 = [...filtData].sort((a, b) => a._pct - b._pct).slice(0, 8);
+      mkChart('ch-bottom', 'bar', bot8.map(r => (r.entidad_nombre || '').substring(0, 22) + '…'), [{ data: bot8.map(r => r._pct), backgroundColor: bot8.map(r => r._pct < 25 ? '#c0392b' : r._pct < 50 ? '#e74c3c' : '#e67e22'), borderRadius: 6 }], { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, y: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } });
+      const niv = { '🟢 Alto (≥75%)': filtData.filter(r => r._pct >= 75).length, '🟡 Medio (50–74%)': filtData.filter(r => r._pct >= 50 && r._pct < 75).length, '🔴 Bajo (25–49%)': filtData.filter(r => r._pct >= 25 && r._pct < 50).length, '⚫ Crítico (<25%)': filtData.filter(r => r._pct < 25).length };
+      mkChart('ch-dist', 'doughnut', Object.keys(niv), [{ data: Object.values(niv), backgroundColor: ['#27ae60', '#e67e22', '#e74c3c', '#555'] }]);
+      const catNames = Object.keys(CATEGORIAS), catProms = catNames.map(cat => { const v = filtData.map(r => calcCategoria(r, CATEGORIAS[cat])); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; });
+      mkChart('ch-cats', 'bar', catNames.map(c => c.substring(0, 20)), [{ data: catProms, backgroundColor: catProms.map(v => v >= 75 ? '#27ae60' : v >= 50 ? '#e67e22' : '#e74c3c'), borderRadius: 6 }], { scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, x: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } });
+    }
+
+    function renderCats() {
+      const grid = document.getElementById('cats-grid');
+      if (!filtData.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Sin datos</p></div>'; return; }
+      grid.innerHTML = Object.keys(CATEGORIAS).map(cat => {
+        const campos = CATEGORIAS[cat], vals = filtData.map(r => ({ ent: r.entidad_nombre || '—', pct: calcCategoria(r, campos) }));
+        const prom = Math.round(vals.reduce((a, b) => a + b.pct, 0) / vals.length);
+        const clr = prom >= 75 ? 'var(--ok)' : prom >= 50 ? 'var(--warn)' : 'var(--err)';
+        const ord = [...vals].sort((a, b) => a.pct - b.pct).slice(0, 5);
+        return `<div class="cat-card"><h4>${cat} <span style="color:${clr};font-size:.85rem;font-weight:800">${prom}% prom</span></h4>${ord.map(e => `<div class="cat-bar-row"><span class="cat-ent" title="${e.ent}">${e.ent.substring(0, 18)}...</span><div class="cat-bar-bg"><div class="cat-bar-f" style="width:${e.pct}%;background:${e.pct >= 75 ? 'var(--ok)' : e.pct >= 50 ? 'var(--warn)' : 'var(--err)'}"></div></div><span class="cat-val">${e.pct}%</span></div>`).join('')}</div>`;
+      }).join('');
+    }
+
+    function verDetalle(idx) {
+      const r = filtData[idx]; if (!r) return;
+      document.getElementById('modal-titulo').innerHTML = `${semaforo(r._pct)} ${r.entidad_nombre || 'Entidad'} · ${r._pct}% avance <span class="close" onclick="document.getElementById('modal').classList.remove('visible')">✕</span>`;
+      const catHtml = Object.keys(CATEGORIAS).map(cat => {
+        const pct = calcCategoria(r, CATEGORIAS[cat]), bar = pct >= 75 ? 'var(--ok)' : pct >= 50 ? 'var(--warn)' : 'var(--err)';
+        return `<div class="detalle-item"><div class="d-label">${cat}</div><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div class="cat-bar-bg" style="flex:1"><div class="cat-bar-f" style="width:${pct}%;background:${bar}"></div></div><strong style="color:${bar}">${pct}%</strong></div></div>`;
+      }).join('');
+      document.getElementById('modal-body').innerHTML = `
+        <div style="margin-bottom:14px;padding:12px;background:#f9fbff;border-radius:10px;font-size:.82rem">
+          <strong>Tipo:</strong> ${r.tipo_entidad || '—'} &nbsp;|&nbsp; <strong>Vigencia:</strong> ${r.entidad_vigencia || '—'} &nbsp;|&nbsp;
+          <strong>Responsable:</strong> ${r.responsable_nombre || '—'} (${r.responsable_cargo || '—'}) &nbsp;|&nbsp;
+          <strong>Fecha:</strong> ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}
+        </div>
+        <div class="detalle-grid">${catHtml}</div>
+        <div style="margin-top:14px;background:#fffbf0;border:1px solid #f0a500;border-radius:10px;padding:12px">
+          <strong style="font-size:.8rem;color:#856404">⚠️ Áreas que requieren atención:</strong>
+          <ul style="margin-top:6px;padding-left:18px;font-size:.8rem;color:#444">
+            ${Object.keys(CATEGORIAS).filter(c => calcCategoria(r, CATEGORIAS[c]) < 50).map(c => `<li><strong>${c}</strong> — ${calcCategoria(r, CATEGORIAS[c])}%</li>`).join('') || '<li>✅ Todas las categorías superan el 50%</li>'}
+          </ul>
+        </div>`;
+      document.getElementById('modal').classList.add('visible');
+    }
+
+    function cerrarModal(e) { if (e.target.id === 'modal') document.getElementById('modal').classList.remove('visible'); }
+
+    function verDiagnostico() {
+      const w = window.open('', '_blank', 'width=720,height=550');
+      w.document.write('<pre style="padding:20px;font-family:monospace;font-size:13px;white-space:pre-wrap">🔬 DIAGNÓSTICO MECI 122\n\nURL: ' + APPS_URL + '\n\nDatos en memoria: ' + allData.length + '\nDatos filtrados: ' + filtData.length + '\nCaché: ' + (localStorage.getItem(CACHE_KEY) ? JSON.parse(localStorage.getItem(CACHE_KEY)).length + ' registros' : 'Vacío') + '\n\nProbando conexión...\n');
+      fetch(APPS_URL + '?t=' + Date.now(), { cache: 'no-store' })
+        .then(r => { w.document.write('HTTP: ' + r.status + ' ' + r.statusText + '\n'); return r.text(); })
+        .then(t => {
+          w.document.write('Respuesta (600 chars):\n' + t.substring(0, 600) + '\n\n');
+          try { const d = JSON.parse(t); w.document.write('✅ JSON: ' + (Array.isArray(d) ? d.length + ' registros' : typeof d) + '\n'); if (d.length > 0) w.document.write('Keys: ' + Object.keys(d[0]).join(', ') + '\n\nPrimer registro:\n' + JSON.stringify(d[0], null, 2)); }
+          catch (e) { w.document.write('❌ JSON inválido: ' + e.message); }
+          w.document.write('</pre>');
+        })
+        .catch(e => w.document.write('❌ Error: ' + e.message + '</pre>'));
+    }
+
+    // ── METODOLOGÍA TOGGLE ──
     function toggleMetodo() {
       const body = document.getElementById('metodo-body');
       const arrow = document.getElementById('metodo-arrow');
       const open = body.classList.toggle('open');
-      arrow.textContent = open ? '▲ Ocultar' : '▼ Ver explicación';
+      arrow.textContent = open ? '▲ Ocultar' : '▼ Ver explicación completa';
     }
 
-    // ══ RESPUESTAS POR ENTIDAD ══
-    const PREG_LEGIBLE = { "PER201": { "label": "¿El MECI ha generado valor agregado?", "opciones": { "si": "Sí", "no": "No" } }, "CIN203": { "label": "Política de integridad — el JCI verificó que la entidad:", "opts": { "a": "Implementa estrategia código de integridad", "b": "Cuenta con protocolo conflictos de interés", "c": "Gestiona conflictos de interés", "d": "Actualiza info en SIGEP", "e": "Garantiza registro Ley 2013/Decreto 830", "ninguna": "No cumple ninguna" } }, "CIN206": { "label": "Talento Humano — el JCI verificó:", "opts": { "a": "Plan Estratégico de Talento Humano", "b": "Articuló planes Decreto 612", "c": "Actividades de capacitación", "d": "Actividades de bienestar", "e": "Clima y relaciones laborales", "f": "Actualización SIGEP", "g": "Otros", "ninguna": "No hace seguimiento" } }, "CIN207": { "label": "Planeación y Riesgos — el JCI verificó:", "opts": { "a": "Objetivos claros y medibles", "b": "Responsables y tiempos definidos", "c": "Política de gestión de riesgos", "d": "Monitoreos a gestión de riesgos", "e": "Monitorea cumplimiento de metas", "f": "Seguimiento ejecución presupuestal", "g": "Otras actividades de revisión", "ninguna": "No lleva a cabo revisión" } }, "CIN221": { "label": "Gestión integral de riesgos (3ª línea):", "opciones": { "a": "Gestión integral con evidencias", "b": "Gestión parcial con evidencias", "c": "No realiza gestión de riesgos" } }, "CIN222": { "label": "Evaluación riesgo/control (3ª línea):", "opts": { "a": "Se pronunció sobre diseño de controles", "b": "Emitió comentarios sobre implementación", "c": "Contrastó eventos de materialización", "d": "Otra", "ninguna": "Ninguna" } }, "CIN233": { "label": "Evaluación gestión de información (3ª línea):", "opciones": { "a": "Evaluó con evidencias", "b": "Evaluación parcial con evidencias", "c": "No evaluó" } }, "CIN234": { "label": "Hallazgos de gestión de información:", "opciones": { "a": "Identificados y comunicados al comité/RL", "b": "Identificados pero NO comunicados", "c": "Ni identificados ni comunicados" } }, "CIN236": { "label": "Informes contables oportunos:", "opciones": { "siempre": "Siempre", "mayoria": "La mayoría de las veces", "pocas": "Pocas veces", "nunca": "Nunca" } }, "CIN238": { "label": "Metodología del proceso auditor:", "opciones": { "a": "Con metodología/lineamientos definidos", "b": "Con plan de trabajo dado su capacidad", "c": "Solo seguimientos puntuales", "d": "No lleva a cabo auditoría interna" } }, "CIN239": { "label": "Plan anual de auditorías:", "opciones": { "a": "Sí, aprobado por el Comité", "b": "Sí definido, pero no aprobado", "c": "No fue definido" } }, "CIN240": { "label": "Componentes del plan anual:", "opts": { "a": "Acciones vinculadas a roles JCI", "b": "Objetivo alineado con planeación", "c": "Universo de auditoría considerado", "d": "Priorización por riesgos", "e": "Programación informes de ley", "f": "Enfoque auditorías basadas en riesgos", "ninguna": "Ninguno" } }, "CIN241": { "label": "Fases de auditoría aplicadas:", "opts": { "a": "Planeación basada en riesgos", "b": "Ejecución del trabajo", "c": "Comunicación de resultados", "d": "Seguimiento planes de mejoramiento", "ninguna": "Ninguna" } }, "CIN242": { "label": "Aspectos considerados en auditoras programadas:", "opts": { "a": "Unidades auditables del universo", "b": "Nivel de riesgo inherente", "c": "Recurrencia de hallazgos", "d": "Solicitudes de alta dirección", "e": "Fecha última auditoría", "f": "Resultados de indicadores", "g": "Impacto en objetivos estratégicos", "ninguna": "Ninguno" } }, "CIN243": { "label": "Ejecución del plan anual:", "opciones": { "a": "90–100% ejecutado", "b": "60–89% ejecutado", "c": "Menos del 60% ejecutado" } }, "CIN244": { "label": "Universo de auditoría considerado:", "opts": { "a": "Procesos estratégicos", "b": "Procesos misionales", "c": "Procesos de apoyo", "d": "Otros", "ninguna": "Ninguno" } }, "CIN246": { "label": "Acciones para evaluar el SCI:", "opts": { "a": "Presentó informes en instancias de CI", "b": "Analizó resultados de autoevaluaciones", "c": "Examinó planes de mejoramiento", "d": "Otras acciones", "ninguna": "Ninguna" } }, "CIN247": { "label": "Alcance del plan de auditorías:", "opts": { "a": "Supervisión ejecución presupuestal", "b": "Seguimiento talento humano", "c": "Verificó política de riesgos", "d": "Evaluó efectividad de controles", "e": "Analizó eficacia planes de mejora", "f": "Auditorías MSPI", "g": "Auditorías accesibilidad web NTC5854", "h": "Auditorías gestión NTC6047", "i": "Otros sistemas de gestión", "j": "Oportunidad info organismos control", "ninguna": "Ninguno" } }, "CIN252": { "label": "Planeación de cada auditoría:", "opts": { "a": "Objetivo definido", "b": "Alcance definido", "c": "Consideraciones de recursos", "d": "Programa de desarrollo", "ninguna": "No se adelanta planeación" } }, "CIN253": { "label": "Herramientas de ejecución aplicadas:", "opts": { "a": "Carta de representación firmada", "b": "Carta de compromiso al auditado", "c": "Reunión inicial con líder", "d": "Procedimientos documentados", "e": "Pruebas y verificaciones", "f": "Papeles de trabajo documentados", "g": "Mesas de trabajo preliminares", "h": "Reunión de cierre", "ninguna": "Ninguna" } }, "CIN254": { "label": "Características de los informes de auditoría:", "opts": { "a": "Estructura ejecutiva para web", "b": "Estructura detallada", "c": "Análisis cumplimiento objetivo", "d": "Análisis cumplimiento alcance", "e": "Resumen de hallazgos", "f": "Recomendaciones y conclusiones", "ninguna": "Ninguna" } }, "CIN255": { "label": "Seguimiento a planes de mejoramiento:", "opciones": { "a": "Sí, con herramienta y evidencias", "b": "Se hace seguimiento sin herramienta formal", "c": "No se adelanta seguimiento" } }, "CIN264": { "label": "Estructura del área de Control Interno:", "opciones": { "a": "Oficina con jefe y equipo", "b": "Grupo interno con jefe y equipo", "c": "Solo jefe sin equipo", "d": "Delegada en otro funcionario", "e": "No cuenta con área de CI" } }, "CIN268": { "label": "Tipo de vinculación del JCI:", "opciones": { "periodo": "Período fijo", "libre": "Libre nombramiento", "carrera": "Carrera administrativa", "provisional": "Provisional", "temporal": "Temporal", "otro": "Otro" } }, "CIN305": { "label": "Total trabajadores en el área de CI:", "tipo_disp": "numero" }, "CIN306": { "label": "Alertas de política de integridad:", "opciones": { "si": "Sí", "no": "No", "na": "No aplica" } }, "CIN300": { "label": "Control de gestión de información:", "opts": { "a": "Política de seguridad de la información", "b": "Clasificación y etiquetado", "c": "Gestión de incidentes", "d": "Control de acceso", "e": "Cifrado de datos", "f": "Respaldos/backups", "g": "Otros", "ninguna": "Ninguno" } }, "CIN301": { "label": "Razones de incumplimiento del plan:", "opts": { "a": "Falta de personal", "b": "Falta de recursos", "c": "Cambios en la entidad", "d": "Prioridades de la dirección", "e": "Falta de información", "f": "Otras razones", "ninguna": "✅ No hubo razones — plan cumplido al 100%" } } };
+    // ── MAPA LEGIBLE DE RESPUESTAS ──
+    const PREG_LEGIBLE = { "PER201": { "label": "¿El MECI ha generado valor agregado a la gestión?", "opciones": { "si": "✅ Sí", "no": "❌ No" } }, "CIN203": { "label": "Política de integridad — el JCI verificó que la entidad:", "opts": { "a": "Implementa estrategia del código de integridad", "b": "Cuenta con protocolo para conflictos de interés", "c": "Gestiona los conflictos de interés", "d": "Mantiene actualizada la información en SIGEP", "e": "Garantiza registro Ley 2013/Decreto 830", "ninguna": "No cumple ninguna condición" } }, "CIN206": { "label": "Talento Humano — el JCI verificó:", "opts": { "a": "Plan Estratégico de Talento Humano publicado", "b": "Articuló planes del Decreto 612", "c": "Actividades de capacitación", "d": "Actividades de bienestar e incentivos", "e": "Clima, convivencia y relaciones laborales", "f": "Actualización y gestión en SIGEP", "g": "Otros", "ninguna": "No hace seguimiento al talento humano" } }, "CIN207": { "label": "Planeación y Riesgos — el JCI verificó:", "opts": { "a": "Objetivos claros, cumplibles y medibles", "b": "Responsables, metas y tiempos definidos", "c": "Política de gestión integral de riesgos", "d": "Monitoreos a la gestión integral del riesgo", "e": "Monitorea cumplimiento de metas y objetivos", "f": "Seguimiento a ejecución presupuestal", "g": "Otras actividades de revisión", "ninguna": "No lleva a cabo actividades de revisión" } }, "CIN221": { "label": "Gestión integral de riesgos (3ª línea):", "opciones": { "a": "✅ Gestión integral con evidencias", "b": "⚠️ Gestión parcial con evidencias", "c": "❌ No realiza gestión de riesgos" } }, "CIN222": { "label": "Evaluación riesgo/control (3ª línea):", "opts": { "a": "Se pronunció sobre diseño de controles", "b": "Emitió comentarios sobre implementación", "c": "Contrastó eventos de materialización", "d": "Otra acción", "ninguna": "Ninguna" } }, "CIN233": { "label": "Evaluación gestión de información (3ª línea):", "opciones": { "a": "✅ Evaluó con evidencias completas", "b": "⚠️ Evaluación parcial con evidencias", "c": "❌ No evaluó la gestión de información" } }, "CIN234": { "label": "Hallazgos de gestión de información:", "opciones": { "a": "✅ Identificados y comunicados al comité/RL", "b": "⚠️ Identificados pero NO comunicados", "c": "❌ Ni identificados ni comunicados" } }, "CIN236": { "label": "Informes contables entregados oportunamente:", "opciones": { "siempre": "✅ Siempre", "mayoria": "⚠️ La mayoría de las veces", "pocas": "🔴 Pocas veces", "nunca": "❌ Nunca" } }, "CIN238": { "label": "Metodología del proceso auditor:", "opciones": { "a": "✅ Con metodología/lineamientos definidos", "b": "⚠️ Con plan de trabajo dada su capacidad", "c": "🔴 Solo seguimientos puntuales", "d": "❌ No lleva a cabo auditoría interna" } }, "CIN239": { "label": "Plan anual de auditorías:", "opciones": { "a": "✅ Sí, aprobado por el Comité", "b": "⚠️ Sí definido, pero no aprobado", "c": "❌ No fue definido" } }, "CIN240": { "label": "Componentes incluidos en el plan anual:", "opts": { "a": "Acciones vinculadas a roles del JCI", "b": "Objetivo alineado con planeación estratégica", "c": "Universo de auditoría considerado", "d": "Priorización de procesos según riesgos", "e": "Programación de informes de ley", "f": "Enfoque de auditorías basadas en riesgos", "ninguna": "Ninguno de los componentes" } }, "CIN241": { "label": "Fases del proceso auditor aplicadas:", "opts": { "a": "Planeación de cada auditoría basada en riesgos", "b": "Ejecución del trabajo de auditoría", "c": "Comunicación de resultados (informe)", "d": "Seguimiento a planes de mejoramiento", "ninguna": "Ninguna fase aplicada" } }, "CIN242": { "label": "Aspectos considerados en auditorías programadas:", "opts": { "a": "Unidades auditables del universo", "b": "Nivel de riesgo inherente", "c": "Recurrencia de hallazgos", "d": "Solicitudes de la alta dirección", "e": "Fecha de la última auditoría", "f": "Resultados de indicadores de gestión", "g": "Impacto en objetivos estratégicos", "ninguna": "Ninguno" } }, "CIN243": { "label": "Ejecución del programa anual de auditorías:", "opciones": { "a": "✅ 90–100% ejecutado", "b": "⚠️ 60–89% ejecutado", "c": "🔴 Menos del 60% ejecutado" } }, "CIN244": { "label": "Universo de auditoría — unidades consideradas:", "opts": { "a": "Procesos estratégicos", "b": "Procesos misionales", "c": "Procesos de apoyo", "d": "Otras unidades", "ninguna": "Ninguna" } }, "CIN246": { "label": "Acciones para evaluar el SCI:", "opts": { "a": "Presentó informes en instancias de CI", "b": "Analizó resultados de autoevaluaciones", "c": "Examinó progresos en planes de mejoramiento", "d": "Desarrolló otras acciones", "ninguna": "Ninguna acción" } }, "CIN247": { "label": "Alcance del plan anual de auditorías:", "opts": { "a": "Supervisión ejecución presupuestal", "b": "Seguimiento talento humano", "c": "Verificó política de gestión de riesgos", "d": "Evaluó efectividad de controles", "e": "Analizó eficacia de planes de mejora", "f": "Auditorías MSPI (seguridad información)", "g": "Auditorías accesibilidad web NTC 5854", "h": "Auditorías de gestión NTC 6047", "i": "Otros sistemas de gestión (SST, salud, etc.)", "j": "Oportunidad de info a organismos de control", "ninguna": "Ninguna" } }, "CIN252": { "label": "Aspectos de planeación en cada auditoría:", "opts": { "a": "Objetivo de la auditoría definido", "b": "Alcance de la auditoría definido", "c": "Consideraciones sobre recursos necesarios", "d": "Programa para el desarrollo de la auditoría", "ninguna": "No se adelantan acciones de planeación" } }, "CIN253": { "label": "Herramientas y actividades de ejecución aplicadas:", "opts": { "a": "Carta de representación firmada", "b": "Carta de compromiso al auditado", "c": "Reunión inicial con líder del proceso", "d": "Procedimientos del programa documentados", "e": "Pruebas y verificaciones de información", "f": "Papeles de trabajo documentados", "g": "Mesas de trabajo para resultados preliminares", "h": "Reunión de cierre con líder del proceso", "ninguna": "Ninguna herramienta aplicada" } }, "CIN254": { "label": "Características de los informes de auditoría:", "opts": { "a": "Estructura ejecutiva para publicación web", "b": "Estructura detallada para auditados", "c": "Análisis del cumplimiento del objetivo", "d": "Análisis del cumplimiento del alcance", "e": "Resumen con títulos de hallazgos", "f": "Recomendaciones y conclusiones", "ninguna": "Ninguna característica" } }, "CIN255": { "label": "Seguimiento a planes de mejoramiento:", "opciones": { "a": "✅ Sí, con herramienta formal y evidencias", "b": "⚠️ Se hace seguimiento sin herramienta formal", "c": "❌ No se adelanta seguimiento" } }, "CIN264": { "label": "Estructura del área de Control Interno:", "opciones": { "a": "✅ Oficina con jefe y equipo de trabajo", "b": "✅ Grupo interno con jefe y equipo", "c": "⚠️ Solo jefe, sin equipo de trabajo", "d": "⚠️ Delegada en otro funcionario", "e": "❌ No cuenta con área de CI" } }, "CIN268": { "label": "Tipo de vinculación del Jefe de CI:", "opciones": { "periodo": "Período fijo", "libre": "Libre nombramiento y remoción", "carrera": "Carrera administrativa", "provisional": "Provisional", "temporal": "Temporal", "otro": "Otro tipo de vinculación" } }, "CIN305": { "label": "Total de trabajadores en el área de CI:", "tipo_disp": "numero" }, "CIN306": { "label": "Se generaron alertas sobre política de integridad:", "opciones": { "si": "✅ Sí", "no": "❌ No", "na": "✅ No aplica" } }, "CIN300": { "label": "Control de gestión de la información — el JCI verificó:", "opts": { "a": "Política de seguridad de la información", "b": "Clasificación y etiquetado de información", "c": "Gestión de incidentes de seguridad", "d": "Control de acceso a sistemas", "e": "Cifrado de datos sensibles", "f": "Respaldos/backups de información", "g": "Otros controles", "ninguna": "Ningún control verificado" } }, "CIN301": { "label": "Razones de incumplimiento del plan anual:", "opts": { "a": "Falta de personal en el área", "b": "Falta de recursos económicos", "c": "Cambios estructurales en la entidad", "d": "Prioridades redefinidas por la dirección", "e": "Falta de acceso a información", "f": "Otras razones", "ninguna": "✅ Sin razones — plan cumplido al 100%" } } };
 
-    // Etiqueta legible de una respuesta
     function etiquetaResp(campo, val) {
       const cfg = PREG_LEGIBLE[campo];
       if (!cfg) return val;
-      if (cfg.opciones && cfg.opciones[val]) return cfg.opciones[val];
+      if (cfg.opciones && cfg.opciones[val.toLowerCase()]) return cfg.opciones[val.toLowerCase()];
       if (cfg.opts) {
-        return val.split(',').map(v => {
-          const k = v.trim();
-          return cfg.opts[k] || k;
-        }).filter(Boolean).join('<br>• ');
+        const parts = val.split(',').map(v => v.trim()).filter(Boolean);
+        const etiquetas = parts.map(k => cfg.opts[k] || k);
+        return '• ' + etiquetas.join('<br>• ');
       }
       return val;
     }
 
+    // ── VER RESPUESTAS POR ENTIDAD ──
     function verRespuestas() {
       const nombre = document.getElementById('sel-entidad').value;
       const lista = document.getElementById('preguntas-list');
@@ -1112,375 +758,51 @@
       }
 
       const r = allData.find(d => d.entidad_nombre === nombre);
-      if (!r) { lista.innerHTML = '<p style="padding:20px;color:var(--muted)">No encontrado.</p>'; return; }
+      if (!r) { lista.innerHTML = '<p style="padding:20px;color:var(--muted)">Entidad no encontrada en los datos cargados.</p>'; return; }
 
       const { pct, detalle } = calcAvance(r);
       const sem = semaforo(pct);
       badge.style.display = 'inline-block';
       badge.style.background = pct >= 75 ? 'var(--ok)' : pct >= 50 ? 'var(--warn)' : 'var(--err)';
-      badge.textContent = sem + ' Avance: ' + pct + '%';
+      badge.textContent = sem + ' Avance total: ' + pct + '%';
 
       lista.innerHTML = Object.entries(PREGUNTAS).map(([campo, cfg]) => {
         const val = (r[campo] || '').toString().trim();
         const pts = detalle[campo] ?? 0;
-        const pct_p = Math.round(pts * 100);
-        const label = cfg.label;
+        const pctP = Math.round(pts * 100);
+        const cls = !val ? 'r-empty' : pctP >= 75 ? 'r-ok' : pctP >= 50 ? 'r-warn' : 'r-err';
+        const icon = !val ? '⬜' : pctP >= 75 ? '✅' : pctP >= 50 ? '⚠️' : '❌';
+        const legib = PREG_LEGIBLE[campo];
+        const label = legib ? legib.label : cfg.label;
 
-        // Color según puntaje
-        const cls = !val ? 'r-empty' : pct_p >= 75 ? 'r-ok' : pct_p >= 50 ? 'r-warn' : 'r-err';
-        const icon = !val ? '⬜' : pct_p >= 75 ? '✅' : pct_p >= 50 ? '⚠️' : '❌';
-
-        const respTexto = val
-          ? '<span class="preg-score">' + icon + ' ' + pct_p + '%</span>' +
-          (PREG_LEGIBLE[campo]?.opts || PREG_LEGIBLE[campo]?.opciones
-            ? '• ' + etiquetaResp(campo, val)
-            : val)
-          : 'Sin respuesta';
-
-        return `<div class="preg-item">
-      <span class="preg-codigo">${campo}</span>
-      <span style="font-size:.7rem;background:#f0f0f0;color:var(--muted);padding:2px 7px;border-radius:6px;margin-left:4px;font-weight:600">Peso ${cfg.peso}</span>
-      <div class="preg-label">${label}</div>
-      <div class="preg-resp ${cls}">${respTexto}</div>
-    </div>`;
-      }).join('');
-    }
-
-    // ── TOAST ──
-    function toast(msg, type = 'info') {
-      const t = document.createElement('div');
-      t.className = 'toast ' + type;
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 4500);
-    }
-
-    // ── CARGAR DATOS ──
-    async function cargar(limpiar = false) {
-      toast('⏳ Cargando desde Google Sheets...', 'info');
-      if (limpiar) localStorage.removeItem(CACHE_KEY);
-
-      try {
-        const res = await fetch(APPS_URL + '?t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        const data = JSON.parse(text);
-        if (!Array.isArray(data)) throw new Error('No es array');
-        if (data.length === 0) {
-          toast('⚠️ Sheets vacío — usando datos de demostración', 'warn');
-          allData = datosDemo();
+        let respHtml;
+        if (!val) {
+          respHtml = 'Sin respuesta registrada';
+        } else if (cfg.tipo === 'numero') {
+          respHtml = '<span class="preg-score-badge">' + icon + ' ' + pctP + '%</span>' + val + ' trabajador(es)';
         } else {
-          allData = data.map(r => { delete r.viewport; return r; });
-          localStorage.setItem(CACHE_KEY, JSON.stringify(allData));
-          toast('✅ ' + allData.length + ' registros cargados', 'ok');
+          respHtml = '<span class="preg-score-badge">' + icon + ' ' + pctP + '%</span>' + etiquetaResp(campo, val);
         }
-      } catch (err) {
-        console.warn('Error sheets:', err.message);
-        const cache = localStorage.getItem(CACHE_KEY);
-        if (cache) {
-          allData = JSON.parse(cache);
-          toast('📦 ' + allData.length + ' desde caché · Error: ' + err.message, 'warn');
-        } else {
-          allData = datosDemo();
-          toast('❌ Error: ' + err.message + ' · Mostrando demo', 'err');
-        }
-      }
 
-      poblarFiltros();
-      aplicar();
-    }
-
-    // ── POBLAR FILTROS ──
-    function poblarFiltros() {
-      const vigs = [...new Set(allData.map(r => r.entidad_vigencia).filter(Boolean))].sort();
-      const tipos = [...new Set(allData.map(r => r.tipo_entidad).filter(Boolean))].sort();
-      const fv = document.getElementById('f-vig');
-      const ft = document.getElementById('f-tipo');
-      fv.innerHTML = '<option value="">— Todas —</option>' + vigs.map(v => `<option>${v}</option>`).join('');
-      ft.innerHTML = '<option value="">— Todos —</option>' + tipos.map(v => `<option>${v}</option>`).join('');
-      ['f-vig', 'f-tipo', 'f-estado'].forEach(id => document.getElementById(id).onchange = aplicar);
-      // Poblar selector de entidades para ver respuestas
-      const se = document.getElementById('sel-entidad');
-      const ents = [...new Set(allData.map(r => r.entidad_nombre).filter(Boolean))].sort();
-      se.innerHTML = '<option value="">— Selecciona una entidad —</option>' + ents.map(e => `<option value="${e}">${e}</option>`).join('');
-    }
-
-    // ── APLICAR FILTROS ──
-    function aplicar() {
-      const fV = document.getElementById('f-vig').value;
-      const fT = document.getElementById('f-tipo').value;
-      const fE = document.getElementById('f-estado').value;
-      const fB = document.getElementById('f-buscar').value.toLowerCase();
-
-      filtData = allData
-        .map(r => { const { pct, detalle } = calcAvance(r); return { ...r, _pct: pct, _det: detalle }; })
-        .filter(r => {
-          if (fV && r.entidad_vigencia !== fV) return false;
-          if (fT && r.tipo_entidad !== fT) return false;
-          if (fB && !(r.entidad_nombre || '').toLowerCase().includes(fB)) return false;
-          if (fE === 'alto' && r._pct < 75) return false;
-          if (fE === 'medio' && (r._pct < 50 || r._pct >= 75)) return false;
-          if (fE === 'bajo' && (r._pct < 25 || r._pct >= 50)) return false;
-          if (fE === 'critico' && r._pct >= 25) return false;
-          return true;
-        })
-        .sort((a, b) => b._pct - a._pct);
-
-      document.getElementById('badge').textContent = filtData.length + ' registros';
-      renderKPIs();
-      renderTabla();
-      renderCharts();
-      renderCats();
-    }
-
-    // ── KPIs ──
-    function renderKPIs() {
-      const n = filtData.length;
-      const alto = filtData.filter(r => r._pct >= 75).length;
-      const medio = filtData.filter(r => r._pct >= 50 && r._pct < 75).length;
-      const bajo = filtData.filter(r => r._pct < 50).length;
-      const prom = n ? Math.round(filtData.reduce((a, r) => a + r._pct, 0) / n * 10) / 10 : 0;
-
-      document.getElementById('k-total').textContent = n;
-      document.getElementById('k-alto').textContent = alto;
-      document.getElementById('k-medio').textContent = medio;
-      document.getElementById('k-bajo').textContent = bajo;
-      document.getElementById('k-prom').textContent = prom + '%';
-      document.getElementById('k-eses').textContent = filtData.filter(r => r.tipo_entidad === 'ESES').length;
-      document.getElementById('k-desc').textContent = filtData.filter(r => r.tipo_entidad === 'DESCENTRALIZADA').length;
-      document.getElementById('k-muni').textContent = filtData.filter(r => r.tipo_entidad === 'MUNICIPIO').length;
-    }
-
-    // ── TABLA ──
-    function barHtml(pct) {
-      const cls = pct >= 75 ? 'bar-ok' : pct >= 50 ? 'bar-warn' : pct > 0 ? 'bar-err' : 'bar-zero';
-      const scls = pct >= 75 ? 's-ok' : pct >= 50 ? 's-warn' : pct > 0 ? 's-err' : 's-zero';
-      return `<div style="display:flex;align-items:center;gap:8px">
-    <div class="bar-wrap"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
-    <span class="score ${scls}">${pct}%</span>
-  </div>`;
-    }
-
-    function catPct(r, campos) {
-      return calcCategoria(r, campos);
-    }
-
-    function renderTabla() {
-      const tbody = document.getElementById('tbody');
-      if (!filtData.length) {
-        tbody.innerHTML = `<tr><td colspan="11"><div class="empty"><div class="empty-icon">🔍</div><p>Sin resultados con los filtros actuales.</p></div></td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = filtData.map((r, i) => {
-        const fecha = r.timestamp ? new Date(r.timestamp).toLocaleDateString('es-CO') : '—';
-        const pInteg = catPct(r, CATEGORIAS['Política de Integridad']);
-        const pRiesg = catPct(r, CATEGORIAS['Evaluación Riesgos']);
-        const pAudit = catPct(r, CATEGORIAS['Proceso Auditor']);
-        const pCap = catPct(r, CATEGORIAS['Capacidad Institucional']);
-        const sem = semaforo(r._pct);
-        return `<tr>
-      <td>${i + 1}</td>
-      <td><strong>${r.entidad_nombre || '—'}</strong><br><small style="color:var(--muted)">${fecha}</small></td>
-      <td><span style="font-size:.72rem;background:#eaf1fb;color:var(--p);padding:2px 8px;border-radius:8px;font-weight:700">${r.tipo_entidad || '—'}</span></td>
-      <td>${r.entidad_vigencia || '—'}</td>
-      <td style="font-size:.78rem">${r.responsable_nombre || '—'}<br><span style="color:var(--muted)">${r.responsable_cargo || ''}</span></td>
-      <td>${sem} ${barHtml(r._pct)}</td>
-      <td>${barHtml(pInteg)}</td>
-      <td>${barHtml(pRiesg)}</td>
-      <td>${barHtml(pAudit)}</td>
-      <td>${barHtml(pCap)}</td>
-      <td><button class="btn btn-w" style="padding:5px 12px;font-size:.75rem" onclick="verDetalle(${i})">🔍 Ver</button></td>
-    </tr>`;
+        return '<div class="preg-item">' +
+          '<div class="preg-meta">' +
+          '<span class="preg-codigo">' + campo + '</span>' +
+          '<span class="preg-peso-tag">Peso ' + cfg.peso + '</span>' +
+          '</div>' +
+          '<div class="preg-label">' + label + '</div>' +
+          '<div class="preg-resp ' + cls + '">' + respHtml + '</div>' +
+          '</div>';
       }).join('');
     }
 
-    // ── CHARTS ──
-    function mkChart(id, type, labels, datasets, opts = {}) {
-      if (chartInst[id]) chartInst[id].destroy();
-      const el = document.getElementById(id);
-      if (!el) return;
-      chartInst[id] = new Chart(el, {
-        type,
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: type === 'pie' || type === 'doughnut', position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
-          ...opts
-        }
-      });
-    }
-
-    function renderCharts() {
-      if (!filtData.length) return;
-
-      // Top 8 mayor avance
-      const top8 = [...filtData].sort((a, b) => b._pct - a._pct).slice(0, 8);
-      mkChart('ch-top', 'bar',
-        top8.map(r => (r.entidad_nombre || '').substring(0, 22) + '…'),
-        [{
-          data: top8.map(r => r._pct),
-          backgroundColor: top8.map(r => r._pct >= 75 ? '#27ae60' : r._pct >= 50 ? '#e67e22' : '#e74c3c'),
-          borderRadius: 6
-        }],
-        { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, y: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } }
-      );
-
-      // Bottom 8 menor avance
-      const bot8 = [...filtData].sort((a, b) => a._pct - b._pct).slice(0, 8);
-      mkChart('ch-bottom', 'bar',
-        bot8.map(r => (r.entidad_nombre || '').substring(0, 22) + '…'),
-        [{
-          data: bot8.map(r => r._pct),
-          backgroundColor: bot8.map(r => r._pct < 25 ? '#c0392b' : r._pct < 50 ? '#e74c3c' : '#e67e22'),
-          borderRadius: 6
-        }],
-        { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, y: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } }
-      );
-
-      // Distribución por nivel
-      const niveles = {
-        '🟢 Alto (≥75%)': filtData.filter(r => r._pct >= 75).length,
-        '🟡 Medio (50–74%)': filtData.filter(r => r._pct >= 50 && r._pct < 75).length,
-        '🔴 Bajo (25–49%)': filtData.filter(r => r._pct >= 25 && r._pct < 50).length,
-        '⚫ Crítico (<25%)': filtData.filter(r => r._pct < 25).length,
-      };
-      mkChart('ch-dist', 'doughnut',
-        Object.keys(niveles),
-        [{ data: Object.values(niveles), backgroundColor: ['#27ae60', '#e67e22', '#e74c3c', '#555'] }]
-      );
-
-      // Promedio por categoría
-      const catNames = Object.keys(CATEGORIAS);
-      const catProms = catNames.map(cat => {
-        const vals = filtData.map(r => calcCategoria(r, CATEGORIAS[cat]));
-        return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
-      });
-      mkChart('ch-cats', 'bar',
-        catNames.map(c => c.substring(0, 20)),
-        [{
-          data: catProms,
-          backgroundColor: catProms.map(v => v >= 75 ? '#27ae60' : v >= 50 ? '#e67e22' : '#e74c3c'),
-          borderRadius: 6
-        }],
-        {
-          scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, x: { ticks: { font: { size: 10 } } } },
-          plugins: { legend: { display: false } }
-        }
-      );
-    }
-
-    // ── CATEGORÍAS CON MAYOR DEBILIDAD ──
-    function renderCats() {
-      const grid = document.getElementById('cats-grid');
-      if (!filtData.length) {
-        grid.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>Sin datos</p></div>';
-        return;
-      }
-
-      const catNames = Object.keys(CATEGORIAS);
-      grid.innerHTML = catNames.map(cat => {
-        const campos = CATEGORIAS[cat];
-        const vals = filtData.map(r => ({ ent: r.entidad_nombre || '—', pct: calcCategoria(r, campos) }));
-        const prom = Math.round(vals.reduce((a, b) => a + b.pct, 0) / vals.length);
-        const ordenadas = [...vals].sort((a, b) => a.pct - b.pct).slice(0, 5);
-        const clr = prom >= 75 ? 'var(--ok)' : prom >= 50 ? 'var(--warn)' : 'var(--err)';
-
-        return `<div class="cat-card">
-      <h4>${cat} <span style="color:${clr};font-size:.85rem;font-weight:800">${prom}% prom</span></h4>
-      ${ordenadas.map(e => `
-        <div class="cat-bar-row">
-          <span class="cat-ent" title="${e.ent}">${e.ent.substring(0, 18) + ('...')}</span>
-          <div class="cat-bar-bg"><div class="cat-bar-f" style="width:${e.pct}%;background:${e.pct >= 75 ? 'var(--ok)' : e.pct >= 50 ? 'var(--warn)' : 'var(--err)'}"></div></div>
-          <span class="cat-val">${e.pct}%</span>
-        </div>`).join('')}
-    </div>`;
-      }).join('');
-    }
-
-    // ── DETALLE ENTIDAD ──
-    function verDetalle(idx) {
-      const r = filtData[idx];
-      if (!r) return;
-
-      document.getElementById('modal-titulo').innerHTML =
-        `${semaforo(r._pct)} ${r.entidad_nombre || 'Entidad'} · ${r._pct}% avance <span class="close" onclick="document.getElementById('modal').classList.remove('visible')">✕</span>`;
-
-      const catNames = Object.keys(CATEGORIAS);
-      const catHtml = catNames.map(cat => {
-        const pct = calcCategoria(r, CATEGORIAS[cat]);
-        const bar = pct >= 75 ? 'var(--ok)' : pct >= 50 ? 'var(--warn)' : 'var(--err)';
-        return `<div class="detalle-item">
-      <div class="d-label">${cat}</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-        <div class="cat-bar-bg" style="flex:1"><div class="cat-bar-f" style="width:${pct}%;background:${bar}"></div></div>
-        <strong style="color:${bar}">${pct}%</strong>
-      </div>
-    </div>`;
-      }).join('');
-
-      document.getElementById('modal-body').innerHTML = `
-    <div style="margin-bottom:14px;padding:12px;background:#f9fbff;border-radius:10px;font-size:.82rem">
-      <strong>Tipo:</strong> ${r.tipo_entidad || '—'} &nbsp;|&nbsp;
-      <strong>Vigencia:</strong> ${r.entidad_vigencia || '—'} &nbsp;|&nbsp;
-      <strong>Responsable:</strong> ${r.responsable_nombre || '—'} (${r.responsable_cargo || '—'}) &nbsp;|&nbsp;
-      <strong>Fecha:</strong> ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}
-    </div>
-    <div class="detalle-grid">${catHtml}</div>
-    <div style="margin-top:14px;background:#fffbf0;border:1px solid #f0a500;border-radius:10px;padding:12px">
-      <strong style="font-size:.8rem;color:#856404">⚠️ Áreas que requieren atención:</strong>
-      <ul style="margin-top:6px;padding-left:18px;font-size:.8rem;color:#444">
-        ${catNames.filter(c => calcCategoria(r, CATEGORIAS[c]) < 50)
-          .map(c => `<li><strong>${c}</strong> — ${calcCategoria(r, CATEGORIAS[c])}%</li>`).join('')
-        || '<li>✅ Todas las categorías superan el 50%</li>'}
-      </ul>
-    </div>`;
-
-      document.getElementById('modal').classList.add('visible');
-    }
-
-    function cerrarModal(e) {
-      if (e.target.id === 'modal') document.getElementById('modal').classList.remove('visible');
-    }
-
-    // ── DIAGNÓSTICO ──
-    function verDiagnostico() {
-      const w = window.open('', '_blank', 'width=720,height=550');
-      w.document.write(`<pre style="padding:20px;font-family:monospace;font-size:13px;white-space:pre-wrap">
-🔬 DIAGNÓSTICO MECI 122
-
-URL: ${APPS_URL}
-
-Datos en memoria: ${allData.length} registros
-Datos filtrados: ${filtData.length} registros
-Caché local: ${localStorage.getItem(CACHE_KEY) ? JSON.parse(localStorage.getItem(CACHE_KEY)).length + ' registros' : 'Vacío'}
-
-Probando conexión...
-  `);
-
-      fetch(APPS_URL + '?t=' + Date.now(), { cache: 'no-store' })
-        .then(r => { w.document.write('HTTP: ' + r.status + ' ' + r.statusText + '\n'); return r.text(); })
-        .then(t => {
-          w.document.write('Respuesta (600 chars):\n' + t.substring(0, 600) + '\n\n');
-          try {
-            const d = JSON.parse(t);
-            w.document.write('✅ JSON válido: ' + (Array.isArray(d) ? d.length + ' registros' : typeof d) + '\n');
-            if (d.length > 0) w.document.write('\nKeys primer registro:\n' + Object.keys(d[0]).join(', ') + '\n\nPrimer registro:\n' + JSON.stringify(d[0], null, 2));
-          } catch (e) { w.document.write('❌ JSON inválido: ' + e.message); }
-        })
-        .catch(e => w.document.write('❌ Error red: ' + e.message + '\nPosible causa: CORS o archivo abierto como file://'));
-    }
-
-    // ── DATOS DEMO ──
     function datosDemo() {
       const ents = [
-        { n: 'Hospital San Rafael Facatativá', t: 'ESES', CIN203: 'a,b,c,d', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', CIN207: 'a,b,c,d,e', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d', CIN240: 'a,b,c,d', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e', CIN254: 'a,b,c', CIN255: 'a', CIN246: 'a,b,c', CIN306: 'si', CIN305: '3' },
-        { n: 'Alcaldía de Cáqueza', t: 'MUNICIPIO', CIN203: 'a,b', CIN221: 'b', CIN238: 'b', CIN239: 'b', CIN243: 'b', CIN255: 'b', CIN264: 'b', PER201: 'si', CIN207: 'a,b', CIN233: 'b', CIN234: 'a', CIN236: 'mayoria', CIN300: 'a,b', CIN240: 'a,b,c', CIN241: 'a,b', CIN253: 'a,b,c', CIN254: 'a,b', CIN246: 'a,b', CIN306: 'si', CIN305: '1' },
-        { n: 'Agencia Catastral de Cundinamarca', t: 'DESCENTRALIZADA', CIN203: 'a,b,c,d,e', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', CIN207: 'a,b,c,d,e,f', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d,e,f', CIN240: 'a,b,c,d,e', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e,f', CIN254: 'a,b,c,d,e', CIN246: 'a,b,c,d', CIN306: 'si', CIN305: '5' },
-        { n: 'ESE Hospital Santa Rosa Tenjo', t: 'ESES', CIN203: 'a', CIN221: 'c', CIN238: 'c', CIN239: 'c', CIN243: 'c', CIN255: 'c', CIN264: 'c', PER201: 'no', CIN207: 'a', CIN233: 'c', CIN234: 'c', CIN236: 'pocas', CIN300: 'a', CIN240: 'a', CIN241: 'a', CIN253: 'a', CIN254: 'a', CIN246: 'ninguna', CIN306: 'no', CIN305: '1' },
-        { n: 'Hospital San Vicente de Paul Fómeque', t: 'ESES', CIN203: 'a,b,c', CIN221: 'a', CIN238: 'b', CIN239: 'a', CIN243: 'b', CIN255: 'b', CIN264: 'b', PER201: 'si', CIN207: 'a,b,c', CIN233: 'b', CIN234: 'a', CIN236: 'mayoria', CIN300: 'a,b,c', CIN240: 'a,b,c', CIN241: 'a,b,c', CIN253: 'a,b,c,d', CIN254: 'a,b,c', CIN246: 'a,b', CIN306: 'na', CIN305: '2' },
-        { n: 'Beneficencia de Cundinamarca', t: 'DESCENTRALIZADA', CIN203: 'ninguna', CIN221: 'c', CIN238: 'd', CIN239: 'c', CIN243: 'c', CIN255: 'c', CIN264: 'e', PER201: 'no', CIN207: 'ninguna', CIN233: 'c', CIN234: 'c', CIN236: 'nunca', CIN300: 'ninguna', CIN240: 'ninguna', CIN241: 'ninguna', CIN253: 'ninguna', CIN254: 'ninguna', CIN246: 'ninguna', CIN306: 'no', CIN305: '0' },
+        { n: 'Hospital San Rafael Facatativá', t: 'ESES', CIN203: 'a,b,c,d', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', CIN207: 'a,b,c,d,e', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d', CIN240: 'a,b,c,d', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e', CIN254: 'a,b,c', CIN246: 'a,b,c', CIN306: 'si', CIN305: '3', CIN242: 'a,b,c,d', CIN244: 'a,b,c', CIN252: 'a,b,c,d', CIN268: 'periodo', CIN301: 'ninguna' },
+        { n: 'Alcaldía de Cáqueza', t: 'MUNICIPIO', CIN203: 'a,b', CIN221: 'b', CIN238: 'b', CIN239: 'b', CIN243: 'b', CIN255: 'b', CIN264: 'b', PER201: 'si', CIN207: 'a,b', CIN233: 'b', CIN234: 'a', CIN236: 'mayoria', CIN300: 'a,b', CIN240: 'a,b,c', CIN241: 'a,b', CIN253: 'a,b,c', CIN254: 'a,b', CIN246: 'a,b', CIN306: 'si', CIN305: '1', CIN242: 'a,b', CIN244: 'a,b', CIN252: 'a,b', CIN268: 'libre', CIN301: 'a' },
+        { n: 'Agencia Catastral de Cundinamarca', t: 'DESCENTRALIZADA', CIN203: 'a,b,c,d,e', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', CIN207: 'a,b,c,d,e,f', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d,e,f', CIN240: 'a,b,c,d,e', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e,f', CIN254: 'a,b,c,d,e', CIN246: 'a,b,c,d', CIN306: 'si', CIN305: '5', CIN242: 'a,b,c,d,e', CIN244: 'a,b,c', CIN252: 'a,b,c,d', CIN268: 'periodo', CIN301: 'ninguna' },
+        { n: 'ESE Hospital Santa Rosa Tenjo', t: 'ESES', CIN203: 'a', CIN221: 'c', CIN238: 'c', CIN239: 'c', CIN243: 'c', CIN255: 'c', CIN264: 'c', PER201: 'no', CIN207: 'a', CIN233: 'c', CIN234: 'c', CIN236: 'pocas', CIN300: 'a', CIN240: 'a', CIN241: 'a', CIN253: 'a', CIN254: 'a', CIN246: 'ninguna', CIN306: 'no', CIN305: '1', CIN242: 'a', CIN244: 'a', CIN252: 'a', CIN268: 'provisional', CIN301: 'a,b' },
+        { n: 'Hospital San Vicente de Paul Fómeque', t: 'ESES', CIN203: 'a,b,c', CIN221: 'a', CIN238: 'b', CIN239: 'a', CIN243: 'b', CIN255: 'b', CIN264: 'b', PER201: 'si', CIN207: 'a,b,c', CIN233: 'b', CIN234: 'a', CIN236: 'mayoria', CIN300: 'a,b,c', CIN240: 'a,b,c', CIN241: 'a,b,c', CIN253: 'a,b,c,d', CIN254: 'a,b,c', CIN246: 'a,b', CIN306: 'na', CIN305: '2', CIN242: 'a,b,c', CIN244: 'a,b', CIN252: 'a,b,c', CIN268: 'carrera', CIN301: 'ninguna' },
+        { n: 'Beneficencia de Cundinamarca', t: 'DESCENTRALIZADA', CIN203: 'ninguna', CIN221: 'c', CIN238: 'd', CIN239: 'c', CIN243: 'c', CIN255: 'c', CIN264: 'e', PER201: 'no', CIN207: 'ninguna', CIN233: 'c', CIN234: 'c', CIN236: 'nunca', CIN300: 'ninguna', CIN240: 'ninguna', CIN241: 'ninguna', CIN253: 'ninguna', CIN254: 'ninguna', CIN246: 'ninguna', CIN306: 'no', CIN305: '0', CIN242: 'ninguna', CIN244: 'ninguna', CIN252: 'ninguna', CIN268: 'temporal', CIN301: 'a,b,c' },
       ];
       return ents.map((e, i) => ({
         timestamp: new Date(Date.now() - i * 86400000).toISOString(),
@@ -1490,7 +812,6 @@ Probando conexión...
       }));
     }
 
-    // ── INICIAR ──
     window.addEventListener('DOMContentLoaded', () => cargar());
   </script>
 </body>
