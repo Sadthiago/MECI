@@ -2,18 +2,18 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7C
 
 // ---- MAPA DE PREGUNTAS (orden PDF) ----
 const QUESTION_MAP = [
-  'PER201','PER205','CIN203','CIN206','CIN207','CIN221','CIN222','CIN233','CIN234','CIN236',
-  'CIN238','CIN239','CIN240','CIN241','CIN242','CIN243','CIN244','CIN246','CIN247','CIN252',
-  'CIN253','CIN254','CIN255','CIN264','CIN268','CIN269','CIN270','CIN271','CIN272','CIN273',
-  'CIN274','CIN275','CIN276','CIN287','CIN288','CIN289','CIN290','CIN300','CIN301','CIN304',
-  'CIN305','CIN306'
+  'PER201', 'PER205', 'CIN203', 'CIN206', 'CIN207', 'CIN221', 'CIN222', 'CIN233', 'CIN234', 'CIN236',
+  'CIN238', 'CIN239', 'CIN240', 'CIN241', 'CIN242', 'CIN243', 'CIN244', 'CIN246', 'CIN247', 'CIN252',
+  'CIN253', 'CIN254', 'CIN255', 'CIN264', 'CIN268', 'CIN269', 'CIN270', 'CIN271', 'CIN272', 'CIN273',
+  'CIN274', 'CIN275', 'CIN276', 'CIN287', 'CIN288', 'CIN289', 'CIN290', 'CIN300', 'CIN301', 'CIN304',
+  'CIN305', 'CIN306'
 ];
 const NEGATIVE_VALUES = ['ninguna', 'ninguno'];
 
 // ---- RAMIFICACIÓN TIPO ENTIDAD ----
 function ramificarEntidad() {
   var tipo = document.getElementById('tipo_entidad').value;
-  document.querySelectorAll('.entidad-block').forEach(function(b) {
+  document.querySelectorAll('.entidad-block').forEach(function (b) {
     b.classList.remove('visible');
     b.querySelector('select').required = false;
   });
@@ -33,7 +33,7 @@ function ramificarEntidad() {
 // ---- HIGHLIGHT SELECCIÓN ----
 function markSelected(radio) {
   var group = radio.closest('.radio-group');
-  group.querySelectorAll(':scope > label').forEach(function(l) { l.classList.remove('selected'); });
+  group.querySelectorAll(':scope > label').forEach(function (l) { l.classList.remove('selected'); });
   radio.closest('label').classList.add('selected');
   actualizarProgreso();
 }
@@ -46,17 +46,17 @@ function markCheck(cb) {
 var TOTAL_PREGUNTAS = 42;
 function actualizarProgreso() {
   var respondidas = 0;
-  document.querySelectorAll('.campo > .radio-group').forEach(function(rg) {
+  document.querySelectorAll('.campo > .radio-group').forEach(function (rg) {
     if (rg.querySelector(':scope > label > input[type=radio]:checked')) respondidas++;
   });
-  document.querySelectorAll('.campo > .check-group').forEach(function(cg) {
+  document.querySelectorAll('.campo > .check-group').forEach(function (cg) {
     if (cg.querySelector(':scope > label > input[type=checkbox]:checked')) respondidas++;
   });
-  ['responsable_nombre','responsable_cedula','responsable_cargo','responsable_correo',
-   'tipo_entidad'].forEach(function(id) {
-    var el = document.getElementById(id) || document.querySelector('[name="' + id + '"]');
-    if (el && el.value.trim()) respondidas++;
-  });
+  ['responsable_nombre', 'responsable_cedula', 'responsable_cargo', 'responsable_correo',
+    'tipo_entidad'].forEach(function (id) {
+      var el = document.getElementById(id) || document.querySelector('[name="' + id + '"]');
+      if (el && el.value.trim()) respondidas++;
+    });
   var pct = Math.min(100, Math.round(respondidas / TOTAL_PREGUNTAS * 100));
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-text').textContent = respondidas + ' de ' + TOTAL_PREGUNTAS + ' preguntas respondidas';
@@ -64,7 +64,7 @@ function actualizarProgreso() {
 
 // ---- NUMERACIÓN DE PREGUNTAS ----
 function initNumeracion() {
-  QUESTION_MAP.forEach(function(code, i) {
+  QUESTION_MAP.forEach(function (code, i) {
     var campo = document.getElementById('campo-' + code);
     if (!campo) return;
     campo.setAttribute('data-pregunta', i + 1);
@@ -88,13 +88,13 @@ function initNavPanel() {
   nav.appendChild(title);
   var grid = document.createElement('div');
   grid.className = 'nav-grid';
-  QUESTION_MAP.forEach(function(code, i) {
+  QUESTION_MAP.forEach(function (code, i) {
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'nav-btn';
     btn.textContent = i + 1;
     btn.title = 'Pregunta ' + (i + 1) + ' — ' + code;
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       var el = document.getElementById('campo-' + code);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
@@ -105,7 +105,7 @@ function initNavPanel() {
 
 // ---- ¿VALIDÓ FRENTE AL 2024? ----
 function crearBloquesValido2024() {
-  QUESTION_MAP.forEach(function(code) {
+  QUESTION_MAP.forEach(function (code) {
     var campo = document.getElementById('campo-' + code);
     if (!campo) return;
     var block = document.createElement('div');
@@ -115,41 +115,41 @@ function crearBloquesValido2024() {
     block.innerHTML =
       '<div class="val2024-header">📋 Comparación con vigencia 2024</div>' +
       '<div class="val2024-options">' +
-        '<label><input type="radio" name="' + rName + '" value="mejoro"> Sí mejoró</label>' +
-        '<label><input type="radio" name="' + rName + '" value="no_mejoro"> No mejoró</label>' +
-        '<label><input type="radio" name="' + rName + '" value="sigue_igual"> Sigue igual</label>' +
+      '<label><input type="radio" name="' + rName + '" value="mejoro"> Sí mejoró</label>' +
+      '<label><input type="radio" name="' + rName + '" value="no_mejoro"> No mejoró</label>' +
+      '<label><input type="radio" name="' + rName + '" value="sigue_igual"> Sigue igual</label>' +
       '</div>' +
       '<textarea class="val2024-desc" name="' + rName + '_desc" rows="2" placeholder="Descripción (opcional)"></textarea>';
-    block.addEventListener('click', function(e) { e.stopPropagation(); });
+    block.addEventListener('click', function (e) { e.stopPropagation(); });
     campo.appendChild(block);
   });
 }
 function initValido2024() {
-  document.querySelectorAll('input[name="valido_2024"]').forEach(function(r) {
+  document.querySelectorAll('input[name="valido_2024"]').forEach(function (r) {
     r.addEventListener('change', toggleValido2024);
   });
 }
 function toggleValido2024() {
   var val = document.querySelector('input[name="valido_2024"]:checked');
   var show = val && val.value === 'si';
-  document.querySelectorAll('.bloque-valido-2024').forEach(function(b) {
+  document.querySelectorAll('.bloque-valido-2024').forEach(function (b) {
     b.style.display = show ? 'block' : 'none';
     if (!show) {
-      b.querySelectorAll('input[type=radio]').forEach(function(r) { r.checked = false; });
-      b.querySelectorAll('textarea').forEach(function(t) { t.value = ''; });
+      b.querySelectorAll('input[type=radio]').forEach(function (r) { r.checked = false; });
+      b.querySelectorAll('textarea').forEach(function (t) { t.value = ''; });
     }
   });
 }
 
 // ---- FOLLOW-UP Verificación (Sí / No / Parcialmente) ----
 function initFollowUps() {
-  document.querySelectorAll('.campo .radio-group, .campo .check-group').forEach(function(group) {
+  document.querySelectorAll('.campo .radio-group, .campo .check-group').forEach(function (group) {
     var campo = group.closest('.campo');
     if (!campo) return;
     if (campo.id === 'campo-valido-2024') return;
     var isCheckGroup = group.classList.contains('check-group');
     var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
-    inputs.forEach(function(inp) {
+    inputs.forEach(function (inp) {
       var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
       if (document.getElementById(fuId)) return;
       var isNegative = NEGATIVE_VALUES.includes(inp.value.toLowerCase());
@@ -163,31 +163,31 @@ function initFollowUps() {
       block.innerHTML =
         '<span class="fu-label">📝 ' + labelText + '</span>' +
         '<div class="followup-sn">' +
-          '<label id="' + fuId + '_si_lbl" title="Contestó la pregunta Y tiene soportes">' +
-            '<input type="radio" name="' + fuId + '_sn" value="si" onchange="markFuSN(this)"> ✅ Sí</label>' +
-          '<label id="' + fuId + '_parcial_lbl" title="No ha contestado pero tiene soportes, o hay justificación válida">' +
-            '<input type="radio" name="' + fuId + '_sn" value="parcial" onchange="markFuSN(this)"> ⚠️ Parcialmente</label>' +
-          '<label id="' + fuId + '_no_lbl" title="No hay soportes, ni respuesta, ni justificación">' +
-            '<input type="radio" name="' + fuId + '_sn" value="no" onchange="markFuSN(this)"> ❌ No</label>' +
+        '<label id="' + fuId + '_si_lbl" title="Contestó la pregunta Y tiene soportes">' +
+        '<input type="radio" name="' + fuId + '_sn" value="si" onchange="markFuSN(this)"> ✅ Sí</label>' +
+        '<label id="' + fuId + '_parcial_lbl" title="No ha contestado pero tiene soportes, o hay justificación válida">' +
+        '<input type="radio" name="' + fuId + '_sn" value="parcial" onchange="markFuSN(this)"> ⚠️ Parcialmente</label>' +
+        '<label id="' + fuId + '_no_lbl" title="No hay soportes, ni respuesta, ni justificación">' +
+        '<input type="radio" name="' + fuId + '_sn" value="no" onchange="markFuSN(this)"> ❌ No</label>' +
         '</div>' +
         '<div class="fu-descriptions">' +
-          '<small>✅ <b>Sí</b>: Contestó la pregunta Y tiene soportes → <b>100 pts</b></small><br>' +
-          '<small>⚠️ <b>Parcialmente</b>: Tiene soportes parciales o justificación válida → <b>50 pts</b></small><br>' +
-          '<small>❌ <b>No</b>: No hay soportes, ni respuesta, ni justificación → <b>0 pts</b></small>' +
+        '<small>✅ <b>Sí</b>: Contestó la pregunta Y tiene soportes → <b>100 pts</b></small><br>' +
+        '<small>⚠️ <b>Parcialmente</b>: Tiene soportes parciales o justificación válida → <b>50 pts</b></small><br>' +
+        '<small>❌ <b>No</b>: No hay soportes, ni respuesta, ni justificación → <b>0 pts</b></small>' +
         '</div>' +
         '<span class="followup-just-label">Descripción (opcional)</span>' +
         '<textarea class="followup-just" name="' + fuId + '_desc" rows="2" placeholder="Escriba una descripción..."></textarea>';
-      block.addEventListener('click', function(e) { e.stopPropagation(); });
+      block.addEventListener('click', function (e) { e.stopPropagation(); });
       var wrapperLabel = inp.closest('label');
       wrapperLabel.parentNode.insertBefore(block, wrapperLabel.nextSibling);
-      inp.addEventListener('change', function() { actualizarVisibilidadFU(group); });
+      inp.addEventListener('change', function () { actualizarVisibilidadFU(group); });
     });
   });
 }
 
 function actualizarVisibilidadFU(group) {
   var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
-  inputs.forEach(function(inp) {
+  inputs.forEach(function (inp) {
     var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
     var block = document.getElementById(fuId);
     if (!block) return;
@@ -195,7 +195,7 @@ function actualizarVisibilidadFU(group) {
       block.classList.add('visible');
     } else {
       block.classList.remove('visible');
-      block.querySelectorAll('input[type=radio]').forEach(function(r) { r.checked = false; markFuSN(r); });
+      block.querySelectorAll('input[type=radio]').forEach(function (r) { r.checked = false; markFuSN(r); });
       var ta = block.querySelector('textarea');
       if (ta) ta.value = '';
       block.removeAttribute('data-score');
@@ -208,7 +208,7 @@ function markFuSN(radio) {
   var siLbl = document.getElementById(fuId + '_si_lbl');
   var noLbl = document.getElementById(fuId + '_no_lbl');
   var parcialLbl = document.getElementById(fuId + '_parcial_lbl');
-  [siLbl, noLbl, parcialLbl].forEach(function(lbl) {
+  [siLbl, noLbl, parcialLbl].forEach(function (lbl) {
     if (lbl) lbl.classList.remove('fu-selected-si', 'fu-selected-no', 'fu-selected-parcial');
   });
   if (radio.checked) {
@@ -224,7 +224,7 @@ function markFuSN(radio) {
 }
 
 // ---- VALIDACIÓN Y ENVÍO ----
-document.getElementById('form-meci').addEventListener('submit', async function(e) {
+document.getElementById('form-meci').addEventListener('submit', async function (e) {
   e.preventDefault();
   if (!validarFormulario()) return;
   var btn = document.querySelector('.btn-submit');
@@ -249,22 +249,22 @@ document.getElementById('form-meci').addEventListener('submit', async function(e
 
 function validarFormulario() {
   var ok = true;
-  document.querySelectorAll('.campo.has-error').forEach(function(c) { c.classList.remove('has-error'); });
-  document.querySelectorAll('input[required], select[required]').forEach(function(el) {
+  document.querySelectorAll('.campo.has-error').forEach(function (c) { c.classList.remove('has-error'); });
+  document.querySelectorAll('input[required], select[required]').forEach(function (el) {
     if (!el.offsetParent) return;
     var v = el.value.trim();
     if (!v || (el.type === 'number' && el.value === '')) { marcarError(el.closest('.campo')); ok = false; }
   });
-  document.querySelectorAll('.campo').forEach(function(campo) {
+  document.querySelectorAll('.campo').forEach(function (campo) {
     var radios = campo.querySelectorAll(':scope > .radio-group > label > input[type=radio][required]');
     if (radios.length > 0) {
       var checked = campo.querySelector(':scope > .radio-group > label > input[type=radio]:checked');
       if (!checked) { marcarError(campo); ok = false; }
     }
   });
-  var checkCampos = ['CIN203','CIN206','CIN207','CIN222','CIN240','CIN241','CIN242','CIN244',
-    'CIN246','CIN247','CIN252','CIN253','CIN254','CIN271','CIN276','CIN300','CIN301'];
-  checkCampos.forEach(function(nombre) {
+  var checkCampos = ['CIN203', 'CIN206', 'CIN207', 'CIN222', 'CIN240', 'CIN241', 'CIN242', 'CIN244',
+    'CIN246', 'CIN247', 'CIN252', 'CIN253', 'CIN254', 'CIN271', 'CIN276', 'CIN300', 'CIN301'];
+  checkCampos.forEach(function (nombre) {
     var campo = document.getElementById('campo-' + nombre);
     if (!campo) return;
     var checked = campo.querySelector('input[type=checkbox]:checked');
@@ -298,15 +298,15 @@ function recopilarDatos() {
       checkNames[k] = [v];
     }
   }
-  Object.keys(checkNames).forEach(function(k) {
+  Object.keys(checkNames).forEach(function (k) {
     if (checkNames[k].length > 1) data[k] = checkNames[k].join(',');
   });
   // Collect followup scores
-  document.querySelectorAll('.followup-block.visible[data-score]').forEach(function(block) {
+  document.querySelectorAll('.followup-block.visible[data-score]').forEach(function (block) {
     data[block.id + '_score'] = parseInt(block.getAttribute('data-score'));
   });
   // Collect 2024 validation data
-  QUESTION_MAP.forEach(function(code) {
+  QUESTION_MAP.forEach(function (code) {
     var rName = 'val2024_' + code;
     var checked = document.querySelector('input[name="' + rName + '"]:checked');
     if (checked) data[rName] = checked.value;
@@ -317,7 +317,7 @@ function recopilarDatos() {
 }
 
 // Escuchar cambios en inputs
-document.querySelectorAll('input, select, textarea').forEach(function(el) {
+document.querySelectorAll('input, select, textarea').forEach(function (el) {
   el.addEventListener('input', actualizarProgreso);
   el.addEventListener('change', actualizarProgreso);
 });

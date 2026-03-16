@@ -185,8 +185,10 @@
           </tr>
           <tr>
             <td><strong>Soportes en Opciones y Checks</strong></td>
-            <td>Se valora la <strong>Verificación Adicional</strong>. Aplica a cada respuesta seleccionada. Si hay "Ninguna", también se valida el soporte.</td>
-            <td>✅ Sí = <strong>1.0 pt</strong><br>⚠️ Parcialmente = <strong>0.5 pt</strong><br>❌ No (o sin soporte) = <strong>0.0 pt</strong></td>
+            <td>Se valora la <strong>Verificación Adicional</strong>. Aplica a cada respuesta seleccionada. Si hay
+              "Ninguna", también se valida el soporte.</td>
+            <td>✅ Sí = <strong>1.0 pt</strong><br>⚠️ Parcialmente = <strong>0.5 pt</strong><br>❌ No (o sin soporte) =
+              <strong>0.0 pt</strong></td>
           </tr>
           <tr>
             <td><strong>Número</strong></td>
@@ -332,7 +334,7 @@
         const val = (r[campo] || '').toString().trim().toLowerCase();
         maxScore += cfg.peso;
         if (!val) { detalle[campo] = 0; totalNo++; continue; }
-        
+
         let localPts = 0;
         if (cfg.tipo === 'radio') {
           const fuSn = r['fu_' + campo + '_' + val + '_sn'];
@@ -364,7 +366,7 @@
 
         score += localPts * cfg.peso;
         detalle[campo] = Math.round(localPts * 100) / 100;
-        
+
         if (r['val2024_' + campo] === 'mejoro') totalMejoro++;
         else if (r['val2024_' + campo] === 'sigue_igual') totalIgual++;
         else if (r['val2024_' + campo] === 'no_mejoro') totalNoMejoro++;
@@ -387,9 +389,9 @@
         m += cfg.peso;
         const val = (r[c] || '').toString().trim().toLowerCase();
         if (!val) return;
-        
+
         let localPts = 0;
-        if (cfg.tipo === 'radio') { 
+        if (cfg.tipo === 'radio') {
           const fuSn = r['fu_' + c + '_' + val + '_sn'];
           if (fuSn === 'si') localPts = 1.0;
           else if (fuSn === 'parcial') localPts = 0.5;
@@ -404,9 +406,9 @@
             localPts = cfg.ninguna_ok ? 1 : 0;
           } else {
             opts.forEach(opt => {
-               const fuSn = r['fu_' + c + '_' + opt + '_sn'];
-               if (fuSn === 'si') optsScore += 1.0;
-               else if (fuSn === 'parcial') optsScore += 0.5;
+              const fuSn = r['fu_' + c + '_' + opt + '_sn'];
+              if (fuSn === 'si') optsScore += 1.0;
+              else if (fuSn === 'parcial') optsScore += 0.5;
             });
             localPts = opts.length > 0 ? Math.min(1, optsScore / opts.length) : 0;
           }
@@ -546,7 +548,7 @@
       mkChart('ch-dist', 'doughnut', Object.keys(niv), [{ data: Object.values(niv), backgroundColor: ['#27ae60', '#e67e22', '#e74c3c', '#555'] }]);
       const catNames = Object.keys(CATEGORIAS), catProms = catNames.map(cat => { const v = filtData.map(r => calcCategoria(r, CATEGORIAS[cat])); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; });
       mkChart('ch-cats', 'bar', catNames.map(c => c.substring(0, 20)), [{ data: catProms, backgroundColor: catProms.map(v => v >= 75 ? '#27ae60' : v >= 50 ? '#e67e22' : '#e74c3c'), borderRadius: 6 }], { scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, x: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } });
-      
+
       let globSi = 0, globPar = 0, globNo = 0;
       let globMejoro = 0, globIgual = 0, globNoMejoro = 0;
       filtData.forEach(r => {
@@ -688,7 +690,7 @@
           // --- NUEVO: Verificaciones adicionales (fu_) ---
           const isCheck = cfg.tipo === 'check';
           const values = (val.split(',') || []).map(v => v.trim()).filter(Boolean);
-          
+
           let fuHtml = '';
           values.forEach(v => {
             const fuId = `fu_${campo}_${v}`;
