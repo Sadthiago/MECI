@@ -111,6 +111,14 @@
         <h3>📋 Promedio de avance por categoría</h3>
         <div class="chart-wrap"><canvas id="ch-cats"></canvas></div>
       </div>
+      <div class="chart-card">
+        <h3>🎯 Estado de Soportes (Global)</h3>
+        <div class="chart-wrap"><canvas id="ch-soportes"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>🔄 Validación frente a 2024 (Global)</h3>
+        <div class="chart-wrap"><canvas id="ch-2024"></canvas></div>
+      </div>
     </div>
 
     <!-- Categorías -->
@@ -172,24 +180,18 @@
         <table class="metodo-table" style="margin-top:10px">
           <tr>
             <th>Tipo</th>
-            <th>Lógica de calificación</th>
-            <th>Ejemplo</th>
+            <th>Lógica de calificación (Aplica a Verificaciones)</th>
+            <th>Puntaje</th>
           </tr>
           <tr>
-            <td><strong>Opción única (radio)</strong></td>
-            <td>Cada opción tiene un valor fijo entre 0.0 y 1.0 según qué tan buena es la respuesta</td>
-            <td>CIN221: Gestión integral=1.0 · Parcial=0.5 · No realiza=0.0</td>
-          </tr>
-          <tr>
-            <td><strong>Múltiple opción (checkbox)</strong></td>
-            <td>Se divide la cantidad de opciones marcadas entre el total posible. "Ninguna de las anteriores" = 0.0
-              (excepto CIN301 donde significa plan cumplido al 100% = 1.0)</td>
-            <td>CIN253: marcó 6 de 8 herramientas = 75%</td>
+            <td><strong>Soportes en Opciones y Checks</strong></td>
+            <td>Se valora la <strong>Verificación Adicional</strong>. Aplica a cada respuesta seleccionada. Si hay "Ninguna", también se valida el soporte.</td>
+            <td>✅ Sí = <strong>1.0 pt</strong><br>⚠️ Parcialmente = <strong>0.5 pt</strong><br>❌ No (o sin soporte) = <strong>0.0 pt</strong></td>
           </tr>
           <tr>
             <td><strong>Número</strong></td>
-            <td>Mayor a 0 = 1.0 · Igual a 0 o vacío = 0.0</td>
-            <td>CIN305: tiene 3 trabajadores = 1.0</td>
+            <td>Se valida si la cantidad especificada es superior a 0.</td>
+            <td>Mayor a 0 = <strong>1.0 pt</strong><br>Igual a 0 o vacío = <strong>0.0 pt</strong></td>
           </tr>
         </table>
         <strong style="font-size:.85rem;color:var(--p);display:block;margin-top:14px">Semáforo de avance:</strong>
@@ -323,34 +325,52 @@
 
     function calcAvance(r) {
       let score = 0, maxScore = 0;
+      let totalSi = 0, totalPar = 0, totalNo = 0;
+      let totalMejoro = 0, totalIgual = 0, totalNoMejoro = 0;
       const detalle = {};
       for (const [campo, cfg] of Object.entries(PREGUNTAS)) {
         const val = (r[campo] || '').toString().trim().toLowerCase();
         maxScore += cfg.peso;
-        if (!val) { detalle[campo] = 0; continue; }
+        if (!val) { detalle[campo] = 0; totalNo++; continue; }
+        
+        let localPts = 0;
         if (cfg.tipo === 'radio') {
-          const pts = cfg.opciones[val] ?? 0;
-          score += pts * cfg.peso; detalle[campo] = pts;
+          const fuSn = r['fu_' + campo + '_' + val + '_sn'];
+          if (fuSn === 'si') { localPts = 1.0; totalSi++; }
+          else if (fuSn === 'parcial') { localPts = 0.5; totalPar++; }
+          else { localPts = 0.0; totalNo++; }
         } else if (cfg.tipo === 'check') {
           const partes = val.split(',').map(o => o.trim()).filter(Boolean);
           const tieneNinguna = partes.includes('ninguna');
           const noScore = cfg.no_score || [];
           const opts = partes.filter(o => o !== 'ninguna' && !noScore.includes(o));
-          let pts;
+          let optsScore = 0;
           if (tieneNinguna && opts.length === 0) {
-            pts = cfg.ninguna_ok ? 1.0 : 0.0;
+            localPts = cfg.ninguna_ok ? 1.0 : 0.0;
+            if (cfg.ninguna_ok) totalSi++; else totalNo++;
           } else {
-            pts = Math.min(1, opts.length / (cfg.max_opts || 5));
+            opts.forEach(opt => {
+              const fuSn = r['fu_' + campo + '_' + opt + '_sn'];
+              if (fuSn === 'si') { optsScore += 1.0; totalSi++; }
+              else if (fuSn === 'parcial') { optsScore += 0.5; totalPar++; }
+              else { totalNo++; }
+            });
+            localPts = opts.length > 0 ? Math.min(1, optsScore / opts.length) : 0;
           }
-          score += pts * cfg.peso; detalle[campo] = Math.round(pts * 100) / 100;
         } else if (cfg.tipo === 'numero') {
           const n = parseInt(val) || 0;
-          const pts = n > 0 ? 1 : 0;
-          score += pts * cfg.peso; detalle[campo] = pts;
+          localPts = n > 0 ? 1 : 0;
         }
+
+        score += localPts * cfg.peso;
+        detalle[campo] = Math.round(localPts * 100) / 100;
+        
+        if (r['val2024_' + campo] === 'mejoro') totalMejoro++;
+        else if (r['val2024_' + campo] === 'sigue_igual') totalIgual++;
+        else if (r['val2024_' + campo] === 'no_mejoro') totalNoMejoro++;
       }
       const pct = maxScore > 0 ? Math.round(score / maxScore * 1000) / 10 : 0;
-      return { pct, detalle };
+      return { pct, detalle, stats: { totalSi, totalPar, totalNo, totalMejoro, totalIgual, totalNoMejoro } };
     }
 
     function semaforo(pct) {
@@ -367,16 +387,32 @@
         m += cfg.peso;
         const val = (r[c] || '').toString().trim().toLowerCase();
         if (!val) return;
-        if (cfg.tipo === 'radio') { s += (cfg.opciones[val] ?? 0) * cfg.peso; }
-        else if (cfg.tipo === 'check') {
+        
+        let localPts = 0;
+        if (cfg.tipo === 'radio') { 
+          const fuSn = r['fu_' + c + '_' + val + '_sn'];
+          if (fuSn === 'si') localPts = 1.0;
+          else if (fuSn === 'parcial') localPts = 0.5;
+          else localPts = 0.0;
+        } else if (cfg.tipo === 'check') {
           const partes = val.split(',').map(o => o.trim()).filter(Boolean);
           const tieneNinguna = partes.includes('ninguna');
           const noScore = cfg.no_score || [];
           const opts = partes.filter(o => o !== 'ninguna' && !noScore.includes(o));
-          const pts = (tieneNinguna && opts.length === 0) ? (cfg.ninguna_ok ? 1 : 0) : Math.min(1, opts.length / (cfg.max_opts || 5));
-          s += pts * cfg.peso;
+          let optsScore = 0;
+          if (tieneNinguna && opts.length === 0) {
+            localPts = cfg.ninguna_ok ? 1 : 0;
+          } else {
+            opts.forEach(opt => {
+               const fuSn = r['fu_' + c + '_' + opt + '_sn'];
+               if (fuSn === 'si') optsScore += 1.0;
+               else if (fuSn === 'parcial') optsScore += 0.5;
+            });
+            localPts = opts.length > 0 ? Math.min(1, optsScore / opts.length) : 0;
+          }
         }
-        else if (cfg.tipo === 'numero') { s += ((parseInt(val) || 0) > 0 ? 1 : 0) * cfg.peso; }
+        else if (cfg.tipo === 'numero') { localPts = ((parseInt(val) || 0) > 0 ? 1 : 0); }
+        s += localPts * cfg.peso;
       });
       return m > 0 ? Math.round(s / m * 100) : 0;
     }
@@ -440,7 +476,7 @@
       const fV = document.getElementById('f-vig').value, fT = document.getElementById('f-tipo').value,
         fE = document.getElementById('f-estado').value, fB = document.getElementById('f-buscar').value.toLowerCase();
       filtData = allData
-        .map(r => { const { pct, detalle } = calcAvance(r); return { ...r, _pct: pct, _det: detalle }; })
+        .map(r => { const { pct, detalle, stats } = calcAvance(r); return { ...r, _pct: pct, _det: detalle, _stats: stats }; })
         .filter(r => {
           if (fV && r.entidad_vigencia !== fV) return false;
           if (fT && r.tipo_entidad !== fT) return false;
@@ -510,6 +546,17 @@
       mkChart('ch-dist', 'doughnut', Object.keys(niv), [{ data: Object.values(niv), backgroundColor: ['#27ae60', '#e67e22', '#e74c3c', '#555'] }]);
       const catNames = Object.keys(CATEGORIAS), catProms = catNames.map(cat => { const v = filtData.map(r => calcCategoria(r, CATEGORIAS[cat])); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; });
       mkChart('ch-cats', 'bar', catNames.map(c => c.substring(0, 20)), [{ data: catProms, backgroundColor: catProms.map(v => v >= 75 ? '#27ae60' : v >= 50 ? '#e67e22' : '#e74c3c'), borderRadius: 6 }], { scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, x: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } });
+      
+      let globSi = 0, globPar = 0, globNo = 0;
+      let globMejoro = 0, globIgual = 0, globNoMejoro = 0;
+      filtData.forEach(r => {
+        if (r._stats) {
+          globSi += r._stats.totalSi; globPar += r._stats.totalPar; globNo += r._stats.totalNo;
+          globMejoro += r._stats.totalMejoro; globIgual += r._stats.totalIgual; globNoMejoro += r._stats.totalNoMejoro;
+        }
+      });
+      mkChart('ch-soportes', 'pie', ['✅ Sí (100 pts)', '⚠️ Parcialmente (50 pts)', '❌ No (0 pts)'], [{ data: [globSi, globPar, globNo], backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'] }]);
+      mkChart('ch-2024', 'doughnut', ['📈 Mejoró', '⚖️ Sigue Igual', '📉 No Mejoró'], [{ data: [globMejoro, globIgual, globNoMejoro], backgroundColor: ['#27ae60', '#f1c40f', '#e74c3c'] }]);
     }
 
     function renderCats() {
@@ -536,6 +583,20 @@
           <strong>Tipo:</strong> ${r.tipo_entidad || '—'} &nbsp;|&nbsp; <strong>Vigencia:</strong> ${r.entidad_vigencia || '—'} &nbsp;|&nbsp;
           <strong>Responsable:</strong> ${r.responsable_nombre || '—'} (${r.responsable_cargo || '—'}) &nbsp;|&nbsp;
           <strong>Fecha:</strong> ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;box-shadow:0 2px 4px rgba(0,0,0,0.03)">
+              <div style="font-weight:800;color:var(--primary);margin-bottom:8px">📋 Estado de Soportes</div>
+              <div style="margin-bottom:4px">✅ Sí (100%): <b>${r._stats ? r._stats.totalSi : 0}</b></div>
+              <div style="margin-bottom:4px">⚠️ Parcialmente (50%): <b>${r._stats ? r._stats.totalPar : 0}</b></div>
+              <div>❌ No (0%): <b>${r._stats ? r._stats.totalNo : 0}</b></div>
+            </div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;box-shadow:0 2px 4px rgba(0,0,0,0.03)">
+              <div style="font-weight:800;color:var(--primary);margin-bottom:8px">🔄 Frente a 2024</div>
+              <div style="margin-bottom:4px">📈 Mejoró: <b>${r._stats ? r._stats.totalMejoro : 0}</b></div>
+              <div style="margin-bottom:4px">⚖️ Sigue Igual: <b>${r._stats ? r._stats.totalIgual : 0}</b></div>
+              <div>📉 No Mejoró: <b>${r._stats ? r._stats.totalNoMejoro : 0}</b></div>
+            </div>
         </div>
         <div class="detalle-grid">${catHtml}</div>
         <div style="margin-top:14px;background:#fffbf0;border:1px solid #f0a500;border-radius:10px;padding:12px">

@@ -10,6 +10,9 @@
 
 <body>
 
+  <!-- Panel de navegación fijo -->
+  <nav id="nav-panel"></nav>
+
   <header>
     <div class="logo">📋</div>
     <div>
@@ -306,16 +309,45 @@
             <div class="err-msg">Seleccione la ESE.</div>
           </div>
 
-          <div class="campo" id="campo-vigencia">
-            <label>Vigencia evaluada <span class="req">*</span></label>
-            <select id="entidad_vigencia" name="entidad_vigencia" required>
-              <option value="">— Seleccione la vigencia —</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
+
+          <div class="campo" id="campo-facilitador">
+            <label>Nombre del facilitador que diligencia <span class="req">*</span></label>
+            <select id="facilitador_nombre" name="facilitador_nombre" required>
+              <option value="">— Seleccione el facilitador —</option>
+              <option value="Ingrid Carolina Villamizar Meneses">Ingrid Carolina Villamizar Meneses</option>
+              <option value="Leonardo Bernal Romero">Leonardo Bernal Romero</option>
+              <option value="Elba Mercedes Parada Pedraza">Elba Mercedes Parada Pedraza</option>
+              <option value="Karen Ginet Ortiz Godoy">Karen Ginet Ortiz Godoy</option>
+              <option value="John Alexander Robles Osorio">John Alexander Robles Osorio</option>
+              <option value="Leidy Johana Herrera Bernal">Leidy Johana Herrera Bernal</option>
             </select>
-            <div class="err-msg">Seleccione la vigencia.</div>
+            <div class="err-msg">Seleccione el facilitador.</div>
           </div>
 
+          <div class="campo" id="campo-pct-mipg">
+            <label>Porcentaje de avance MIPG</label>
+            <input type="number" id="pct_mipg" name="pct_mipg" min="0" max="100" placeholder="0 – 100">
+          </div>
+
+          <div class="campo" id="campo-pct-meci">
+            <label>Porcentaje de avance MECI</label>
+            <input type="number" id="pct_meci" name="pct_meci" min="0" max="100" placeholder="0 – 100">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== PREGUNTA VIGENCIA ANTERIOR ====== -->
+      <div class="seccion" id="seccion-valido-2024">
+        <div class="sec-header">🔄 Validación frente a vigencia anterior</div>
+        <div class="sec-body">
+          <div class="campo" id="campo-valido-2024">
+            <label>¿Usted validó frente al formulario del año 2024? <span class="req">*</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="valido_2024" value="si" onchange="markSelected(this)"> Sí</label>
+              <label><input type="radio" name="valido_2024" value="no" onchange="markSelected(this)"> No</label>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -756,23 +788,6 @@
         <div class="sec-header">🏛️ Capacidad Institucional del Área de Control Interno</div>
         <div class="sec-body">
 
-          <div class="campo" id="campo-CIN264">
-            <label>Para el ejercicio de evaluación independiente en la vigencia evaluada, la entidad: <span
-                class="req">*</span> <span class="codigo">CIN264</span></label>
-            <div class="radio-group">
-              <label><input type="radio" name="CIN264" value="a" required onchange="markSelected(this)"> Contó con una
-                oficina de control interno (dependencia, jefe y equipo de trabajo)</label>
-              <label><input type="radio" name="CIN264" value="b" onchange="markSelected(this)"> Contó con un grupo
-                interno de trabajo coordinado por un servidor del nivel asesor o profesional</label>
-              <label><input type="radio" name="CIN264" value="c" onchange="markSelected(this)"> No contó con un área
-                responsable, pero el Representante Legal asignó la función a un servidor (sin equipo)</label>
-              <label><input type="radio" name="CIN264" value="d" onchange="markSelected(this)"> Se cuenta con un
-                contrato de apoyo</label>
-              <label><input type="radio" name="CIN264" value="e" onchange="markSelected(this)"> No se contaba con un
-                responsable</label>
-            </div>
-            <div class="err-msg">Seleccione una opción.</div>
-          </div>
 
           <div class="campo" id="campo-CIN268">
             <label>El jefe de control interno o quien haga sus veces: <span class="req">*</span> <span
@@ -1144,269 +1159,7 @@
 
   </div>
 
-  <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlAaRGoqJUXO7CC-4xF46_PqWhLkD7mDpcR5aXkzHmO9wDXBGMuaiAbrtD_2M_w_EGIQ/exec";
-
-    // ---- RAMIFICACIÓN TIPO ENTIDAD ----
-    function ramificarEntidad() {
-      const tipo = document.getElementById('tipo_entidad').value;
-      document.querySelectorAll('.entidad-block').forEach(b => {
-        b.classList.remove('visible');
-        b.querySelector('select').required = false;
-      });
-      if (tipo === 'DESCENTRALIZADA') {
-        document.getElementById('bloque-desc').classList.add('visible');
-        document.getElementById('entidad_desc').required = true;
-      } else if (tipo === 'MUNICIPIO') {
-        document.getElementById('bloque-muni').classList.add('visible');
-        document.getElementById('entidad_muni').required = true;
-      } else if (tipo === 'ESES') {
-        document.getElementById('bloque-eses').classList.add('visible');
-        document.getElementById('entidad_ese').required = true;
-      }
-      actualizarProgreso();
-    }
-
-    // ---- HIGHLIGHT SELECCIÓN ----
-    function markSelected(radio) {
-      const group = radio.closest('.radio-group');
-      group.querySelectorAll('label').forEach(l => l.classList.remove('selected'));
-      radio.closest('label').classList.add('selected');
-      actualizarProgreso();
-    }
-    function markCheck(cb) {
-      cb.closest('label').classList.toggle('selected', cb.checked);
-      actualizarProgreso();
-    }
-
-    // ---- PROGRESO ----
-    const TOTAL_PREGUNTAS = 42;
-    function actualizarProgreso() {
-      let respondidas = 0;
-      // radios
-      document.querySelectorAll('.radio-group').forEach(rg => {
-        if (rg.querySelector('input[type=radio]:checked')) respondidas++;
-      });
-      // checkboxes
-      document.querySelectorAll('.check-group').forEach(cg => {
-        if (cg.querySelector('input[type=checkbox]:checked')) respondidas++;
-      });
-      // text/number/select inputs (excluye entidad_nombre ramificados)
-      ['responsable_nombre', 'responsable_cedula', 'responsable_cargo', 'responsable_correo',
-        'tipo_entidad', 'entidad_vigencia'].forEach(id => {
-          const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
-          if (el && el.value.trim()) respondidas++;
-        });
-      const pct = Math.min(100, Math.round(respondidas / TOTAL_PREGUNTAS * 100));
-      document.getElementById('progress-fill').style.width = pct + '%';
-      document.getElementById('progress-text').textContent = respondidas + ' de ' + TOTAL_PREGUNTAS + ' preguntas respondidas';
-    }
-
-    // ---- VALIDACIÓN Y ENVÍO ----
-    document.getElementById('form-meci').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      if (!validarFormulario()) return;
-
-      const btn = document.querySelector('.btn-submit');
-      btn.textContent = '⏳ Enviando...';
-      btn.disabled = true;
-
-      const data = recopilarDatos();
-
-      try {
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        document.getElementById('form-meci').style.display = 'none';
-        document.getElementById('success-screen').style.display = 'block';
-        window.scrollTo(0, 0);
-      } catch (err) {
-        alert('Error al enviar. Intente de nuevo.');
-        btn.textContent = '✅ Enviar Formulario';
-        btn.disabled = false;
-      }
-    });
-
-    function validarFormulario() {
-      let ok = true;
-      document.querySelectorAll('.campo.has-error').forEach(c => c.classList.remove('has-error'));
-
-      // Campos de texto/select required
-      document.querySelectorAll('input[required], select[required]').forEach(el => {
-        if (!el.offsetParent) return; // elemento oculto
-        const v = el.value.trim();
-        if (!v || (el.type === 'number' && el.value === '')) {
-          marcarError(el.closest('.campo'));
-          ok = false;
-        }
-      });
-
-      // Radio groups requeridos
-      document.querySelectorAll('.campo').forEach(campo => {
-        const radios = campo.querySelectorAll('input[type=radio][required]');
-        if (radios.length > 0) {
-          const checked = campo.querySelector('input[type=radio]:checked');
-          if (!checked) { marcarError(campo); ok = false; }
-        }
-      });
-
-      // Checkboxes requeridos
-      const checkCampos = ['CIN203', 'CIN206', 'CIN207', 'CIN222', 'CIN240', 'CIN241', 'CIN242', 'CIN244',
-        'CIN246', 'CIN247', 'CIN252', 'CIN253', 'CIN254', 'CIN271', 'CIN276', 'CIN300', 'CIN301'];
-      checkCampos.forEach(nombre => {
-        const campo = document.getElementById('campo-' + nombre);
-        if (!campo) return;
-        const checked = campo.querySelector('input[type=checkbox]:checked');
-        if (!checked) { marcarError(campo); ok = false; }
-      });
-
-      if (!ok) {
-        const firstErr = document.querySelector('.campo.has-error');
-        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return ok;
-    }
-
-    function marcarError(campo) {
-      if (campo) campo.classList.add('has-error');
-    }
-
-    function recopilarDatos() {
-      const data = { timestamp: new Date().toISOString() };
-      const fd = new FormData(document.getElementById('form-meci'));
-
-      // Nombre de entidad según tipo
-      const tipo = document.getElementById('tipo_entidad').value;
-      if (tipo === 'DESCENTRALIZADA') data.entidad_nombre = document.getElementById('entidad_desc').value;
-      else if (tipo === 'MUNICIPIO') data.entidad_nombre = document.getElementById('entidad_muni').value;
-      else if (tipo === 'ESES') data.entidad_nombre = document.getElementById('entidad_ese').value;
-      data.tipo_entidad = tipo;
-
-      const checkNames = {};
-      for (let [k, v] of fd.entries()) {
-        if (['entidad_nombre'].includes(k)) continue;
-        if (data[k]) {
-          if (!checkNames[k]) checkNames[k] = [];
-          checkNames[k].push(v);
-        } else {
-          data[k] = v;
-          checkNames[k] = [v];
-        }
-      }
-      // Para checkboxes múltiples, unir con coma
-      Object.entries(checkNames).forEach(([k, vals]) => {
-        if (vals.length > 1) data[k] = vals.join(',');
-      });
-
-      return data;
-    }
-
-    // Escuchar cambios en inputs numéricos y texto
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-      el.addEventListener('input', actualizarProgreso);
-      el.addEventListener('change', actualizarProgreso);
-    });
-
-    // ---- FOLLOW-UP Si/No/Justificación ----
-    function initFollowUps() {
-      document.querySelectorAll('.campo .radio-group, .campo .check-group').forEach(function (group) {
-        var campo = group.closest('.campo');
-        if (!campo) return;
-        var isCheckGroup = group.classList.contains('check-group');
-
-        // Solo los inputs directos del grupo (no los de los follow-up blocks)
-        var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
-
-        inputs.forEach(function (inp) {
-          var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
-
-          // Evitar duplicados
-          if (document.getElementById(fuId)) return;
-
-          var block = document.createElement('div');
-          block.className = 'followup-block';
-          block.id = fuId;
-
-          var labelText = isCheckGroup
-            ? 'Verificación: ' + inp.closest('label').textContent.trim()
-            : 'Verificación adicional';
-
-          block.innerHTML =
-            '<span class="fu-label">📝 ' + labelText + '</span>' +
-            '<div class="followup-sn">' +
-            '<label id="' + fuId + '_si_lbl"><input type="radio" name="' + fuId + '_sn" value="si" onchange="markFuSN(this)"> ✅ Sí</label>' +
-            '<label id="' + fuId + '_no_lbl"><input type="radio" name="' + fuId + '_sn" value="no" onchange="markFuSN(this)"> ❌ No</label>' +
-            '</div>' +
-            '<span class="followup-just-label">Justificación (opcional)</span>' +
-            '<textarea class="followup-just" name="' + fuId + '_just" rows="2" placeholder="Escriba una justificación para esta opción..."></textarea>';
-
-          // Prevenir que clicks en el bloque de verificación afecten al checkbox/radio padre
-          block.addEventListener('click', function (e) {
-            e.stopPropagation();
-          });
-
-          // Insertar justo debajo de la opción (el label)
-          var wrapperLabel = inp.closest('label');
-          wrapperLabel.parentNode.insertBefore(block, wrapperLabel.nextSibling);
-
-          // Lógica de visibilidad
-          inp.addEventListener('change', function () {
-            actualizarVisibilidadFU(group);
-          });
-        });
-      });
-    }
-
-    function actualizarVisibilidadFU(group) {
-      // Solo los inputs directos del grupo (no los de los follow-up blocks)
-      var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
-
-      inputs.forEach(function (inp) {
-        var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
-        var block = document.getElementById(fuId);
-        if (!block) return;
-
-        if (inp.checked) {
-          block.classList.add('visible');
-        } else {
-          block.classList.remove('visible');
-          // Limpiar valores al ocultar
-          block.querySelectorAll('input[type=radio]').forEach(function (r) {
-            r.checked = false;
-            markFuSN(r);
-          });
-          var ta = block.querySelector('textarea');
-          if (ta) ta.value = '';
-        }
-      });
-    }
-
-
-    function markFuSN(radio) {
-      var fuId = radio.name.replace('_sn', '');
-      var siLbl = document.getElementById(fuId + '_si_lbl');
-      var noLbl = document.getElementById(fuId + '_no_lbl');
-      if (siLbl) siLbl.classList.remove('fu-selected-si', 'fu-selected-no');
-      if (noLbl) noLbl.classList.remove('fu-selected-si', 'fu-selected-no');
-      
-      if (radio.checked) {
-        if (radio.value === 'si' && siLbl) siLbl.classList.add('fu-selected-si');
-        if (radio.value === 'no' && noLbl) noLbl.classList.add('fu-selected-no');
-      }
-    }
-
-    // Initialize on DOM ready
-    document.addEventListener('DOMContentLoaded', function () {
-      initFollowUps();
-    });
-    if (document.readyState !== 'loading') {
-      initFollowUps();
-    }
-
-  </script>
+  <script src="formulario.js"></script>
 </body>
 
 </html>
