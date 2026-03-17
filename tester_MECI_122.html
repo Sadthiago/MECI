@@ -142,7 +142,7 @@
         CIN304_f: String(Math.floor(Math.random() * 3)),
         CIN305: String(Math.floor(1 + Math.random() * 5)),
         CIN306: rnd(['si', 'no', 'na']),
-        
+
         // --- NUEVO: AVANCES MIPG / MECI ---
         avance_mipg: (Math.random() * 100).toFixed(1),
         avance_meci: (Math.random() * 100).toFixed(1),
@@ -151,10 +151,10 @@
 
       // Generadores dinámicos de soportes (follow-ups) para campos CIN
       // y también para 2024
-      const CIN_KEYS = ['CIN203','CIN206','CIN207','CIN221','CIN222','CIN233','CIN234','CIN236',
-        'CIN238','CIN239','CIN240','CIN241','CIN242','CIN243','CIN244','CIN246','CIN247','CIN252',
-        'CIN253','CIN254','CIN255','CIN264','CIN268','CIN269','CIN270','CIN271','CIN272','CIN273',
-        'CIN274','CIN275','CIN276','CIN287','CIN288','CIN289','CIN290','CIN300','CIN301','CIN306'];
+      const CIN_KEYS = ['CIN203', 'CIN206', 'CIN207', 'CIN221', 'CIN222', 'CIN233', 'CIN234', 'CIN236',
+        'CIN238', 'CIN239', 'CIN240', 'CIN241', 'CIN242', 'CIN243', 'CIN244', 'CIN246', 'CIN247', 'CIN252',
+        'CIN253', 'CIN254', 'CIN255', 'CIN264', 'CIN268', 'CIN269', 'CIN270', 'CIN271', 'CIN272', 'CIN273',
+        'CIN274', 'CIN275', 'CIN276', 'CIN287', 'CIN288', 'CIN289', 'CIN290', 'CIN300', 'CIN301', 'CIN306'];
 
       CIN_KEYS.forEach(code => {
         const val = data[code];
@@ -167,7 +167,7 @@
         }
 
         // Si es número o input abierto no le agregamos soport (Ej: 305)
-        if (!isNaN(val) && code !== 'CIN306') return; 
+        if (!isNaN(val) && code !== 'CIN306') return;
 
         // Generar soportes por cada opción marcada
         const opts = val.split(',');
@@ -177,7 +177,7 @@
           const sn = rnd(['si', 'si', 'parcial', 'no']); // Peso hacia 'si'
           data[code + '_fu_' + opt + '_sn'] = sn;
           if (sn !== 'no' && rndBool(0.5)) {
-            data[code + '_fu_' + opt + '_desc'] = 'Evidencia documento ' + Math.floor(Math.random()*100);
+            data[code + '_fu_' + opt + '_desc'] = 'Evidencia documento ' + Math.floor(Math.random() * 100);
           }
         });
       });
@@ -191,7 +191,7 @@
 
         var ansParts = ans.split(',');
         var sops = [];
-        ansParts.forEach(function(opt) {
+        ansParts.forEach(function (opt) {
           opt = opt.trim();
           if (!opt) return;
           var fuVal = data[code + '_fu_' + opt + '_sn'];
@@ -209,7 +209,7 @@
           var cJust = data[code + '_val2024_desc'];
           res.push("Vs 2024: " + cLbl + (cJust ? " (" + cJust + ")" : ""));
         }
-        
+
         data[code + '_Resumen'] = res.join('\n');
       });
 
