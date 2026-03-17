@@ -414,10 +414,30 @@ function initAll() {
   initNumeracion();
   initNavPanel();
   crearBloquesValido2024();
-  initValido2024();
   initFollowUps();
+
+  // Limpieza profunda para evitar persistencia del navegador/caché
   var form = document.getElementById('form-meci');
-  if (form) form.reset();
+  if (form) {
+    form.reset();
+    // Limpiar manualmente cada input por si acaso
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+      else el.value = '';
+    });
+    // Limpiar clases de selección visual
+    form.querySelectorAll('.selected, .fu-selected-si, .fu-selected-no, .fu-selected-parcial').forEach(el => {
+      el.classList.remove('selected', 'fu-selected-si', 'fu-selected-no', 'fu-selected-parcial');
+    });
+    // Ocultar bloques condicionales
+    form.querySelectorAll('.visible, .bloque-valido-2024').forEach(el => {
+      if (!el.classList.contains('sec-header')) { // evitar ocultar headers si tuvieran 'visible'
+        el.classList.remove('visible');
+        if (el.classList.contains('bloque-valido-2024')) el.style.display = 'none';
+      }
+    });
+  }
+
   actualizarProgreso();
 }
 document.addEventListener('DOMContentLoaded', initAll);
