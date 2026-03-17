@@ -115,14 +115,18 @@
         <h3>🧭 Avance Promedio MIPG</h3>
         <div class="chart-wrap" style="position:relative">
           <canvas id="ch-gauge-mipg"></canvas>
-          <div id="gauge-mipg-val" style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:var(--primary)">0%</div>
+          <div id="gauge-mipg-val"
+            style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:var(--primary)">
+            0%</div>
         </div>
       </div>
       <div class="chart-card">
         <h3>⚓ Avance Promedio MECI</h3>
         <div class="chart-wrap" style="position:relative">
           <canvas id="ch-gauge-meci"></canvas>
-          <div id="gauge-meci-val" style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:var(--primary)">0%</div>
+          <div id="gauge-meci-val"
+            style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:var(--primary)">
+            0%</div>
         </div>
       </div>
     </div>
@@ -655,46 +659,46 @@
         </div>
         <div id="det-preg-${idx}" style="display:none; margin-top:12px; max-height: 280px; overflow-y: auto; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: left;">
           ${Object.keys(PREGUNTAS).map(c => {
-             const ans = (r[c] || '').toString().trim();
-             if (!ans) return '';
-             
-             let detalleHtml = '';
-             const resStr = r[c + '_Resumen'];
+        const ans = (r[c] || '').toString().trim();
+        if (!ans) return '';
 
-             if (resStr) {
-               detalleHtml = `<div style="white-space:pre-wrap; font-size:0.75rem; color:#444; line-height:1.5">${resStr}</div>`;
-             } else {
-               // Fallback: Compute detail locally if _Resumen is missing from old sheet data
-               const cfg = PREGUNTAS[c];
-               detalleHtml += `<div style="font-size:0.75rem; color:#444;">Respuesta: <b>${ans}</b></div>`;
-               
-               if (cfg && (cfg.tipo === 'radio' || cfg.tipo === 'check')) {
-                 const partes = ans.split(',').map(o => o.trim()).filter(Boolean);
-                 const sopsArr = [];
-                 partes.forEach(opt => {
-                   const fuSn = r[c + '_fu_' + opt + '_sn'] || r['fu_' + c + '_' + opt + '_sn'];
-                   if (fuSn) {
-                     const lbl = fuSn==='si'?'✅ Sí':(fuSn==='parcial'?'⚠️ Parcialmente':'❌ No');
-                     const just = r[c + '_fu_' + opt + '_desc'] || r['fu_' + c + '_' + opt + '_desc'];
-                     sopsArr.push(`<b>Opción ${opt.toUpperCase()}</b>: ${lbl}` + (just ? ` <i style="color:#777">("${just}")</i>` : ''));
-                   }
-                 });
-                 if (sopsArr.length > 0) detalleHtml += `<div style="margin-top:4px; font-size:0.75rem; color:#444;"><b>Soportes:</b><br> - ${sopsArr.join('<br> - ')}</div>`;
-               }
+        let detalleHtml = '';
+        const resStr = r[c + '_Resumen'];
 
-               const val2024 = r[c + '_val2024'] || r['val2024_' + c];
-               if (val2024) {
-                 const cLbl = val2024==='mejoro'?'📈 Mejoró':(val2024==='sigue_igual'?'⚖️ Sigue Igual':'📉 No Mejoró');
-                 const cJust = r[c + '_val2024_desc'] || r['val2024_' + c + '_desc'];
-                 detalleHtml += `<div style="margin-top:4px; font-size:0.75rem; color:#444;"><b>Vs 2024:</b> ${cLbl}` + (cJust ? ` <i style="color:#777">("${cJust}")</i>` : '') + `</div>`;
-               }
-             }
+        if (resStr) {
+          detalleHtml = `<div style="white-space:pre-wrap; font-size:0.75rem; color:#444; line-height:1.5">${resStr}</div>`;
+        } else {
+          // Fallback: Compute detail locally if _Resumen is missing from old sheet data
+          const cfg = PREGUNTAS[c];
+          detalleHtml += `<div style="font-size:0.75rem; color:#444;">Respuesta: <b>${ans}</b></div>`;
 
-             return `<div style="margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #eee;">
+          if (cfg && (cfg.tipo === 'radio' || cfg.tipo === 'check')) {
+            const partes = ans.split(',').map(o => o.trim()).filter(Boolean);
+            const sopsArr = [];
+            partes.forEach(opt => {
+              const fuSn = r[c + '_fu_' + opt + '_sn'] || r['fu_' + c + '_' + opt + '_sn'];
+              if (fuSn) {
+                const lbl = fuSn === 'si' ? '✅ Sí' : (fuSn === 'parcial' ? '⚠️ Parcialmente' : '❌ No');
+                const just = r[c + '_fu_' + opt + '_desc'] || r['fu_' + c + '_' + opt + '_desc'];
+                sopsArr.push(`<b>Opción ${opt.toUpperCase()}</b>: ${lbl}` + (just ? ` <i style="color:#777">("${just}")</i>` : ''));
+              }
+            });
+            if (sopsArr.length > 0) detalleHtml += `<div style="margin-top:4px; font-size:0.75rem; color:#444;"><b>Soportes:</b><br> - ${sopsArr.join('<br> - ')}</div>`;
+          }
+
+          const val2024 = r[c + '_val2024'] || r['val2024_' + c];
+          if (val2024) {
+            const cLbl = val2024 === 'mejoro' ? '📈 Mejoró' : (val2024 === 'sigue_igual' ? '⚖️ Sigue Igual' : '📉 No Mejoró');
+            const cJust = r[c + '_val2024_desc'] || r['val2024_' + c + '_desc'];
+            detalleHtml += `<div style="margin-top:4px; font-size:0.75rem; color:#444;"><b>Vs 2024:</b> ${cLbl}` + (cJust ? ` <i style="color:#777">("${cJust}")</i>` : '') + `</div>`;
+          }
+        }
+
+        return `<div style="margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #eee;">
                         <div style="font-weight:700; color:var(--primary); font-size:0.8rem; margin-bottom:4px;">Pregunta ${c}</div>
                         ${detalleHtml}
                      </div>`;
-          }).join('')}
+      }).join('')}
         </div>`;
       document.getElementById('modal').classList.add('visible');
     }
@@ -731,25 +735,25 @@
       if (!cfg) return val;
 
       function extractSoportes(optCode, labelDef) {
-         let sub = ``;
-         const fuSn = r[campo + '_fu_' + optCode + '_sn'] || r['fu_' + campo + '_' + optCode + '_sn'];
-         if (fuSn) {
-            const lbl = fuSn==='si'?'✅ Sí':(fuSn==='parcial'?'⚠️ Parcialmente':'❌ No');
-            const just = (r[campo + '_fu_' + optCode + '_desc'] || r['fu_' + campo + '_' + optCode + '_desc']) ?? '';
-            sub = ` <div style="margin-left:14px; font-size:0.75rem; color:#555; margin-top:2px;">↳ ${lbl} <span style="font-style:italic; color:#777">${just ? `("${just}")` : ''}</span></div>`;
-         }
-         return labelDef + sub;
+        let sub = ``;
+        const fuSn = r[campo + '_fu_' + optCode + '_sn'] || r['fu_' + campo + '_' + optCode + '_sn'];
+        if (fuSn) {
+          const lbl = fuSn === 'si' ? '✅ Sí' : (fuSn === 'parcial' ? '⚠️ Parcialmente' : '❌ No');
+          const just = (r[campo + '_fu_' + optCode + '_desc'] || r['fu_' + campo + '_' + optCode + '_desc']) ?? '';
+          sub = ` <div style="margin-left:14px; font-size:0.75rem; color:#555; margin-top:2px;">↳ ${lbl} <span style="font-style:italic; color:#777">${just ? `("${just}")` : ''}</span></div>`;
+        }
+        return labelDef + sub;
       }
 
       if (cfg.opciones && cfg.opciones[val.toLowerCase()]) {
         return extractSoportes(val.toLowerCase(), cfg.opciones[val.toLowerCase()]);
       }
-      
+
       if (cfg.opts) {
         const parts = val.split(',').map(v => v.trim()).filter(Boolean);
         const labels = parts.map(k => {
-           const l = cfg.opts[k] || k;
-           return extractSoportes(k, `• ${l}`);
+          const l = cfg.opts[k] || k;
+          return extractSoportes(k, `• ${l}`);
         });
         return labels.join('<br>'); // Usamos br directo porque extractSoportes mete block elements
       }
@@ -820,9 +824,9 @@
 
           const val2024 = r[campo + '_val2024'] || r['val2024_' + campo];
           if (val2024) {
-             const cLbl = val2024==='mejoro'?'📈 Mejoró':(val2024==='sigue_igual'?'⚖️ Sigue Igual':'📉 No Mejoró');
-             const cJust = r[campo + '_val2024_desc'] || r['val2024_' + campo + '_desc'] || '';
-             respHtml += `<div style="margin-top:10px; padding-top:8px; border-top:1px dashed #cdd7e8; font-size:0.78rem; font-weight:600; color:var(--primary);">
+            const cLbl = val2024 === 'mejoro' ? '📈 Mejoró' : (val2024 === 'sigue_igual' ? '⚖️ Sigue Igual' : '📉 No Mejoró');
+            const cJust = r[campo + '_val2024_desc'] || r['val2024_' + campo + '_desc'] || '';
+            respHtml += `<div style="margin-top:10px; padding-top:8px; border-top:1px dashed #cdd7e8; font-size:0.78rem; font-weight:600; color:var(--primary);">
                             Frente a 2024: <span style="font-weight:700">${cLbl}</span> <span style="font-style:italic; font-weight:400; color:#666">${cJust ? `("${cJust}")` : ''}</span>
                          </div>`;
           }
