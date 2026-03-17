@@ -416,6 +416,8 @@ function initAll() {
   crearBloquesValido2024();
   initValido2024();
   initFollowUps();
+  var form = document.getElementById('form-meci');
+  if (form) form.reset();
   actualizarProgreso();
 }
 document.addEventListener('DOMContentLoaded', initAll);
