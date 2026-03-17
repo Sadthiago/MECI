@@ -517,6 +517,12 @@ select.invalid {
   box-shadow: 0 4px 10px rgba(45, 125, 210, 0.3);
 }
 
+.nav-btn.answered {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
 @media(max-width: 1100px) {
   #nav-panel {
     top: auto;

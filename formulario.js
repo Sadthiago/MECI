@@ -83,6 +83,31 @@ function actualizarProgreso() {
   var pct = Math.min(100, Math.round(respondidas / TOTAL_PREGUNTAS * 100));
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-text').textContent = respondidas + ' de ' + TOTAL_PREGUNTAS + ' preguntas respondidas';
+
+  // Actualizar indicadores en el panel de navegación
+  QUESTION_MAP.forEach(function (code) {
+    var btn = document.getElementById('nav-btn-' + code);
+    if (!btn) return;
+    
+    var campo = document.getElementById('campo-' + code);
+    var estaRespondida = false;
+    
+    if (campo) {
+      // Caso radio
+      var radioChecked = campo.querySelector('input[type=radio]:checked');
+      if (radioChecked) estaRespondida = true;
+      
+      // Caso check
+      var checkChecked = campo.querySelector('input[type=checkbox]:checked');
+      if (checkChecked) estaRespondida = true;
+
+      // Caso textarea/numero (PER205, CIN305, CIN304)
+      var textInput = campo.querySelector('textarea, input[type=number], input[type=text]');
+      if (textInput && textInput.value.trim()) estaRespondida = true;
+    }
+    
+    btn.classList.toggle('answered', estaRespondida);
+  });
 }
 
 // ---- NUMERACIÓN DE PREGUNTAS ----
@@ -114,6 +139,7 @@ function initNavPanel() {
   QUESTION_MAP.forEach(function (code, i) {
     var btn = document.createElement('button');
     btn.type = 'button';
+    btn.id = 'nav-btn-' + code;
     btn.className = 'nav-btn';
     btn.textContent = i + 1;
     btn.title = 'Pregunta ' + (i + 1) + ' — ' + code;
@@ -390,6 +416,7 @@ function initAll() {
   crearBloquesValido2024();
   initValido2024();
   initFollowUps();
+  actualizarProgreso();
 }
 document.addEventListener('DOMContentLoaded', initAll);
 if (document.readyState !== 'loading') initAll();
