@@ -40,7 +40,7 @@ function markSelected(radio) {
 function markCheck(cb) {
   const isNegative = NEGATIVE_VALUES.includes(cb.value);
   const group = cb.closest('.check-group') || cb.closest('.campo'); // fallback to campo if no check-group class
-  
+
   if (cb.checked) {
     if (isNegative) {
       // If "none" is checked, uncheck everything else
@@ -60,7 +60,7 @@ function markCheck(cb) {
       });
     }
   }
-  
+
   cb.closest('label').classList.toggle('selected', cb.checked);
   actualizarProgreso();
 }
@@ -88,15 +88,15 @@ function actualizarProgreso() {
   QUESTION_MAP.forEach(function (code) {
     var btn = document.getElementById('nav-btn-' + code);
     if (!btn) return;
-    
+
     var campo = document.getElementById('campo-' + code);
     var estaRespondida = false;
-    
+
     if (campo) {
       // Caso radio
       var radioChecked = campo.querySelector('input[type=radio]:checked');
       if (radioChecked) estaRespondida = true;
-      
+
       // Caso check
       var checkChecked = campo.querySelector('input[type=checkbox]:checked');
       if (checkChecked) estaRespondida = true;
@@ -105,7 +105,7 @@ function actualizarProgreso() {
       var textInput = campo.querySelector('textarea, input[type=number], input[type=text]');
       if (textInput && textInput.value.trim()) estaRespondida = true;
     }
-    
+
     btn.classList.toggle('answered', estaRespondida);
   });
 }
@@ -375,7 +375,7 @@ function recopilarDatos() {
     // Follow-ups
     var ansParts = ans.split(',');
     var sops = [];
-    ansParts.forEach(function(opt) {
+    ansParts.forEach(function (opt) {
       opt = opt.trim();
       if (!opt) return;
       var fuKey = code + '_fu_' + opt + '_sn';
@@ -396,7 +396,7 @@ function recopilarDatos() {
       var cJust = data[code + '_val2024_desc'] || data['val2024_' + code + '_desc'];
       res.push("Vs 2024: " + cLbl + (cJust ? " (" + cJust + ")" : ""));
     }
-    
+
     data[code + '_Resumen'] = res.join('\n');
   });
 
