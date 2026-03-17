@@ -38,6 +38,29 @@ function markSelected(radio) {
   actualizarProgreso();
 }
 function markCheck(cb) {
+  const isNegative = NEGATIVE_VALUES.includes(cb.value);
+  const group = cb.closest('.check-group') || cb.closest('.campo'); // fallback to campo if no check-group class
+  
+  if (cb.checked) {
+    if (isNegative) {
+      // If "none" is checked, uncheck everything else
+      group.querySelectorAll('input[type=checkbox]').forEach(el => {
+        if (el !== cb) {
+          el.checked = false;
+          el.closest('label').classList.remove('selected');
+        }
+      });
+    } else {
+      // If something else is checked, uncheck "none"
+      group.querySelectorAll('input[type=checkbox]').forEach(el => {
+        if (NEGATIVE_VALUES.includes(el.value)) {
+          el.checked = false;
+          el.closest('label').classList.remove('selected');
+        }
+      });
+    }
+  }
+  
   cb.closest('label').classList.toggle('selected', cb.checked);
   actualizarProgreso();
 }
@@ -111,13 +134,13 @@ function crearBloquesValido2024() {
     var block = document.createElement('div');
     block.className = 'bloque-valido-2024';
     block.style.display = 'none';
-    var rName = 'val2024_' + code;
+    var rName = code + '_val2024';
     block.innerHTML =
       '<div class="val2024-header">📋 Comparación con vigencia 2024</div>' +
       '<div class="val2024-options">' +
       '<label><input type="radio" name="' + rName + '" value="mejoro"> Sí mejoró</label>' +
-      '<label><input type="radio" name="' + rName + '" value="no_mejoro"> No mejoró</label>' +
       '<label><input type="radio" name="' + rName + '" value="sigue_igual"> Sigue igual</label>' +
+      '<label><input type="radio" name="' + rName + '" value="no_mejoro"> No mejoró</label>' +
       '</div>' +
       '<textarea class="val2024-desc" name="' + rName + '_desc" rows="2" placeholder="Descripción (opcional)"></textarea>';
     block.addEventListener('click', function (e) { e.stopPropagation(); });
@@ -150,7 +173,8 @@ function initFollowUps() {
     var isCheckGroup = group.classList.contains('check-group');
     var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
     inputs.forEach(function (inp) {
-      var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
+      var campoCode = (inp.name || inp.id);
+      var fuId = campoCode + '_fu_' + inp.value;
       if (document.getElementById(fuId)) return;
       var isNegative = NEGATIVE_VALUES.includes(inp.value.toLowerCase());
       var block = document.createElement('div');
@@ -188,7 +212,8 @@ function initFollowUps() {
 function actualizarVisibilidadFU(group) {
   var inputs = Array.from(group.querySelectorAll(':scope > label > input'));
   inputs.forEach(function (inp) {
-    var fuId = 'fu_' + (inp.name || inp.id) + '_' + inp.value;
+    var campoCode = (inp.name || inp.id);
+    var fuId = campoCode + '_fu_' + inp.value;
     var block = document.getElementById(fuId);
     if (!block) return;
     if (inp.checked) {
@@ -307,12 +332,48 @@ function recopilarDatos() {
   });
   // Collect 2024 validation data
   QUESTION_MAP.forEach(function (code) {
-    var rName = 'val2024_' + code;
+    var rName = code + '_val2024';
     var checked = document.querySelector('input[name="' + rName + '"]:checked');
     if (checked) data[rName] = checked.value;
     var desc = document.querySelector('textarea[name="' + rName + '_desc"]');
     if (desc && desc.value.trim()) data[rName + '_desc'] = desc.value.trim();
   });
+
+  // Construct readable Resumen for each question
+  QUESTION_MAP.forEach(function (code) {
+    if (!data[code]) return;
+    var res = [];
+    var ans = data[code];
+    res.push("Respuesta: " + ans);
+
+    // Follow-ups
+    var ansParts = ans.split(',');
+    var sops = [];
+    ansParts.forEach(function(opt) {
+      opt = opt.trim();
+      if (!opt) return;
+      var fuKey = code + '_fu_' + opt + '_sn';
+      if (!data[fuKey]) fuKey = 'fu_' + code + '_' + opt + '_sn'; // fallback
+      var fuVal = data[fuKey];
+      if (fuVal) {
+        var lbl = (fuVal === 'si') ? '✅ Sí' : (fuVal === 'parcial' ? '⚠️ Parcialmente' : '❌ No');
+        var just = data[code + '_fu_' + opt + '_desc'] || data['fu_' + code + '_' + opt + '_desc'];
+        sops.push(opt + " -> " + lbl + (just ? " (" + just + ")" : ""));
+      }
+    });
+    if (sops.length > 0) res.push("Soportes:\n  " + sops.join('\n  '));
+
+    // 2024
+    var compVal = data[code + '_val2024'] || data['val2024_' + code];
+    if (compVal) {
+      var cLbl = (compVal === 'mejoro') ? '📈 Mejoró' : (compVal === 'sigue_igual' ? '⚖️ Sigue Igual' : '📉 No Mejoró');
+      var cJust = data[code + '_val2024_desc'] || data['val2024_' + code + '_desc'];
+      res.push("Vs 2024: " + cLbl + (cJust ? " (" + cJust + ")" : ""));
+    }
+    
+    data[code + '_Resumen'] = res.join('\n');
+  });
+
   return data;
 }
 

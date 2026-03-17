@@ -96,10 +96,6 @@
     <div class="sec-header">📈 Visualización de avance</div>
     <div class="charts-grid">
       <div class="chart-card">
-        <h3>🏆 Top entidades con mayor avance</h3>
-        <div class="chart-wrap"><canvas id="ch-top"></canvas></div>
-      </div>
-      <div class="chart-card">
         <h3>⚠️ Entidades que necesitan atención</h3>
         <div class="chart-wrap"><canvas id="ch-bottom"></canvas></div>
       </div>
@@ -112,12 +108,22 @@
         <div class="chart-wrap"><canvas id="ch-cats"></canvas></div>
       </div>
       <div class="chart-card">
-        <h3>🎯 Estado de Soportes (Global)</h3>
-        <div class="chart-wrap"><canvas id="ch-soportes"></canvas></div>
-      </div>
-      <div class="chart-card">
         <h3>🔄 Validación frente a 2024 (Global)</h3>
         <div class="chart-wrap"><canvas id="ch-2024"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>🧭 Avance Promedio MIPG</h3>
+        <div class="chart-wrap" style="position:relative">
+          <canvas id="ch-gauge-mipg"></canvas>
+          <div id="gauge-mipg-val" style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:var(--primary)">0%</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>⚓ Avance Promedio MECI</h3>
+        <div class="chart-wrap" style="position:relative">
+          <canvas id="ch-gauge-meci"></canvas>
+          <div id="gauge-meci-val" style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-size:1.5rem;font-weight:800;color:var(--primary)">0%</div>
+        </div>
       </div>
     </div>
 
@@ -308,7 +314,7 @@
       "CIN240": { "label": "Componentes plan anual", "tipo": "check", "max_opts": 6, "peso": 2 },
       "CIN241": { "label": "Fases de auditoría", "tipo": "check", "max_opts": 4, "peso": 2 },
       "CIN242": { "label": "Aspectos auditoras programadas", "tipo": "check", "max_opts": 7, "peso": 2 },
-      "CIN243": { "label": "Ejecución plan anual", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0.25 }, "peso": 3 },
+      "CIN243": { "label": "Ejecución plan anual", "tipo": "radio", "opciones": { "a": 1, "b": 0.75, "c": 0 }, "peso": 3 },
       "CIN244": { "label": "Universo de auditoría", "tipo": "check", "max_opts": 3, "no_score": ["d"], "peso": 2 },
       "CIN246": { "label": "Acciones eval. SCI", "tipo": "check", "max_opts": 3, "no_score": ["d"], "peso": 2 },
       "CIN247": { "label": "Alcance plan auditoras", "tipo": "check", "max_opts": 10, "peso": 2 },
@@ -338,7 +344,7 @@
 
         let localPts = 0;
         if (cfg.tipo === 'radio') {
-          const fuSn = r['fu_' + campo + '_' + val + '_sn'];
+          const fuSn = r[campo + '_fu_' + val + '_sn'] || r['fu_' + campo + '_' + val + '_sn'];
           if (fuSn === 'si') { localPts = 1.0; totalSi++; }
           else if (fuSn === 'parcial') { localPts = 0.5; totalPar++; }
           else { localPts = 0.0; totalNo++; }
@@ -353,7 +359,7 @@
             if (cfg.ninguna_ok) totalSi++; else totalNo++;
           } else {
             opts.forEach(opt => {
-              const fuSn = r['fu_' + campo + '_' + opt + '_sn'];
+              const fuSn = r[campo + '_fu_' + opt + '_sn'] || r['fu_' + campo + '_' + opt + '_sn'];
               if (fuSn === 'si') { optsScore += 1.0; totalSi++; }
               else if (fuSn === 'parcial') { optsScore += 0.5; totalPar++; }
               else { totalNo++; }
@@ -368,9 +374,10 @@
         score += localPts * cfg.peso;
         detalle[campo] = Math.round(localPts * 100) / 100;
 
-        if (r['val2024_' + campo] === 'mejoro') totalMejoro++;
-        else if (r['val2024_' + campo] === 'sigue_igual') totalIgual++;
-        else if (r['val2024_' + campo] === 'no_mejoro') totalNoMejoro++;
+        const val2024 = r[campo + '_val2024'] || r['val2024_' + campo];
+        if (val2024 === 'mejoro') totalMejoro++;
+        else if (val2024 === 'sigue_igual') totalIgual++;
+        else if (val2024 === 'no_mejoro') totalNoMejoro++;
       }
       const pct = maxScore > 0 ? Math.round(score / maxScore * 1000) / 10 : 0;
       return { pct, detalle, stats: { totalSi, totalPar, totalNo, totalMejoro, totalIgual, totalNoMejoro } };
@@ -393,21 +400,21 @@
 
         let localPts = 0;
         if (cfg.tipo === 'radio') {
-          const fuSn = r['fu_' + c + '_' + val + '_sn'];
+          const fuSn = r[c + '_fu_' + val + '_sn'] || r['fu_' + c + '_' + val + '_sn'];
           if (fuSn === 'si') localPts = 1.0;
           else if (fuSn === 'parcial') localPts = 0.5;
           else localPts = 0.0;
         } else if (cfg.tipo === 'check') {
           const partes = val.split(',').map(o => o.trim()).filter(Boolean);
-          const tieneNinguna = partes.includes('ninguna');
+          const tieneNinguna = partes.includes('ninguna') || partes.includes('ninguno');
           const noScore = cfg.no_score || [];
-          const opts = partes.filter(o => o !== 'ninguna' && !noScore.includes(o));
+          const opts = partes.filter(o => o !== 'ninguna' && o !== 'ninguno' && !noScore.includes(o));
           let optsScore = 0;
           if (tieneNinguna && opts.length === 0) {
             localPts = cfg.ninguna_ok ? 1 : 0;
           } else {
             opts.forEach(opt => {
-              const fuSn = r['fu_' + c + '_' + opt + '_sn'];
+              const fuSn = r[c + '_fu_' + opt + '_sn'] || r['fu_' + c + '_' + opt + '_sn'];
               if (fuSn === 'si') optsScore += 1.0;
               else if (fuSn === 'parcial') optsScore += 0.5;
             });
@@ -541,8 +548,6 @@
 
     function renderCharts() {
       if (!filtData.length) return;
-      const top8 = [...filtData].sort((a, b) => b._pct - a._pct).slice(0, 8);
-      mkChart('ch-top', 'bar', top8.map(r => (r.entidad_nombre || '').substring(0, 22) + '…'), [{ data: top8.map(r => r._pct), backgroundColor: top8.map(r => r._pct >= 75 ? '#27ae60' : r._pct >= 50 ? '#e67e22' : '#e74c3c'), borderRadius: 6 }], { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, y: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } });
       const bot8 = [...filtData].sort((a, b) => a._pct - b._pct).slice(0, 8);
       mkChart('ch-bottom', 'bar', bot8.map(r => (r.entidad_nombre || '').substring(0, 22) + '…'), [{ data: bot8.map(r => r._pct), backgroundColor: bot8.map(r => r._pct < 25 ? '#c0392b' : r._pct < 50 ? '#e74c3c' : '#e67e22'), borderRadius: 6 }], { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } }, y: { ticks: { font: { size: 10 } } } }, plugins: { legend: { display: false } } });
       const niv = { '🟢 Alto (≥75%)': filtData.filter(r => r._pct >= 75).length, '🟡 Medio (50–74%)': filtData.filter(r => r._pct >= 50 && r._pct < 75).length, '🔴 Bajo (25–49%)': filtData.filter(r => r._pct >= 25 && r._pct < 50).length, '⚫ Crítico (<25%)': filtData.filter(r => r._pct < 25).length };
@@ -558,8 +563,34 @@
           globMejoro += r._stats.totalMejoro; globIgual += r._stats.totalIgual; globNoMejoro += r._stats.totalNoMejoro;
         }
       });
-      mkChart('ch-soportes', 'pie', ['✅ Sí (100 pts)', '⚠️ Parcialmente (50 pts)', '❌ No (0 pts)'], [{ data: [globSi, globPar, globNo], backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'] }]);
       mkChart('ch-2024', 'doughnut', ['📈 Mejoró', '⚖️ Sigue Igual', '📉 No Mejoró'], [{ data: [globMejoro, globIgual, globNoMejoro], backgroundColor: ['#27ae60', '#f1c40f', '#e74c3c'] }]);
+
+      // --- NUEVO: GAUGES (ACELERÓMETROS) ---
+      const validMipg = filtData.map(r => parseFloat(r.avance_mipg)).filter(v => !isNaN(v));
+      const avgMipg = validMipg.length ? Math.round(validMipg.reduce((a, b) => a + b, 0) / validMipg.length * 10) / 10 : 0;
+      renderGauge('ch-gauge-mipg', 'gauge-mipg-val', avgMipg);
+
+      const validMeci = filtData.map(r => parseFloat(r.avance_meci)).filter(v => !isNaN(v));
+      const avgMeci = validMeci.length ? Math.round(validMeci.reduce((a, b) => a + b, 0) / validMeci.length * 10) / 10 : 0;
+      renderGauge('ch-gauge-meci', 'gauge-meci-val', avgMeci);
+    }
+
+    function renderGauge(id, valId, value) {
+      document.getElementById(valId).textContent = value + '%';
+      const color = value >= 75 ? '#27ae60' : value >= 50 ? '#e67e22' : '#e74c3c';
+      mkChart(id, 'doughnut', ['', ''], [
+        {
+          data: [value, 100 - value],
+          backgroundColor: [color, '#f0f2f5'],
+          borderWidth: 0,
+          circumference: 180,
+          rotation: 270,
+          cutout: '80%'
+        }
+      ], {
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        aspectRatio: 1.8
+      });
     }
 
     function renderCats() {
@@ -582,10 +613,20 @@
         return `<div class="detalle-item"><div class="d-label">${cat}</div><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div class="cat-bar-bg" style="flex:1"><div class="cat-bar-f" style="width:${pct}%;background:${bar}"></div></div><strong style="color:${bar}">${pct}%</strong></div></div>`;
       }).join('');
       document.getElementById('modal-body').innerHTML = `
-        <div style="margin-bottom:14px;padding:12px;background:#f9fbff;border-radius:10px;font-size:.82rem">
-          <strong>Tipo:</strong> ${r.tipo_entidad || '—'} &nbsp;|&nbsp; <strong>Vigencia:</strong> ${r.entidad_vigencia || '—'} &nbsp;|&nbsp;
-          <strong>Responsable:</strong> ${r.responsable_nombre || '—'} (${r.responsable_cargo || '—'}) &nbsp;|&nbsp;
-          <strong>Fecha:</strong> ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}
+        <div style="margin-bottom:14px;padding:12px;background:#f9fbff;border-radius:10px;font-size:.82rem;line-height:1.6">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <div><strong>Tipo:</strong> ${r.tipo_entidad || '—'}</div>
+            <div><strong>Vigencia:</strong> ${r.entidad_vigencia || '—'}</div>
+            <div><strong>Responsable:</strong> ${r.responsable_nombre || '—'}</div>
+            <div><strong>Cédula:</strong> ${r.responsable_cedula || '—'}</div>
+            <div><strong>Cargo:</strong> ${r.responsable_cargo || '—'}</div>
+            <div><strong>Facilitador:</strong> ${r.facilitador_nombre || '—'}</div>
+          </div>
+          <div style="margin-top:8px; display:flex; gap:16px; color:var(--primary); font-weight:700;">
+            <span>🧭 MIPG: ${r.avance_mipg || 0}%</span>
+            <span>⚓ MECI: ${r.avance_meci || 0}%</span>
+          </div>
+          <div style="margin-top:4px; font-size:0.75rem; color:var(--muted)">Fecha envío: ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
             <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;box-shadow:0 2px 4px rgba(0,0,0,0.03)">
@@ -607,6 +648,53 @@
           <ul style="margin-top:6px;padding-left:18px;font-size:.8rem;color:#444">
             ${Object.keys(CATEGORIAS).filter(c => calcCategoria(r, CATEGORIAS[c]) < 50).map(c => `<li><strong>${c}</strong> — ${calcCategoria(r, CATEGORIAS[c])}%</li>`).join('') || '<li>✅ Todas las categorías superan el 50%</li>'}
           </ul>
+        </div>
+        
+        <div style="margin-top:16px;text-align:center">
+          <button class="btn btn-w" style="font-size:.8rem;padding:8px 16px" onclick="const el=document.getElementById('det-preg-${idx}'); el.style.display = el.style.display === 'none' ? 'block' : 'none'">📄 Ver Respuestas Detalladas y Soportes</button>
+        </div>
+        <div id="det-preg-${idx}" style="display:none; margin-top:12px; max-height: 280px; overflow-y: auto; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: left;">
+          ${Object.keys(PREGUNTAS).map(c => {
+             const ans = (r[c] || '').toString().trim();
+             if (!ans) return '';
+             
+             let detalleHtml = '';
+             const resStr = r[c + '_Resumen'];
+
+             if (resStr) {
+               detalleHtml = `<div style="white-space:pre-wrap; font-size:0.75rem; color:#444; line-height:1.5">${resStr}</div>`;
+             } else {
+               // Fallback: Compute detail locally if _Resumen is missing from old sheet data
+               const cfg = PREGUNTAS[c];
+               detalleHtml += `<div style="font-size:0.75rem; color:#444;">Respuesta: <b>${ans}</b></div>`;
+               
+               if (cfg && (cfg.tipo === 'radio' || cfg.tipo === 'check')) {
+                 const partes = ans.split(',').map(o => o.trim()).filter(Boolean);
+                 const sopsArr = [];
+                 partes.forEach(opt => {
+                   const fuSn = r[c + '_fu_' + opt + '_sn'] || r['fu_' + c + '_' + opt + '_sn'];
+                   if (fuSn) {
+                     const lbl = fuSn==='si'?'✅ Sí':(fuSn==='parcial'?'⚠️ Parcialmente':'❌ No');
+                     const just = r[c + '_fu_' + opt + '_desc'] || r['fu_' + c + '_' + opt + '_desc'];
+                     sopsArr.push(`<b>Opción ${opt.toUpperCase()}</b>: ${lbl}` + (just ? ` <i style="color:#777">("${just}")</i>` : ''));
+                   }
+                 });
+                 if (sopsArr.length > 0) detalleHtml += `<div style="margin-top:4px; font-size:0.75rem; color:#444;"><b>Soportes:</b><br> - ${sopsArr.join('<br> - ')}</div>`;
+               }
+
+               const val2024 = r[c + '_val2024'] || r['val2024_' + c];
+               if (val2024) {
+                 const cLbl = val2024==='mejoro'?'📈 Mejoró':(val2024==='sigue_igual'?'⚖️ Sigue Igual':'📉 No Mejoró');
+                 const cJust = r[c + '_val2024_desc'] || r['val2024_' + c + '_desc'];
+                 detalleHtml += `<div style="margin-top:4px; font-size:0.75rem; color:#444;"><b>Vs 2024:</b> ${cLbl}` + (cJust ? ` <i style="color:#777">("${cJust}")</i>` : '') + `</div>`;
+               }
+             }
+
+             return `<div style="margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #eee;">
+                        <div style="font-weight:700; color:var(--primary); font-size:0.8rem; margin-bottom:4px;">Pregunta ${c}</div>
+                        ${detalleHtml}
+                     </div>`;
+          }).join('')}
         </div>`;
       document.getElementById('modal').classList.add('visible');
     }
@@ -638,14 +726,32 @@
     // ── MAPA LEGIBLE DE RESPUESTAS ──
     const PREG_LEGIBLE = { "PER201": { "label": "¿El MECI ha generado valor agregado a la gestión?", "opciones": { "si": "✅ Sí", "no": "❌ No" } }, "CIN203": { "label": "Política de integridad — el JCI verificó que la entidad:", "opts": { "a": "Implementa estrategia del código de integridad", "b": "Cuenta con protocolo para conflictos de interés", "c": "Gestiona los conflictos de interés", "d": "Mantiene actualizada la información en SIGEP", "e": "Garantiza registro Ley 2013/Decreto 830", "ninguna": "No cumple ninguna condición" } }, "CIN206": { "label": "Talento Humano — el JCI verificó:", "opts": { "a": "Plan Estratégico de Talento Humano publicado", "b": "Articuló planes del Decreto 612", "c": "Actividades de capacitación", "d": "Actividades de bienestar e incentivos", "e": "Clima, convivencia y relaciones laborales", "f": "Actualización y gestión en SIGEP", "g": "Otros", "ninguna": "No hace seguimiento al talento humano" } }, "CIN207": { "label": "Planeación y Riesgos — el JCI verificó:", "opts": { "a": "Objetivos claros, cumplibles y medibles", "b": "Responsables, metas y tiempos definidos", "c": "Política de gestión integral de riesgos", "d": "Monitoreos a la gestión integral del riesgo", "e": "Monitorea cumplimiento de metas y objetivos", "f": "Seguimiento a ejecución presupuestal", "g": "Otras actividades de revisión", "ninguna": "No lleva a cabo actividades de revisión" } }, "CIN221": { "label": "Gestión integral de riesgos (3ª línea):", "opciones": { "a": "✅ Gestión integral con evidencias", "b": "⚠️ Gestión parcial con evidencias", "c": "❌ No realiza gestión de riesgos" } }, "CIN222": { "label": "Evaluación riesgo/control (3ª línea):", "opts": { "a": "Se pronunció sobre diseño de controles", "b": "Emitió comentarios sobre implementación", "c": "Contrastó eventos de materialización", "d": "Otra acción", "ninguna": "Ninguna" } }, "CIN233": { "label": "Evaluación gestión de información (3ª línea):", "opciones": { "a": "✅ Evaluó con evidencias completas", "b": "⚠️ Evaluación parcial con evidencias", "c": "❌ No evaluó la gestión de información" } }, "CIN234": { "label": "Hallazgos de gestión de información:", "opciones": { "a": "✅ Identificados y comunicados al comité/RL", "b": "⚠️ Identificados pero NO comunicados", "c": "❌ Ni identificados ni comunicados" } }, "CIN236": { "label": "Informes contables entregados oportunamente:", "opciones": { "siempre": "✅ Siempre", "mayoria": "⚠️ La mayoría de las veces", "pocas": "🔴 Pocas veces", "nunca": "❌ Nunca" } }, "CIN238": { "label": "Metodología del proceso auditor:", "opciones": { "a": "✅ Con metodología/lineamientos definidos", "b": "⚠️ Con plan de trabajo dada su capacidad", "c": "🔴 Solo seguimientos puntuales", "d": "❌ No lleva a cabo auditoría interna" } }, "CIN239": { "label": "Plan anual de auditorías:", "opciones": { "a": "✅ Sí, aprobado por el Comité", "b": "⚠️ Sí definido, pero no aprobado", "c": "❌ No fue definido" } }, "CIN240": { "label": "Componentes incluidos en el plan anual:", "opts": { "a": "Acciones vinculadas a roles del JCI", "b": "Objetivo alineado con planeación estratégica", "c": "Universo de auditoría considerado", "d": "Priorización de procesos según riesgos", "e": "Programación de informes de ley", "f": "Enfoque de auditorías basadas en riesgos", "ninguna": "Ninguno de los componentes" } }, "CIN241": { "label": "Fases del proceso auditor aplicadas:", "opts": { "a": "Planeación de cada auditoría basada en riesgos", "b": "Ejecución del trabajo de auditoría", "c": "Comunicación de resultados (informe)", "d": "Seguimiento a planes de mejoramiento", "ninguna": "Ninguna fase aplicada" } }, "CIN242": { "label": "Aspectos considerados en auditorías programadas:", "opts": { "a": "Unidades auditables del universo", "b": "Nivel de riesgo inherente", "c": "Recurrencia de hallazgos", "d": "Solicitudes de la alta dirección", "e": "Fecha de la última auditoría", "f": "Resultados de indicadores de gestión", "g": "Impacto en objetivos estratégicos", "ninguna": "Ninguno" } }, "CIN243": { "label": "Ejecución del programa anual de auditorías:", "opciones": { "a": "✅ 90–100% ejecutado", "b": "⚠️ 60–89% ejecutado", "c": "🔴 Menos del 60% ejecutado" } }, "CIN244": { "label": "Universo de auditoría — unidades consideradas:", "opts": { "a": "Procesos estratégicos", "b": "Procesos misionales", "c": "Procesos de apoyo", "d": "Otras unidades", "ninguna": "Ninguna" } }, "CIN246": { "label": "Acciones para evaluar el SCI:", "opts": { "a": "Presentó informes en instancias de CI", "b": "Analizó resultados de autoevaluaciones", "c": "Examinó progresos en planes de mejoramiento", "d": "Desarrolló otras acciones", "ninguna": "Ninguna acción" } }, "CIN247": { "label": "Alcance del plan anual de auditorías:", "opts": { "a": "Supervisión ejecución presupuestal", "b": "Seguimiento talento humano", "c": "Verificó política de gestión de riesgos", "d": "Evaluó efectividad de controles", "e": "Analizó eficacia de planes de mejora", "f": "Auditorías MSPI (seguridad información)", "g": "Auditorías accesibilidad web NTC 5854", "h": "Auditorías de gestión NTC 6047", "i": "Otros sistemas de gestión (SST, salud, etc.)", "j": "Oportunidad de info a organismos de control", "ninguna": "Ninguna" } }, "CIN252": { "label": "Aspectos de planeación en cada auditoría:", "opts": { "a": "Objetivo de la auditoría definido", "b": "Alcance de la auditoría definido", "c": "Consideraciones sobre recursos necesarios", "d": "Programa para el desarrollo de la auditoría", "ninguna": "No se adelantan acciones de planeación" } }, "CIN253": { "label": "Herramientas y actividades de ejecución aplicadas:", "opts": { "a": "Carta de representación firmada", "b": "Carta de compromiso al auditado", "c": "Reunión inicial con líder del proceso", "d": "Procedimientos del programa documentados", "e": "Pruebas y verificaciones de información", "f": "Papeles de trabajo documentados", "g": "Mesas de trabajo para resultados preliminares", "h": "Reunión de cierre con líder del proceso", "ninguna": "Ninguna herramienta aplicada" } }, "CIN254": { "label": "Características de los informes de auditoría:", "opts": { "a": "Estructura ejecutiva para publicación web", "b": "Estructura detallada para auditados", "c": "Análisis del cumplimiento del objetivo", "d": "Análisis del cumplimiento del alcance", "e": "Resumen con títulos de hallazgos", "f": "Recomendaciones y conclusiones", "ninguna": "Ninguna característica" } }, "CIN255": { "label": "Seguimiento a planes de mejoramiento:", "opciones": { "a": "✅ Sí, con herramienta formal y evidencias", "b": "⚠️ Se hace seguimiento sin herramienta formal", "c": "❌ No se adelanta seguimiento" } }, "CIN264": { "label": "Estructura del área de Control Interno:", "opciones": { "a": "✅ Oficina con jefe y equipo de trabajo", "b": "✅ Grupo interno con jefe y equipo", "c": "⚠️ Solo jefe, sin equipo de trabajo", "d": "⚠️ Delegada en otro funcionario", "e": "❌ No cuenta con área de CI" } }, "CIN268": { "label": "Tipo de vinculación del Jefe de CI:", "opciones": { "periodo": "Período fijo", "libre": "Libre nombramiento y remoción", "carrera": "Carrera administrativa", "provisional": "Provisional", "temporal": "Temporal", "otro": "Otro tipo de vinculación" } }, "CIN305": { "label": "Total de trabajadores en el área de CI:", "tipo_disp": "numero" }, "CIN306": { "label": "Se generaron alertas sobre política de integridad:", "opciones": { "si": "✅ Sí", "no": "❌ No", "na": "✅ No aplica" } }, "CIN300": { "label": "Control de gestión de la información — el JCI verificó:", "opts": { "a": "Política de seguridad de la información", "b": "Clasificación y etiquetado de información", "c": "Gestión de incidentes de seguridad", "d": "Control de acceso a sistemas", "e": "Cifrado de datos sensibles", "f": "Respaldos/backups de información", "g": "Otros controles", "ninguna": "Ningún control verificado" } }, "CIN301": { "label": "Razones de incumplimiento del plan anual:", "opts": { "a": "Falta de personal en el área", "b": "Falta de recursos económicos", "c": "Cambios estructurales en la entidad", "d": "Prioridades redefinidas por la dirección", "e": "Falta de acceso a información", "f": "Otras razones", "ninguna": "✅ Sin razones — plan cumplido al 100%" } } };
 
-    function etiquetaResp(campo, val) {
+    function etiquetaResp(campo, val, r) {
       const cfg = PREG_LEGIBLE[campo];
       if (!cfg) return val;
-      if (cfg.opciones && cfg.opciones[val.toLowerCase()]) return cfg.opciones[val.toLowerCase()];
+
+      function extractSoportes(optCode, labelDef) {
+         let sub = ``;
+         const fuSn = r[campo + '_fu_' + optCode + '_sn'] || r['fu_' + campo + '_' + optCode + '_sn'];
+         if (fuSn) {
+            const lbl = fuSn==='si'?'✅ Sí':(fuSn==='parcial'?'⚠️ Parcialmente':'❌ No');
+            const just = (r[campo + '_fu_' + optCode + '_desc'] || r['fu_' + campo + '_' + optCode + '_desc']) ?? '';
+            sub = ` <div style="margin-left:14px; font-size:0.75rem; color:#555; margin-top:2px;">↳ ${lbl} <span style="font-style:italic; color:#777">${just ? `("${just}")` : ''}</span></div>`;
+         }
+         return labelDef + sub;
+      }
+
+      if (cfg.opciones && cfg.opciones[val.toLowerCase()]) {
+        return extractSoportes(val.toLowerCase(), cfg.opciones[val.toLowerCase()]);
+      }
+      
       if (cfg.opts) {
         const parts = val.split(',').map(v => v.trim()).filter(Boolean);
-        const etiquetas = parts.map(k => cfg.opts[k] || k);
-        return '• ' + etiquetas.join('<br>• ');
+        const labels = parts.map(k => {
+           const l = cfg.opts[k] || k;
+           return extractSoportes(k, `• ${l}`);
+        });
+        return labels.join('<br>'); // Usamos br directo porque extractSoportes mete block elements
       }
       return val;
     }
@@ -671,7 +777,30 @@
       badge.style.background = pct >= 75 ? 'var(--ok)' : pct >= 50 ? 'var(--warn)' : 'var(--err)';
       badge.textContent = sem + ' Avance total: ' + pct + '%';
 
-      lista.innerHTML = Object.entries(PREGUNTAS).map(([campo, cfg]) => {
+      // --- BLOQUE DATOS BÁSICOS ---
+      let basicHtml = `
+        <div class="preg-item" style="border-left: 4px solid var(--p); background: #f8fafc; margin-bottom: 24px;">
+          <div class="preg-meta"><span class="preg-codigo">DATOS SEGUIMIENTO</span></div>
+          <div class="preg-label" style="font-size:1.1rem; margin-bottom:12px;">👤 Información de la Entidad y Responsable</div>
+          <div class="preg-resp" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:0.85rem;">
+            <div><strong>Responsable:</strong> ${r.responsable_nombre || '—'}</div>
+            <div><strong>Cargo:</strong> ${r.responsable_cargo || '—'}</div>
+            <div><strong>Cédula:</strong> ${r.responsable_cedula || '—'}</div>
+            <div><strong>Correo:</strong> ${r.responsable_correo || '—'}</div>
+            <div><strong>Entidad:</strong> ${r.entidad_nombre || '—'}</div>
+            <div><strong>Tipo:</strong> ${r.tipo_entidad || '—'}</div>
+            <div><strong>Vigencia:</strong> ${r.entidad_vigencia || '—'}</div>
+            <div><strong>Facilitador:</strong> ${r.facilitador_nombre || '—'}</div>
+            <div style="grid-column: span 2; margin-top:8px; padding-top:8px; border-top: 1px solid #e2e8f0; display:flex; gap:20px;">
+               <span>🧭 <strong>Avance MIPG:</strong> ${r.avance_mipg || 0}%</span>
+               <span>⚓ <strong>Avance MECI:</strong> ${r.avance_meci || 0}%</span>
+            </div>
+          </div>
+        </div>
+        <div style="height:1px; background:#e2e8f0; margin: 20px 0;"></div>
+      `;
+
+      lista.innerHTML = basicHtml + Object.entries(PREGUNTAS).map(([campo, cfg]) => {
         const val = (r[campo] || '').toString().trim();
         const pts = detalle[campo] ?? 0;
         const pctP = Math.round(pts * 100);
@@ -686,29 +815,17 @@
         } else if (cfg.tipo === 'numero') {
           respHtml = '<span class="preg-score-badge">' + icon + ' ' + pctP + '%</span>' + val + ' trabajador(es)';
         } else {
-          respHtml = '<span class="preg-score-badge">' + icon + ' ' + pctP + '%</span>' + etiquetaResp(campo, val);
+          // El _Resumen agrupa todo bonito, pero para las tarjetas usamos la legibilidad enriquecida.
+          respHtml = '<span class="preg-score-badge">' + icon + ' ' + pctP + '%</span>' + etiquetaResp(campo, val, r);
 
-          // --- NUEVO: Verificaciones adicionales (fu_) ---
-          const isCheck = cfg.tipo === 'check';
-          const values = (val.split(',') || []).map(v => v.trim()).filter(Boolean);
-
-          let fuHtml = '';
-          values.forEach(v => {
-            const fuId = `fu_${campo}_${v}`;
-            const sn = r[fuId + '_sn'];
-            const just = r[fuId + '_just'];
-
-            if (sn || just) {
-              const label = isCheck ? `Verificación (${v}):` : 'Verificación:';
-              const snText = sn === 'si' ? '<span style="color:#27ae60;font-weight:800">✅ Sí</span>' : (sn === 'no' ? '<span style="color:#e74c3c;font-weight:800">❌ No</span>' : '');
-
-              fuHtml += `<div class="fu-box" style="margin-top:8px;padding:8px;background:#fff;border-radius:6px;border-left:4px solid #3498db;font-size:.8rem">
-                <div style="font-weight:700;margin-bottom:4px">${label} ${snText}</div>
-                ${just ? `<div style="font-style:italic;color:#555">"${just}"</div>` : ''}
-              </div>`;
-            }
-          });
-          if (fuHtml) respHtml += fuHtml;
+          const val2024 = r[campo + '_val2024'] || r['val2024_' + campo];
+          if (val2024) {
+             const cLbl = val2024==='mejoro'?'📈 Mejoró':(val2024==='sigue_igual'?'⚖️ Sigue Igual':'📉 No Mejoró');
+             const cJust = r[campo + '_val2024_desc'] || r['val2024_' + campo + '_desc'] || '';
+             respHtml += `<div style="margin-top:10px; padding-top:8px; border-top:1px dashed #cdd7e8; font-size:0.78rem; font-weight:600; color:var(--primary);">
+                            Frente a 2024: <span style="font-weight:700">${cLbl}</span> <span style="font-style:italic; font-weight:400; color:#666">${cJust ? `("${cJust}")` : ''}</span>
+                         </div>`;
+          }
         }
 
         return '<div class="preg-item">' +
@@ -724,10 +841,10 @@
 
     function datosDemo() {
       const ents = [
-        { n: 'Hospital San Rafael Facatativá', t: 'ESES', CIN203: 'a,b,c,d', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', CIN207: 'a,b,c,d,e', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d', CIN240: 'a,b,c,d', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e', CIN254: 'a,b,c', CIN246: 'a,b,c', CIN306: 'si', CIN305: '3', CIN242: 'a,b,c,d', CIN244: 'a,b,c', CIN252: 'a,b,c,d', CIN268: 'periodo', CIN301: 'ninguna' },
-        { n: 'Alcaldía de Cáqueza', t: 'MUNICIPIO', CIN203: 'a,b', CIN221: 'b', CIN238: 'b', CIN239: 'b', CIN243: 'b', CIN255: 'b', CIN264: 'b', PER201: 'si', CIN207: 'a,b', CIN233: 'b', CIN234: 'a', CIN236: 'mayoria', CIN300: 'a,b', CIN240: 'a,b,c', CIN241: 'a,b', CIN253: 'a,b,c', CIN254: 'a,b', CIN246: 'a,b', CIN306: 'si', CIN305: '1', CIN242: 'a,b', CIN244: 'a,b', CIN252: 'a,b', CIN268: 'libre', CIN301: 'a' },
-        { n: 'Agencia Catastral de Cundinamarca', t: 'DESCENTRALIZADA', CIN203: 'a,b,c,d,e', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', CIN207: 'a,b,c,d,e,f', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d,e,f', CIN240: 'a,b,c,d,e', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e,f', CIN254: 'a,b,c,d,e', CIN246: 'a,b,c,d', CIN306: 'si', CIN305: '5', CIN242: 'a,b,c,d,e', CIN244: 'a,b,c', CIN252: 'a,b,c,d', CIN268: 'periodo', CIN301: 'ninguna' },
-        { n: 'ESE Hospital Santa Rosa Tenjo', t: 'ESES', CIN203: 'a', CIN221: 'c', CIN238: 'c', CIN239: 'c', CIN243: 'c', CIN255: 'c', CIN264: 'c', PER201: 'no', CIN207: 'a', CIN233: 'c', CIN234: 'c', CIN236: 'pocas', CIN300: 'a', CIN240: 'a', CIN241: 'a', CIN253: 'a', CIN254: 'a', CIN246: 'ninguna', CIN306: 'no', CIN305: '1', CIN242: 'a', CIN244: 'a', CIN252: 'a', CIN268: 'provisional', CIN301: 'a,b' },
+        { n: 'Hospital San Rafael Facatativá', t: 'ESES', avance_mipg: 88.5, avance_meci: 82.1, CIN203: 'a,b,c,d', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', val2024_PER201: 'mejoro', val2024_PER201_desc: 'Mejor percepción este año', CIN207: 'a,b,c,d,e', val2024_CIN207: 'sigue_igual', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d', CIN240: 'a,b,c,d', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e', CIN254: 'a,b,c', CIN246: 'a,b,c', CIN306: 'si', CIN305: '3', CIN242: 'a,b,c,d', CIN244: 'a,b,c', CIN252: 'a,b,c,d', CIN268: 'periodo', CIN301: 'ninguna' },
+        { n: 'Alcaldía de Cáqueza', t: 'MUNICIPIO', avance_mipg: 72.4, avance_meci: 65.0, CIN203: 'a,b', CIN221: 'b', CIN238: 'b', CIN239: 'b', CIN243: 'b', CIN255: 'b', CIN264: 'b', PER201: 'si', CIN207: 'a,b', CIN233: 'b', CIN234: 'a', CIN236: 'mayoria', CIN300: 'a,b', CIN240: 'a,b,c', CIN241: 'a,b', CIN253: 'a,b,c', CIN254: 'a,b', CIN246: 'a,b', CIN306: 'si', CIN305: '1', CIN242: 'a,b', CIN244: 'a,b', CIN252: 'a,b', CIN268: 'libre', CIN301: 'a' },
+        { n: 'Agencia Catastral de Cundinamarca', t: 'DESCENTRALIZADA', avance_mipg: 91.2, avance_meci: 89.4, CIN203: 'a,b,c,d,e', CIN203_val2024: 'mejoro', CIN221: 'a', CIN238: 'a', CIN239: 'a', CIN243: 'a', CIN255: 'a', CIN264: 'a', PER201: 'si', CIN207: 'a,b,c,d,e,f', CIN233: 'a', CIN234: 'a', CIN236: 'siempre', CIN300: 'a,b,c,d,e,f', CIN240: 'a,b,c,d,e', CIN241: 'a,b,c,d', CIN253: 'a,b,c,d,e,f', CIN254: 'a,b,c,d,e', CIN246: 'a,b,c,d', CIN306: 'si', CIN305: '5', CIN242: 'a,b,c,d,e', CIN244: 'a,b,c', CIN252: 'a,b,c,d', CIN268: 'periodo', CIN301: 'ninguna' },
+        { n: 'ESE Hospital Santa Rosa Tenjo', t: 'ESES', avance_mipg: 45.3, avance_meci: 38.9, CIN203: 'a', CIN221: 'c', CIN238: 'c', CIN239: 'c', CIN243: 'c', CIN255: 'c', CIN264: 'c', PER201: 'no', CIN207: 'a', CIN233: 'c', CIN234: 'c', CIN236: 'pocas', CIN300: 'a', CIN240: 'a', CIN241: 'a', CIN253: 'a', CIN254: 'a', CIN246: 'ninguna', CIN306: 'no', CIN305: '1', CIN242: 'a', CIN244: 'a', CIN252: 'a', CIN268: 'provisional', CIN301: 'a,b', val2024_CIN301: 'no_mejoro' },
         { n: 'Hospital San Vicente de Paul Fómeque', t: 'ESES', CIN203: 'a,b,c', CIN221: 'a', CIN238: 'b', CIN239: 'a', CIN243: 'b', CIN255: 'b', CIN264: 'b', PER201: 'si', CIN207: 'a,b,c', CIN233: 'b', CIN234: 'a', CIN236: 'mayoria', CIN300: 'a,b,c', CIN240: 'a,b,c', CIN241: 'a,b,c', CIN253: 'a,b,c,d', CIN254: 'a,b,c', CIN246: 'a,b', CIN306: 'na', CIN305: '2', CIN242: 'a,b,c', CIN244: 'a,b', CIN252: 'a,b,c', CIN268: 'carrera', CIN301: 'ninguna' },
         { n: 'Beneficencia de Cundinamarca', t: 'DESCENTRALIZADA', CIN203: 'ninguna', CIN221: 'c', CIN238: 'd', CIN239: 'c', CIN243: 'c', CIN255: 'c', CIN264: 'e', PER201: 'no', CIN207: 'ninguna', CIN233: 'c', CIN234: 'c', CIN236: 'nunca', CIN300: 'ninguna', CIN240: 'ninguna', CIN241: 'ninguna', CIN253: 'ninguna', CIN254: 'ninguna', CIN246: 'ninguna', CIN306: 'no', CIN305: '0', CIN242: 'ninguna', CIN244: 'ninguna', CIN252: 'ninguna', CIN268: 'temporal', CIN301: 'a,b,c' },
       ];

@@ -65,7 +65,9 @@
     function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     function rndBool(prob = 0.7) { return Math.random() < prob; }
     function rndOpts(opts, min = 1, max = 3) {
-      const shuffled = [...opts].sort(() => Math.random() - 0.5);
+      if (rndBool(0.2)) return 'ninguna'; // 20% prob of picking "none"
+      const filtered = opts.filter(o => o !== 'ninguna' && o !== 'ninguno');
+      const shuffled = [...filtered].sort(() => Math.random() - 0.5);
       const n = min + Math.floor(Math.random() * (max - min + 1));
       return shuffled.slice(0, n).join(',');
     }
@@ -77,15 +79,18 @@
       const entidad = rnd(entidades);
       const cedula = String(Math.floor(10000000 + Math.random() * 90000000));
 
-      return {
+      const data = {
         timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 3600000).toISOString(),
-        responsablenombre: nombre,
-        responsablecedula: cedula,
-        responsablecargo: rnd(CARGOS),
-        responsablecorreo: nombre.split(' ')[0].toLowerCase() + '@cundinamarca.gov.co',
+        responsable_nombre: nombre,
+        responsable_cedula: cedula,
+        responsable_cargo: rnd(CARGOS),
+        responsable_correo: nombre.split(' ')[0].toLowerCase() + '@cundinamarca.gov.co',
         tipo_entidad: tipo,
         entidad_nombre: entidad,
         entidad_vigencia: rnd(['2024', '2025']),
+
+        // Campo validación 2024
+        valido_2024: rnd(['si', 'no']),
 
         // Sección PER
         PER201: rndBool(0.75) ? 'si' : 'no',
@@ -93,8 +98,8 @@
 
         // Sección CIN
         CIN203: rndOpts(['a', 'b', 'c', 'd', 'e']),
-        CIN206: rndOpts(['a', 'b', 'c', 'd', 'e', 'f']),
-        CIN207: rndOpts(['a', 'b', 'c', 'd', 'e', 'f']),
+        CIN206: rndOpts(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+        CIN207: rndOpts(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
         CIN221: rnd(['a', 'b', 'c']),
         CIN222: rndOpts(['a', 'b', 'c', 'd']),
         CIN233: rnd(['a', 'b', 'c']),
@@ -104,35 +109,111 @@
         CIN239: rnd(['a', 'b', 'c']),
         CIN240: rndOpts(['a', 'b', 'c', 'd', 'e', 'f']),
         CIN241: rndOpts(['a', 'b', 'c', 'd']),
-        CIN242: rndOpts(['a', 'b', 'c', 'd', 'e']),
+        CIN242: rndOpts(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
         CIN243: rnd(['a', 'b', 'c']),
         CIN244: rndOpts(['a', 'b', 'c', 'd']),
         CIN246: rndOpts(['a', 'b', 'c', 'd']),
-        CIN247: rndOpts(['a', 'b', 'c', 'd', 'e', 'f']),
+        CIN247: rndOpts(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']),
         CIN252: rndOpts(['a', 'b', 'c', 'd']),
-        CIN253: rndOpts(['a', 'b', 'c', 'd', 'e', 'f']),
+        CIN253: rndOpts(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']),
         CIN254: rndOpts(['a', 'b', 'c', 'd', 'e', 'f']),
         CIN255: rnd(['a', 'b', 'c']),
         CIN264: rnd(['a', 'b', 'c', 'd', 'e']),
-        CIN268: rnd(['periodo', 'libre', 'carrera', 'provisional']),
+        CIN268: rnd(['periodo', 'libre', 'carrera', 'provisional', 'temporal', 'otro']),
         CIN269: rnd(['directivo', 'asesor', 'profesional', 'tecnico']),
         CIN270: rnd(['doctorado', 'maestria', 'especializacion', 'pregrado', 'tecnica']),
+        CIN271: rndOpts(['a', 'b', 'c', 'd']),
         CIN272: rnd(['1', '1-3', '4-6', '7-10', '11-20', '21']),
+        CIN273: rndOpts(['a', 'b', 'c', 'd', 'e']),
+        CIN274: rndOpts(['a', 'b', 'c', 'd', 'e']),
+        CIN275: rndOpts(['a', 'b', 'c', 'd', 'e']),
+        CIN276: rndOpts(['a', 'b', 'c', 'd']),
+        CIN287: rnd(['si', 'no']),
+        CIN288: rnd(['si', 'no']),
+        CIN289: rnd(['si', 'no']),
+        CIN290: rnd(['si', 'no']),
+        CIN300: rndOpts(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+        CIN301: rndOpts(['a', 'b', 'c', 'd', 'e', 'f']),
+        CIN304_a: String(Math.floor(Math.random() * 20)),
+        CIN304_b: String(Math.floor(Math.random() * 5)),
+        CIN304_c: String(Math.floor(Math.random() * 5)),
+        CIN304_d: String(Math.floor(Math.random() * 10)),
+        CIN304_e: String(Math.floor(Math.random() * 3)),
+        CIN304_f: String(Math.floor(Math.random() * 3)),
         CIN305: String(Math.floor(1 + Math.random() * 5)),
         CIN306: rnd(['si', 'no', 'na']),
-
-        // Campos fu_sn_ (Sí/No/No aplica por opción)
-        fu_sn_PER201_si: rnd(['si', 'no', 'na']),
-        fu_sn_CIN221_a: rnd(['si', 'no', 'na']),
-        fu_sn_CIN221_b: rnd(['si', 'no', 'na']),
-        fu_sn_CIN236_siempre: rnd(['si', 'no', 'na']),
-        fu_sn_CIN239_a: rnd(['si', 'no', 'na']),
-        fu_sn_CIN243_a: rnd(['si', 'no', 'na']),
-        fu_sn_CIN243_b: rnd(['si', 'no', 'na']),
-        fu_sn_CIN255_a: rnd(['si', 'no', 'na']),
-        fu_sn_CIN264_a: rnd(['si', 'no', 'na']),
-        fu_sn_CIN306_si: rnd(['si', 'no', 'na']),
+        
+        // --- NUEVO: AVANCES MIPG / MECI ---
+        avance_mipg: (Math.random() * 100).toFixed(1),
+        avance_meci: (Math.random() * 100).toFixed(1),
+        facilitador_nombre: rnd(["Ingrid Carolina Villamizar Meneses", "Leonardo Bernal Romero", "Elba Mercedes Parada Pedraza", "Karen Ginet Ortiz Godoy", "John Alexander Robles Osorio", "Leidy Johana Herrera Bernal"])
       };
+
+      // Generadores dinámicos de soportes (follow-ups) para campos CIN
+      // y también para 2024
+      const CIN_KEYS = ['CIN203','CIN206','CIN207','CIN221','CIN222','CIN233','CIN234','CIN236',
+        'CIN238','CIN239','CIN240','CIN241','CIN242','CIN243','CIN244','CIN246','CIN247','CIN252',
+        'CIN253','CIN254','CIN255','CIN264','CIN268','CIN269','CIN270','CIN271','CIN272','CIN273',
+        'CIN274','CIN275','CIN276','CIN287','CIN288','CIN289','CIN290','CIN300','CIN301','CIN306'];
+
+      CIN_KEYS.forEach(code => {
+        const val = data[code];
+        if (!val) return;
+
+        // Generar 2024 validation si queremos simular (70% prob)
+        if (rndBool(0.7)) {
+          data[code + '_val2024'] = rnd(['mejoro', 'sigue_igual', 'no_mejoro']);
+          if (rndBool(0.3)) data[code + '_val2024_desc'] = 'Justificación aleatoria vs 2024';
+        }
+
+        // Si es número o input abierto no le agregamos soport (Ej: 305)
+        if (!isNaN(val) && code !== 'CIN306') return; 
+
+        // Generar soportes por cada opción marcada
+        const opts = val.split(',');
+        opts.forEach(opt => {
+          opt = opt.trim();
+          if (!opt) return;
+          const sn = rnd(['si', 'si', 'parcial', 'no']); // Peso hacia 'si'
+          data[code + '_fu_' + opt + '_sn'] = sn;
+          if (sn !== 'no' && rndBool(0.5)) {
+            data[code + '_fu_' + opt + '_desc'] = 'Evidencia documento ' + Math.floor(Math.random()*100);
+          }
+        });
+      });
+
+      // Crear el Resumen
+      CIN_KEYS.forEach(function (code) {
+        if (!data[code]) return;
+        var res = [];
+        var ans = data[code];
+        res.push("Respuesta: " + ans);
+
+        var ansParts = ans.split(',');
+        var sops = [];
+        ansParts.forEach(function(opt) {
+          opt = opt.trim();
+          if (!opt) return;
+          var fuVal = data[code + '_fu_' + opt + '_sn'];
+          if (fuVal) {
+            var lbl = (fuVal === 'si') ? '✅ Sí' : (fuVal === 'parcial' ? '⚠️ Parcialmente' : '❌ No');
+            var just = data[code + '_fu_' + opt + '_desc'];
+            sops.push(opt + " -> " + lbl + (just ? " (" + just + ")" : ""));
+          }
+        });
+        if (sops.length > 0) res.push("Soportes:\n  " + sops.join('\n  '));
+
+        var compVal = data[code + '_val2024'];
+        if (compVal) {
+          var cLbl = (compVal === 'mejoro') ? '📈 Mejoró' : (compVal === 'sigue_igual' ? '⚖️ Sigue Igual' : '📉 No Mejoró');
+          var cJust = data[code + '_val2024_desc'];
+          res.push("Vs 2024: " + cLbl + (cJust ? " (" + cJust + ")" : ""));
+        }
+        
+        data[code + '_Resumen'] = res.join('\n');
+      });
+
+      return data;
     }
 
     let registrosGenerados = [];
