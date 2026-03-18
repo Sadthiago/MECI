@@ -625,12 +625,12 @@
             <div><strong>Cédula:</strong> ${r.responsable_cedula || '—'}</div>
             <div><strong>Cargo:</strong> ${r.responsable_cargo || '—'}</div>
             <div><strong>Facilitador:</strong> ${r.facilitador_nombre || '—'}</div>
+            <div><strong>Fecha/Hora envío:</strong> ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}</div>
           </div>
           <div style="margin-top:8px; display:flex; gap:16px; color:var(--primary); font-weight:700;">
             <span>🧭 MIPG: ${r.avance_mipg || 0}%</span>
             <span>⚓ MECI: ${r.avance_meci || 0}%</span>
           </div>
-          <div style="margin-top:4px; font-size:0.75rem; color:var(--muted)">Fecha envío: ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
             <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;box-shadow:0 2px 4px rgba(0,0,0,0.03)">
@@ -795,6 +795,7 @@
             <div><strong>Tipo:</strong> ${r.tipo_entidad || '—'}</div>
             <div><strong>Vigencia:</strong> ${r.entidad_vigencia || '—'}</div>
             <div><strong>Facilitador:</strong> ${r.facilitador_nombre || '—'}</div>
+            <div style="grid-column: span 1;"><strong>Fecha/Hora envío:</strong> ${r.timestamp ? new Date(r.timestamp).toLocaleString('es-CO') : '—'}</div>
             <div style="grid-column: span 2; margin-top:8px; padding-top:8px; border-top: 1px solid #e2e8f0; display:flex; gap:20px;">
                <span>🧭 <strong>Avance MIPG:</strong> ${r.avance_mipg || 0}%</span>
                <span>⚓ <strong>Avance MECI:</strong> ${r.avance_meci || 0}%</span>
