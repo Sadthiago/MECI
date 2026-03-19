@@ -19,13 +19,10 @@ function ramificarEntidad() {
   });
   if (tipo === 'DESCENTRALIZADA') {
     document.getElementById('bloque-desc').classList.add('visible');
-    document.getElementById('entidad_desc').required = true;
   } else if (tipo === 'MUNICIPIO') {
     document.getElementById('bloque-muni').classList.add('visible');
-    document.getElementById('entidad_muni').required = true;
   } else if (tipo === 'ESES') {
     document.getElementById('bloque-eses').classList.add('visible');
-    document.getElementById('entidad_ese').required = true;
   }
   actualizarProgreso();
 }
@@ -299,33 +296,10 @@ document.getElementById('form-meci').addEventListener('submit', async function (
 });
 
 function validarFormulario() {
-  var ok = true;
+  // Ahora todos los campos son opcionales, pero mantenemos la función
+  // por si se desea agregar validaciones de formato en el futuro.
   document.querySelectorAll('.campo.has-error').forEach(function (c) { c.classList.remove('has-error'); });
-  document.querySelectorAll('input[required], select[required]').forEach(function (el) {
-    if (!el.offsetParent) return;
-    var v = el.value.trim();
-    if (!v || (el.type === 'number' && el.value === '')) { marcarError(el.closest('.campo')); ok = false; }
-  });
-  document.querySelectorAll('.campo').forEach(function (campo) {
-    var radios = campo.querySelectorAll(':scope > .radio-group > label > input[type=radio][required]');
-    if (radios.length > 0) {
-      var checked = campo.querySelector(':scope > .radio-group > label > input[type=radio]:checked');
-      if (!checked) { marcarError(campo); ok = false; }
-    }
-  });
-  var checkCampos = ['CIN203', 'CIN206', 'CIN207', 'CIN222', 'CIN240', 'CIN241', 'CIN242', 'CIN244',
-    'CIN246', 'CIN247', 'CIN252', 'CIN253', 'CIN254', 'CIN271', 'CIN276', 'CIN300', 'CIN301'];
-  checkCampos.forEach(function (nombre) {
-    var campo = document.getElementById('campo-' + nombre);
-    if (!campo) return;
-    var checked = campo.querySelector('input[type=checkbox]:checked');
-    if (!checked) { marcarError(campo); ok = false; }
-  });
-  if (!ok) {
-    var firstErr = document.querySelector('.campo.has-error');
-    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-  return ok;
+  return true;
 }
 function marcarError(campo) { if (campo) campo.classList.add('has-error'); }
 
