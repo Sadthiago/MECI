@@ -272,23 +272,37 @@ function markFuSN(radio) {
 }
 
 // ---- VALIDACIÓN Y ENVÍO ----
+var _enviando = false;
 document.getElementById('form-meci').addEventListener('submit', async function (e) {
   e.preventDefault();
+  if (_enviando) return; // Evitar doble envío
   if (!validarFormulario()) return;
+  _enviando = true;
   var btn = document.querySelector('.btn-submit');
   btn.textContent = '⏳ Enviando...';
   btn.disabled = true;
   var data = recopilarDatos();
+
+  // Timeout de seguridad: si no responde en 15s, asumir éxito (no-cors no da respuesta legible)
+  var timeout = setTimeout(function () {
+    document.getElementById('form-meci').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    window.scrollTo(0, 0);
+  }, 15000);
+
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST', mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+    clearTimeout(timeout);
     document.getElementById('form-meci').style.display = 'none';
     document.getElementById('success-screen').style.display = 'block';
     window.scrollTo(0, 0);
   } catch (err) {
+    clearTimeout(timeout);
+    _enviando = false;
     alert('Error al enviar. Intente de nuevo.');
     btn.textContent = '✅ Enviar Formulario';
     btn.disabled = false;
@@ -388,6 +402,7 @@ function initAll() {
   initNumeracion();
   initNavPanel();
   crearBloquesValido2024();
+  initValido2024();
   initFollowUps();
 
   // Limpieza profunda para evitar persistencia del navegador/caché
